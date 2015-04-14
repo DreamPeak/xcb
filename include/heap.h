@@ -14,6 +14,10 @@
  * at the top of the source tree.
  */
 
+/*
+ * tailored by xiaoyem
+ */
+
 #ifndef HEAP_INCLUDED
 #define HEAP_INCLUDED
 

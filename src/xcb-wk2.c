@@ -275,7 +275,7 @@ static int server_cron(event_loop el, unsigned long id, void *data) {
 			exit(0);
 		xcb_log(XCB_LOG_WARNING, "SIGTERM received, but errors trying to shutdown the server");
 	}
-	/* FIXME */
+	/* close clients asynchronously */
 	iter = dlist_iter_new(clients_to_close, DLIST_START_HEAD);
 	while ((node = dlist_next(iter))) {
 		client c = (client)dlist_node_value(node);
@@ -284,7 +284,7 @@ static int server_cron(event_loop el, unsigned long id, void *data) {
 			client_free(c);
 	}
 	dlist_iter_free(&iter);
-	/* FIXME */
+	/* triggered approximately every one second */
 	if (cronloops % 10 == 0)
 		if (persistence && dirty) {
 			char *dberr = NULL;
@@ -299,7 +299,7 @@ static int server_cron(event_loop el, unsigned long id, void *data) {
 			pthread_mutex_unlock(&wb_lock);
 			dirty = 0;
 		}
-	/* FIXME */
+	/* triggered approximately every 20 seconds */
 	if (cronloops % 200 == 0) {
 		dstr res, ip = getipv4();
 		dlist_iter_t iter2;
@@ -315,7 +315,7 @@ static int server_cron(event_loop el, unsigned long id, void *data) {
 				client c = (client)dlist_node_value(node);
 
 				pthread_spin_lock(&c->lock);
-				if (net_try_write(c->fd, res, dstr_length(res), 100, NET_NONBLOCK) == -1)
+				if (net_try_write(c->fd, res, dstr_length(res), 10, NET_NONBLOCK) == -1)
 					xcb_log(XCB_LOG_WARNING, "Writing to client '%p': %s",
 						c, strerror(errno));
 				pthread_spin_unlock(&c->lock);
@@ -404,6 +404,7 @@ static void *wk_thread(void *data) {
 					while ((node = dlist_next(iter))) {
 						struct appout *ao = (struct appout *)dlist_node_value(node);
 
+						/* speed up computation */
 						thrpool_queue(tp, ao->app, msg, ao->out, msgfree, NULL);
 					}
 					dlist_iter_free(&iter);
@@ -463,7 +464,7 @@ static int on_msgv(struct pgm_msgv_t *msgv, size_t len) {
 			dlist_iter_t iter;
 			dlist_node_t node;
 
-			/* for testing */
+			/* in case of multiple monitors */
 			dlist_rwlock_rdlock(monitors);
 			if (dlist_length(monitors) > 0) {
 				char res[512];
@@ -494,17 +495,16 @@ static int on_msgv(struct pgm_msgv_t *msgv, size_t len) {
 					client c = (client)dlist_node_value(node);
 
 					pthread_spin_lock(&c->lock);
-					if (c->flags & CLIENT_CLOSE_ASAP) {
-						pthread_spin_unlock(&c->lock);
-						continue;
+					if (!(c->flags & CLIENT_CLOSE_ASAP)) {
+						if (net_try_write(c->fd, res, strlen(res),
+							10, NET_NONBLOCK) == -1) {
+							xcb_log(XCB_LOG_WARNING, "Writing to client '%p': %s",
+								c, strerror(errno));
+							if (++c->eagcount >= 10)
+								client_free_async(c);
+						} else if (c->eagcount)
+							c->eagcount = 0;
 					}
-					if (net_try_write(c->fd, res, strlen(res), 10, NET_NONBLOCK) == -1) {
-						xcb_log(XCB_LOG_WARNING, "Writing to client '%p': %s",
-							c, strerror(errno));
-						if (++c->eagcount >= 10)
-							client_free_async(c);
-					} else if (c->eagcount)
-						c->eagcount = 0;
 					pthread_spin_unlock(&c->lock);
 				}
 				dlist_iter_free(&iter);
@@ -857,7 +857,7 @@ void out2rmp(const char *res) {
 	if (res) {
 		int status;
 
-		/* for testing */
+		/* in case of multiple monitors */
 		dlist_rwlock_rdlock(monitors);
 		if (dlist_length(monitors) > 0) {
 			dstr ds = dstr_new("TX '");
@@ -870,17 +870,16 @@ void out2rmp(const char *res) {
 				client c = (client)dlist_node_value(node);
 
 				pthread_spin_lock(&c->lock);
-				if (c->flags & CLIENT_CLOSE_ASAP) {
-					pthread_spin_unlock(&c->lock);
-					continue;
+				if (!(c->flags & CLIENT_CLOSE_ASAP)) {
+					if (net_try_write(c->fd, ds, dstr_length(ds),
+						10, NET_NONBLOCK) == -1) {
+						xcb_log(XCB_LOG_WARNING, "Writing to client '%p': %s",
+							c, strerror(errno));
+						if (++c->eagcount >= 10)
+							client_free_async(c);
+					} else if (c->eagcount)
+						c->eagcount = 0;
 				}
-				if (net_try_write(c->fd, ds, dstr_length(ds), 10, NET_NONBLOCK) == -1) {
-					xcb_log(XCB_LOG_WARNING, "Writing to client '%p': %s",
-						c, strerror(errno));
-					if (++c->eagcount >= 10)
-						client_free_async(c);
-				} else if (c->eagcount)
-					c->eagcount = 0;
 				pthread_spin_unlock(&c->lock);
 			}
 			dlist_iter_free(&iter);
@@ -1049,6 +1048,7 @@ int main(int argc, char **argv) {
 		char *dberr = NULL;
 
 		db_o = db_options_create();
+		/* FIXME */
 		db = db_open(db_o, "/var/lib/xcb/db", &dberr);
 		if (dberr) {
 			xcb_log(XCB_LOG_ERROR, "Opening database: %s", dberr);
@@ -1267,7 +1267,7 @@ static void tcp_accept_handler(event_loop el, int fd, int mask, void *data) {
 		res = dstr_cat(res, ip);
 		res = dstr_cat(res, "\r\n");
 		pthread_spin_lock(&c->lock);
-		if (net_try_write(c->fd, res, dstr_length(res), 100, NET_NONBLOCK) == -1)
+		if (net_try_write(c->fd, res, dstr_length(res), 10, NET_NONBLOCK) == -1)
 			xcb_log(XCB_LOG_WARNING, "Writing to client '%p': %s", c, strerror(errno));
 		pthread_spin_unlock(&c->lock);
 		dstr_free(ip);

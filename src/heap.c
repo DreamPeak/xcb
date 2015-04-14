@@ -14,6 +14,10 @@
  * at the top of the source tree.
  */
 
+/*
+ * tailored by xiaoyem
+ */
+
 #include <pthread.h>
 #include "mem.h"
 #include "heap.h"

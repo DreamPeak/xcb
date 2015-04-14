@@ -256,7 +256,7 @@ static int server_cron(event_loop el, unsigned long id, void *data) {
 			exit(0);
 		xcb_log(XCB_LOG_WARNING, "SIGTERM received, but errors trying to shutdown the server");
 	}
-	/* FIXME */
+	/* close clients asynchronously */
 	iter = dlist_iter_new(clients_to_close, DLIST_START_HEAD);
 	while ((node = dlist_next(iter))) {
 		client c = (client)dlist_node_value(node);
@@ -265,7 +265,7 @@ static int server_cron(event_loop el, unsigned long id, void *data) {
 			client_free(c);
 	}
 	dlist_iter_free(&iter);
-	/* FIXME */
+	/* triggered approximately every 20 seconds */
 	if (cronloops % 200 == 0) {
 		char meme[] = "SU OT GNOLEB ERA ESAB RUOY LLA";
 		int status;
@@ -283,7 +283,7 @@ static int server_cron(event_loop el, unsigned long id, void *data) {
 				client c = (client)dlist_node_value(node);
 
 				pthread_spin_lock(&c->lock);
-				if (net_try_write(c->fd, res, dstr_length(res), 100, NET_NONBLOCK) == -1)
+				if (net_try_write(c->fd, res, dstr_length(res), 10, NET_NONBLOCK) == -1)
 					xcb_log(XCB_LOG_WARNING, "Writing to client '%p': %s",
 						c, strerror(errno));
 				pthread_spin_unlock(&c->lock);
@@ -337,7 +337,7 @@ static int send_quote(void *data, void *data2) {
 				quote->thyquote.m_dMCJG1,
 				quote->thyquote.m_nMCSL1);
 		}
-		/* for testing */
+		/* in case of multiple monitors */
 		dlist_rwlock_rdlock(monitors);
 		if (dlist_length(monitors) > 0) {
 			char res[512];
@@ -369,17 +369,15 @@ static int send_quote(void *data, void *data2) {
 				client c = (client)dlist_node_value(node);
 
 				pthread_spin_lock(&c->lock);
-				if (c->flags & CLIENT_CLOSE_ASAP) {
-					pthread_spin_unlock(&c->lock);
-					continue;
+				if (!(c->flags & CLIENT_CLOSE_ASAP)) {
+					if (net_try_write(c->fd, res, strlen(res), 10, NET_NONBLOCK) == -1) {
+						xcb_log(XCB_LOG_WARNING, "Writing to client '%p': %s",
+							c, strerror(errno));
+						if (++c->eagcount >= 10)
+							client_free_async(c);
+					} else if (c->eagcount)
+						c->eagcount = 0;
 				}
-				if (net_try_write(c->fd, res, strlen(res), 10, NET_NONBLOCK) == -1) {
-					xcb_log(XCB_LOG_WARNING, "Writing to client '%p': %s",
-						c, strerror(errno));
-					if (++c->eagcount >= 10)
-						client_free_async(c);
-				} else if (c->eagcount)
-					c->eagcount = 0;
 				pthread_spin_unlock(&c->lock);
 			}
 			dlist_iter_free(&iter);
@@ -416,7 +414,7 @@ static void read_quote(event_loop el, int fd, int mask, void *data) {
 			quote->thyquote.m_cJYS[sizeof quote->thyquote.m_cJYS - 1] = '\0';
 			quote->thyquote.m_cHYDM[sizeof quote->thyquote.m_cHYDM - 1] = '\0';
 			quote->m_nMSec = 0;
-			/* for testing */
+			/* in case of multiple monitors */
 			dlist_rwlock_rdlock(monitors);
 			if (dlist_length(monitors) > 0) {
 				char res[512];
@@ -448,17 +446,16 @@ static void read_quote(event_loop el, int fd, int mask, void *data) {
 					client c = (client)dlist_node_value(node);
 
 					pthread_spin_lock(&c->lock);
-					if (c->flags & CLIENT_CLOSE_ASAP) {
-						pthread_spin_unlock(&c->lock);
-						continue;
+					if (!(c->flags & CLIENT_CLOSE_ASAP)) {
+						if (net_try_write(c->fd, res, strlen(res),
+							10, NET_NONBLOCK) == -1) {
+							xcb_log(XCB_LOG_WARNING, "Writing to client '%p': %s",
+								c, strerror(errno));
+							if (++c->eagcount >= 10)
+								client_free_async(c);
+						} else if (c->eagcount)
+							c->eagcount = 0;
 					}
-					if (net_try_write(c->fd, res, strlen(res), 10, NET_NONBLOCK) == -1) {
-						xcb_log(XCB_LOG_WARNING, "Writing to client '%p': %s",
-							c, strerror(errno));
-						if (++c->eagcount >= 10)
-							client_free_async(c);
-					} else if (c->eagcount)
-						c->eagcount = 0;
 					pthread_spin_unlock(&c->lock);
 				}
 				dlist_iter_free(&iter);
@@ -468,6 +465,7 @@ static void read_quote(event_loop el, int fd, int mask, void *data) {
 			if (quote->thyquote.m_nTime == 999999999) {
 				FREE(buf);
 				return;
+			/* idiosyncrasy of different timestamps */
 			} else if ((tlen = intlen(quote->thyquote.m_nTime)) < 10) {
 				struct timeval tv;
 				struct tm lt;
@@ -484,7 +482,7 @@ static void read_quote(event_loop el, int fd, int mask, void *data) {
 				quote->m_nMSec = quote->thyquote.m_nTime % 1000;
 				quote->thyquote.m_nTime = mktime(&lt);
 			}
-			/* FIXME */
+			/* FIXME: no millisecond field in some exchanges' quotes */
 			if (addms) {
 				struct timeval tv;
 				dstr contract = dstr_new(quote->thyquote.m_cHYDM);
@@ -520,6 +518,7 @@ static void read_quote(event_loop el, int fd, int mask, void *data) {
 		}
 		msg->data     = buf;
 		msg->refcount = 1;
+		/* send quotes as soon as possible */
 		thrpool_queue(tp, send_quote, msg, NULL, msgfree, NULL);
 	} else
 		FREE(buf);
@@ -786,7 +785,7 @@ static void tcp_accept_handler(event_loop el, int fd, int mask, void *data) {
 		res = dstr_cat(res, ip);
 		res = dstr_cat(res, "\r\n");
 		pthread_spin_lock(&c->lock);
-		if (net_try_write(c->fd, res, dstr_length(res), 100, NET_NONBLOCK) == -1)
+		if (net_try_write(c->fd, res, dstr_length(res), 10, NET_NONBLOCK) == -1)
 			xcb_log(XCB_LOG_WARNING, "Writing to client '%p': %s", c, strerror(errno));
 		pthread_spin_unlock(&c->lock);
 		dstr_free(ip);
