@@ -373,7 +373,7 @@ static int send_quote(void *data, void *data2) {
 					if (net_try_write(c->fd, res, strlen(res), 10, NET_NONBLOCK) == -1) {
 						xcb_log(XCB_LOG_WARNING, "Writing to client '%p': %s",
 							c, strerror(errno));
-						if (++c->eagcount >= 10)
+						if (++c->eagcount >= 3)
 							client_free_async(c);
 					} else if (c->eagcount)
 						c->eagcount = 0;
@@ -451,7 +451,7 @@ static void read_quote(event_loop el, int fd, int mask, void *data) {
 							10, NET_NONBLOCK) == -1) {
 							xcb_log(XCB_LOG_WARNING, "Writing to client '%p': %s",
 								c, strerror(errno));
-							if (++c->eagcount >= 10)
+							if (++c->eagcount >= 3)
 								client_free_async(c);
 						} else if (c->eagcount)
 							c->eagcount = 0;

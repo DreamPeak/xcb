@@ -449,7 +449,7 @@ static int send_quote(void *data, void *data2) {
 							10, NET_NONBLOCK) == -1) {
 							xcb_log(XCB_LOG_WARNING, "Writing to client '%p': %s",
 								c, strerror(errno));
-							if (++c->eagcount >= 10)
+							if (++c->eagcount >= 3)
 								client_free_async(c);
 						} else if (c->eagcount)
 							c->eagcount = 0;
@@ -504,7 +504,7 @@ static int on_msgv(struct pgm_msgv_t *msgv, size_t len) {
 						10, NET_NONBLOCK) == -1) {
 						xcb_log(XCB_LOG_WARNING, "Writing to client '%p': %s",
 							c, strerror(errno));
-						if (++c->eagcount >= 10)
+						if (++c->eagcount >= 3)
 							client_free_async(c);
 					} else if (c->eagcount)
 						c->eagcount = 0;
@@ -680,7 +680,7 @@ end:
 							10, NET_NONBLOCK) == -1) {
 							xcb_log(XCB_LOG_WARNING, "Writing to client '%p': %s",
 								c, strerror(errno));
-							if (++c->eagcount >= 10)
+							if (++c->eagcount >= 3)
 								client_free_async(c);
 						} else if (c->eagcount)
 							c->eagcount = 0;
@@ -1042,8 +1042,7 @@ static int process_command(client c) {
 	if (c->sock == ctmsock) {
 		dstr ctm_cmd = dstr_new_len(c->argv[0], 1);
 
-		if (!strcmp(c->argv[0], "QC") || !strcmp(c->argv[0], "INDEX") ||
-			!strcmp(c->argv[0], "AUTH") || !strcmp(c->argv[0], "XGTEST"))
+		if (!strcmp(c->argv[0], "QC") || !strcmp(c->argv[0], "INDEX") || !strcmp(c->argv[0], "AUTH"))
 			c->cmd = table_get_value(ctm_cmds, c->argv[0]);
 		else {
 			c->cmd = table_get_value(ctm_cmds, ctm_cmd);

@@ -500,7 +500,7 @@ static int on_msgv(struct pgm_msgv_t *msgv, size_t len) {
 							10, NET_NONBLOCK) == -1) {
 							xcb_log(XCB_LOG_WARNING, "Writing to client '%p': %s",
 								c, strerror(errno));
-							if (++c->eagcount >= 10)
+							if (++c->eagcount >= 3)
 								client_free_async(c);
 						} else if (c->eagcount)
 							c->eagcount = 0;
@@ -875,7 +875,7 @@ void out2rmp(const char *res) {
 						10, NET_NONBLOCK) == -1) {
 						xcb_log(XCB_LOG_WARNING, "Writing to client '%p': %s",
 							c, strerror(errno));
-						if (++c->eagcount >= 10)
+						if (++c->eagcount >= 3)
 							client_free_async(c);
 					} else if (c->eagcount)
 						c->eagcount = 0;

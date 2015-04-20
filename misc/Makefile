@@ -25,7 +25,7 @@ CPPFLAGS = -I../include/
 CFLAGS   = -fPIC -Wall -march=corei7 -g -O2
 LDFLAGS1 = -ltcmalloc
 LDFLAGS2 = stl.so
-RPATH    = /var/lib/rmc
+RPATH    = /var/lib/xcb
 TARGET1  = stl.so
 TARGET2  = app_ema.so
 OBJ1     = stl.o
