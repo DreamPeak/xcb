@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
+#include "macros.h"
 #include "mem.h"
 #include "dstr.h"
 #include "logger.h"
@@ -89,21 +90,22 @@ static void on_front_connected(void) {
 	strcpy(req.UserID, userid);
 	strcpy(req.Password, passwd);
 	res = ctp_mdapi_login_user(mdapi, &req, 1);
-	xcb_log(XCB_LOG_NOTICE, "User '%s' login %s", userid, res == 0 ? "success" : "failure");
+	xcb_log(XCB_LOG_NOTICE, "Login %s for user '%s'", res == 0 ? "succeeded" : "failed", userid);
 }
 
 static void on_user_login(struct CThostFtdcRspUserLoginField *userlogin,
 	struct CThostFtdcRspInfoField *rspinfo, int rid, int islast) {
-	if (islast && rspinfo && rspinfo->ErrorID != 0 && contracts) {
+	/* FIXME */
+	if (islast && rspinfo && rspinfo->ErrorID == 0 && contracts) {
 		dstr *fields = NULL;
 		int nfield = 0, i;
 
 		fields = dstr_split_len(contracts, strlen(contracts), ",", 1, &nfield);
 		for (i = 0; i < nfield; ++i)
 			if (ctp_mdapi_subscribe_market_data(mdapi, &fields[i], 1) == 0)
-				xcb_log(XCB_LOG_INFO, "Subscribe '%s' success", fields[i]);
+				xcb_log(XCB_LOG_INFO, "Subscribe '%s' succeeded", fields[i]);
 			else
-				xcb_log(XCB_LOG_INFO, "Subscribe '%s' failure", fields[i]);
+				xcb_log(XCB_LOG_INFO, "Subscribe '%s' failed", fields[i]);
 		dstr_free_tokens(fields, nfield);
 	}
 }
@@ -116,7 +118,8 @@ static void on_deep_market_data(struct CThostFtdcDepthMarketDataField *deepmd) {
 	if (NEW0(quote)) {
 		/* FIXME */
 		quote->thyquote.m_nLen   = sizeof (THYQuote);
-		quote->thyquote.m_nTime  = atoi(deepmd->UpdateTime);
+		RMCHR(deepmd->UpdateTime, ':');
+		quote->thyquote.m_nTime  = atoi(deepmd->UpdateTime) * 1000 + deepmd->UpdateMillisec;
 		if (!strcmp(deepmd->ExchangeID, "SHFE"))
 			strcpy(quote->thyquote.m_cJYS, "SQ");
 		else if (!strcmp(deepmd->ExchangeID, "DCE"))
@@ -148,12 +151,13 @@ static void on_deep_market_data(struct CThostFtdcDepthMarketDataField *deepmd) {
 		quote->thyquote.m_dMCJG1 = deepmd->AskPrice1 != DBL_MAX ? deepmd->AskPrice1 : 0;
 		quote->thyquote.m_nMRSL1 = deepmd->BidVolume1;
 		quote->thyquote.m_nMCSL1 = deepmd->AskVolume1;
-		quote->m_nMSec           = deepmd->UpdateMillisec;
-		put_quote(quote);
+		process_quote(quote);
 	}
 }
 
 static int ctp_exec(void *data, void *data2) {
+	RAII_VAR(struct msg *, msg, (struct msg *)data, msg_decr);
+
 	/* do nothing */
 	return 0;
 }

@@ -103,7 +103,7 @@ struct msg {
 
 /* default queue */
 extern struct msgs default_msgs;
-extern void put_quote(Quote *quote);
+extern void process_quote(void *data);
 
 /* FIXME */
 extern void msg_ref(struct msg *msg, int delta);

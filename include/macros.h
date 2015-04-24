@@ -42,6 +42,13 @@
 		while (i > 0 && isspace(str[i - 1])) --i; \
 		str[i] = '\0'; \
 	} while (0);
+#define RMCHR(str, c) \
+	do { \
+		char *p, *q; \
+		for (p = q = str; *p != '\0'; ++p) \
+			if (*p != c) *q++ = *p; \
+		*q = '\0'; \
+	} while (0);
 #define STR2LOWER(str) \
 	do { \
 		char *p = str; \
