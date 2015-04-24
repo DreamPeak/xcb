@@ -18,9 +18,9 @@ AM_PROG_CC_C_O
 
 # Checks for header files.
 AC_FUNC_ALLOCA
-AC_CHECK_HEADERS([arpa/inet.h fcntl.h inttypes.h limits.h netdb.h    \
-netinet/in.h stddef.h stdlib.h string.h strings.h sys/socket.h       \
-sys/time.h syslog.h unistd.h])
+AC_CHECK_HEADERS([arpa/inet.h fcntl.h float.h inttypes.h limits.h    \
+netdb.h netinet/in.h stddef.h stdlib.h string.h strings.h            \
+sys/socket.h sys/time.h syslog.h unistd.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL

@@ -19,8 +19,6 @@
  */
 
 #include "fmacros.h"
-#include <alloca.h>
-#include <errno.h>
 #include <pthread.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -28,12 +26,11 @@
 #include <syslog.h>
 #include <time.h>
 #include <unistd.h>
-#include <sys/stat.h>
 #include <sys/syscall.h>
 #include <sys/time.h>
-#include <sys/types.h>
 #include "macros.h"
 #include "mem.h"
+#include "utilities.h"
 #include "logger.h"
 
 /* FIXME */
@@ -148,27 +145,9 @@ int init_logger(const char *path, int level) {
 	} else
 		closelog();
 	if (path) {
-		char *p, *tmp = strdupa(path), *fullpath = alloca(strlen(path) + 1);
-		int count = 0, pcount = 0, i;
-		char **pieces;
-
-		for (p = tmp; *p; ++p)
-			if (*p == '/')
-				++count;
-		pieces = alloca(count * sizeof *pieces);
-		for (p = tmp; *p; ++p)
-			if (*p == '/') {
-				*p = '\0';
-				pieces[pcount++] = p + 1;
-			}
-		*fullpath = '\0';
-		for (i = 0; i < pcount - 1; ++i) {
-			strcat(fullpath, "/");
-			strcat(fullpath, pieces[i]);
-			/* FIXME: hard-coded mode */
-			if (mkdir(fullpath, 0777) != 0 && errno != EEXIST)
-				return -1;
-		}
+		/* FIXME: hard-coded mode */
+		if (makedir(path, 0777) != 0)
+			return -1;
 		logfp = fopen(path, "a");
 	}
 	/* FIXME */

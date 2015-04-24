@@ -141,8 +141,17 @@ void s_command(client c) {
 						10, NET_NONBLOCK) == -1) {
 						xcb_log(XCB_LOG_WARNING, "Writing to client '%p': %s",
 							c, strerror(errno));
-						if (++c->eagcount >= 3)
+						if (++c->eagcount >= 3) {
 							client_free_async(c);
+							pthread_spin_unlock(&c->lock);
+							dstr_free(contracts);
+							dstr_free(res);
+							dstr_free_tokens(fields, nfield);
+							table_unlock(cache);
+							dstr_free(skey);
+							dstr_free(pkey);
+							return;
+						}
 					} else if (c->eagcount)
 						c->eagcount = 0;
 				}

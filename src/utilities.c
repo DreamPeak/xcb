@@ -18,6 +18,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "fmacros.h"
+#include <alloca.h>
+#include <errno.h>
 #include <ifaddrs.h>
 #include <netdb.h>
 #include <string.h>
@@ -115,6 +118,31 @@ dstr getipv4(void) {
 		res = dstr_new(host);
 	freeifaddrs(ifaddr);
 	return res;
+}
+
+/* FIXME */
+int makedir(const char *path, mode_t mode) {
+	char *p, *tmp = strdupa(path), *fullpath = alloca(strlen(path) + 1);
+	int count = 0, pcount = 0, i;
+	char **pieces;
+
+	for (p = tmp; *p; ++p)
+		if (*p == '/')
+			++count;
+	pieces = alloca(count * sizeof *pieces);
+	for (p = tmp; *p; ++p)
+		if (*p == '/') {
+			*p = '\0';
+			pieces[pcount++] = p + 1;
+		}
+	*fullpath = '\0';
+	for (i = 0; i < pcount - 1; ++i) {
+		strcat(fullpath, "/");
+		strcat(fullpath, pieces[i]);
+		if (mkdir(fullpath, mode) != 0 && errno != EEXIST)
+			return errno;
+	}
+	return 0;
 }
 
 /* FIXME */

@@ -21,7 +21,13 @@
 #ifndef UTILITIES_INCLUDED
 #define UTILITIES_INCLUDED
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <inttypes.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include "dstr.h"
 
 /* exported functions */
@@ -31,8 +37,13 @@ extern unsigned hashdjb2(const void *key);
 extern unsigned hashmurmur2(const void *key);
 extern unsigned intlen(int32_t i);
 extern dstr     getipv4(void);
+extern int      makedir(const char *path, mode_t mode);
 extern int      diffday(int startday, int endday);
 extern int      diffnow(int endday);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* UTILITIES_INCLUDED */
 

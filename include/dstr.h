@@ -34,6 +34,10 @@
 #ifndef DSTR_INCLUDED
 #define DSTR_INCLUDED
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdarg.h>
 #include <stddef.h>
 
@@ -61,6 +65,10 @@ extern dstr  *dstr_split_len(const char *str, size_t length, const char *sep, si
 extern void   dstr_free_tokens(dstr *tokens, int count);
 extern dstr  *dstr_split_args(const char *line, int *argc);
 extern void   dstr_free_args(dstr *argv, int argc);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* DSTR_INCLUDED */
 

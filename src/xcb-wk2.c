@@ -1049,6 +1049,7 @@ int main(int argc, char **argv) {
 
 		db_o = db_options_create();
 		/* FIXME */
+		makedir("var/lib/xcb/db", 0777);
 		db = db_open(db_o, "/var/lib/xcb/db", &dberr);
 		if (dberr) {
 			xcb_log(XCB_LOG_ERROR, "Opening database: %s", dberr);

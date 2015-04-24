@@ -1,5 +1,6 @@
 sbin_PROGRAMS = xcb-exp
-xcb_exp_SOURCES = $(top_srcdir)/src/mem.c $(top_srcdir)/src/logger.c           \
+xcb_exp_SOURCES = $(top_srcdir)/src/mem.c $(top_srcdir)/src/dstr.c             \
+$(top_srcdir)/src/utilities.c $(top_srcdir)/src/logger.c                       \
 $(top_srcdir)/src/config.c xcb-exp.cpp
 xcb_exp_CPPFLAGS = -I$(top_srcdir)/include
 xcb_exp_CFLAGS = -Wall -Winline

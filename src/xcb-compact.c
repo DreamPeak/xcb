@@ -751,6 +751,116 @@ static void read_quote(event_loop el, int fd, int mask, void *data) {
 		FREE(buf);
 }
 
+void put_quote(Quote *quote) {
+	dlist_iter_t iter;
+	dlist_node_t node;
+	struct msg *msg;
+
+	/* in case of multiple monitors */
+	dlist_rwlock_rdlock(monitors);
+	if (dlist_length(monitors) > 0) {
+		char res[512];
+
+		snprintf(res, sizeof res, "RX '%d,%s,%s,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,"
+			"%.2f,%.2f,%d,%.2f,%d,%d,%.2f,%d,%.2f,%d'\r\n",
+			quote->thyquote.m_nTime,
+			quote->thyquote.m_cHYDM,
+			quote->thyquote.m_cJYS,
+			quote->thyquote.m_dZXJ,
+			quote->thyquote.m_dJKP,
+			quote->thyquote.m_dZGJ,
+			quote->thyquote.m_dZDJ,
+			quote->thyquote.m_dZSP,
+			quote->thyquote.m_dJSP,
+			quote->thyquote.m_dZJSJ,
+			quote->thyquote.m_dJJSJ,
+			quote->thyquote.m_nCJSL,
+			quote->thyquote.m_dCJJE,
+			quote->thyquote.m_nZCCL,
+			quote->thyquote.m_nCCL,
+			quote->thyquote.m_dMRJG1,
+			quote->thyquote.m_nMRSL1,
+			quote->thyquote.m_dMCJG1,
+			quote->thyquote.m_nMCSL1);
+		iter = dlist_iter_new(monitors, DLIST_START_HEAD);
+		while ((node = dlist_next(iter))) {
+			client c = (client)dlist_node_value(node);
+
+			pthread_spin_lock(&c->lock);
+			if (!(c->flags & CLIENT_CLOSE_ASAP)) {
+				if (net_try_write(c->fd, res, strlen(res),
+					10, NET_NONBLOCK) == -1) {
+					xcb_log(XCB_LOG_WARNING, "Writing to client '%p': %s",
+						c, strerror(errno));
+					if (++c->eagcount >= 3)
+						client_free_async(c);
+				} else if (c->eagcount)
+					c->eagcount = 0;
+			}
+			pthread_spin_unlock(&c->lock);
+		}
+		dlist_iter_free(&iter);
+	}
+	dlist_rwlock_unlock(monitors);
+	/* FIXME: filter */
+	iter = dlist_iter_new(filter, DLIST_START_HEAD);
+	while ((node = dlist_next(iter))) {
+		dstr item = (dstr)dlist_node_value(node);
+
+		if (dstr_length(item) <= sizeof quote->thyquote.m_cHYDM &&
+			!memcmp(item, quote->thyquote.m_cHYDM, dstr_length(item)))
+			break;
+	}
+	dlist_iter_free(&iter);
+	if (node == NULL) {
+		FREE(quote);
+		return;
+	}
+	if (get_logger_level() == __LOG_DEBUG) {
+		time_t t = (time_t)quote->thyquote.m_nTime;
+		char datestr[64];
+
+		strftime(datestr, sizeof datestr, "%F %T", localtime(&t));
+		xcb_log(XCB_LOG_DEBUG, "%s.%03d,%s,%s,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,"
+			"%d,%.2f,%d,%d,%.2f,%d,%.2f,%d",
+			datestr,
+			quote->m_nMSec,
+			quote->thyquote.m_cHYDM,
+			quote->thyquote.m_cJYS,
+			quote->thyquote.m_dZXJ,
+			quote->thyquote.m_dJKP,
+			quote->thyquote.m_dZGJ,
+			quote->thyquote.m_dZDJ,
+			quote->thyquote.m_dZSP,
+			quote->thyquote.m_dJSP,
+			quote->thyquote.m_dZJSJ,
+			quote->thyquote.m_dJJSJ,
+			quote->thyquote.m_nCJSL,
+			quote->thyquote.m_dCJJE,
+			quote->thyquote.m_nZCCL,
+			quote->thyquote.m_nCCL,
+			quote->thyquote.m_dMRJG1,
+			quote->thyquote.m_nMRSL1,
+			quote->thyquote.m_dMCJG1,
+			quote->thyquote.m_nMCSL1);
+	}
+	if (NEW0(msg) == NULL) {
+		FREE(quote);
+		return;
+	}
+	msg->data     = quote;
+	msg->refcount = 1;
+	pthread_mutex_lock(&default_msgs.lock);
+	if (default_msgs.first == NULL)
+		default_msgs.last = default_msgs.first = msg;
+	else {
+		default_msgs.last->link = msg;
+		default_msgs.last = msg;
+	}
+	pthread_cond_signal(&default_msgs.cond);
+	pthread_mutex_unlock(&default_msgs.lock);
+}
+
 /* FIXME */
 int msgs_init(struct msgs **msgs, const char *name, struct module *mod) {
 	pthread_mutexattr_t attr;
@@ -1211,6 +1321,8 @@ int main(int argc, char **argv) {
 		char *dberr = NULL;
 
 		db_o = db_options_create();
+		/* FIXME */
+		makedir("var/lib/xcb/db", 0777);
 		db = db_open(db_o, "/var/lib/xcb/db", &dberr);
 		if (dberr) {
 			xcb_log(XCB_LOG_ERROR, "Opening database: %s", dberr);

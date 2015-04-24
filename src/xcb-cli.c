@@ -263,12 +263,10 @@ static int execute_line(char *line) {
 		++i;
 	if (line[i])
 		line[i++] = '\0';
-
 	if ((command = find_command(word)) == NULL) {
 		fprintf(stdout, "%s: No such command for xcb-cli\n", word);
 		return -1;
 	}
-
 	while (isspace(line[i]))
 		++i;
 	word = line + i;
