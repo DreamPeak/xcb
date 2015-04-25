@@ -1,3 +1,8 @@
 
 XCUBE -- A real-time computing platform specialized for China's derivatives market
 
+At our company, XCUBE is a substantial part of our market making system, and we
+mainly use it to compute implied volatilities, greeks, and theoretical prices almost
+every 'tick'.  Although the system is designed for heavyload derivatives computing,
+you can always run your own real-time indicators blazing fast on this babe.
+

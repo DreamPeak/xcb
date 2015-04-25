@@ -129,30 +129,48 @@ static void on_deep_market_data(struct CThostFtdcDepthMarketDataField *deepmd) {
 		else if (!strcmp(deepmd->ExchangeID, "CFFEX"))
 			strcpy(quote->thyquote.m_cJYS, "ZJ");
 		strcpy(quote->thyquote.m_cHYDM, deepmd->InstrumentID);
-		quote->thyquote.m_dZJSJ  = deepmd->PreSettlementPrice != DBL_MAX
-						? deepmd->PreSettlementPrice : 0;
-		quote->thyquote.m_dJJSJ  = deepmd->SettlementPrice != DBL_MAX ? deepmd->SettlementPrice : 0;
-		quote->thyquote.m_dCJJJ  = deepmd->AveragePrice != DBL_MAX ? deepmd->AveragePrice : 0;
-		quote->thyquote.m_dZSP   = deepmd->PreClosePrice != DBL_MAX ? deepmd->PreClosePrice : 0;
-		quote->thyquote.m_dJSP   = deepmd->ClosePrice != DBL_MAX ? deepmd->ClosePrice : 0;
-		quote->thyquote.m_dJKP   = deepmd->OpenPrice != DBL_MAX ? deepmd->OpenPrice : 0;
-		quote->thyquote.m_nZCCL  = deepmd->PreOpenInterest != DBL_MAX ? deepmd->PreOpenInterest : 0;
-		quote->thyquote.m_nCCL   = deepmd->OpenInterest != DBL_MAX ? deepmd->OpenInterest : 0;
-		quote->thyquote.m_dZXJ   = deepmd->LastPrice != DBL_MAX ? deepmd->LastPrice : 0;
+		if (deepmd->PreSettlementPrice != DBL_MAX)
+			quote->thyquote.m_dZJSJ  = deepmd->PreSettlementPrice;
+		if (deepmd->SettlementPrice != DBL_MAX)
+			quote->thyquote.m_dJJSJ  = deepmd->SettlementPrice;
+		if (deepmd->AveragePrice != DBL_MAX)
+			quote->thyquote.m_dCJJJ  = deepmd->AveragePrice;
+		if (deepmd->PreClosePrice != DBL_MAX)
+			quote->thyquote.m_dZSP   = deepmd->PreClosePrice;
+		if (deepmd->ClosePrice != DBL_MAX)
+			quote->thyquote.m_dJSP   = deepmd->ClosePrice;
+		if (deepmd->OpenPrice != DBL_MAX)
+			quote->thyquote.m_dJKP   = deepmd->OpenPrice;
+		if (deepmd->PreOpenInterest != DBL_MAX)
+			quote->thyquote.m_nZCCL  = deepmd->PreOpenInterest;
+		if (deepmd->OpenInterest != DBL_MAX)
+			quote->thyquote.m_nCCL   = deepmd->OpenInterest;
+		if (deepmd->LastPrice != DBL_MAX)
+			quote->thyquote.m_dZXJ   = deepmd->LastPrice;
 		quote->thyquote.m_nCJSL  = deepmd->Volume;
-		quote->thyquote.m_dCJJE  = deepmd->Turnover != DBL_MAX ? deepmd->Turnover : 0;
-		quote->thyquote.m_dZGBJ  = deepmd->UpperLimitPrice != DBL_MAX ? deepmd->UpperLimitPrice : 0;
-		quote->thyquote.m_dZDBJ  = deepmd->LowerLimitPrice != DBL_MAX ? deepmd->LowerLimitPrice : 0;
-		quote->thyquote.m_dZGJ   = deepmd->HighestPrice != DBL_MAX ? deepmd->HighestPrice : 0;
-		quote->thyquote.m_dZDJ   = deepmd->LowestPrice != DBL_MAX ? deepmd->LowestPrice : 0;
-		quote->thyquote.m_dZXSD  = deepmd->PreDelta != DBL_MAX ? deepmd->PreDelta : 0;
-		quote->thyquote.m_dJXSD  = deepmd->CurrDelta != DBL_MAX ? deepmd->CurrDelta : 0;
-		quote->thyquote.m_dMRJG1 = deepmd->BidPrice1 != DBL_MAX ? deepmd->BidPrice1 : 0;
-		quote->thyquote.m_dMCJG1 = deepmd->AskPrice1 != DBL_MAX ? deepmd->AskPrice1 : 0;
+		if (deepmd->Turnover != DBL_MAX)
+			quote->thyquote.m_dCJJE  = deepmd->Turnover;
+		if (deepmd->UpperLimitPrice != DBL_MAX)
+			quote->thyquote.m_dZGBJ  = deepmd->UpperLimitPrice;
+		if (deepmd->LowerLimitPrice != DBL_MAX)
+			quote->thyquote.m_dZDBJ  = deepmd->LowerLimitPrice;
+		if (deepmd->HighestPrice != DBL_MAX)
+			quote->thyquote.m_dZGJ   = deepmd->HighestPrice;
+		if (deepmd->LowestPrice != DBL_MAX)
+			quote->thyquote.m_dZDJ   = deepmd->LowestPrice;
+		if (deepmd->PreDelta != DBL_MAX)
+			quote->thyquote.m_dZXSD  = deepmd->PreDelta;
+		if (deepmd->CurrDelta != DBL_MAX)
+			quote->thyquote.m_dJXSD  = deepmd->CurrDelta;
+		if (deepmd->BidPrice1 != DBL_MAX)
+			quote->thyquote.m_dMRJG1 = deepmd->BidPrice1;
+		if (deepmd->AskPrice1 != DBL_MAX)
+			quote->thyquote.m_dMCJG1 = deepmd->AskPrice1;
 		quote->thyquote.m_nMRSL1 = deepmd->BidVolume1;
 		quote->thyquote.m_nMCSL1 = deepmd->AskVolume1;
 		process_quote(quote);
-	}
+	} else
+		xcb_log(XCB_LOG_WARNING, "Error allocating memory for quote");
 }
 
 static int ctp_exec(void *data, void *data2) {
