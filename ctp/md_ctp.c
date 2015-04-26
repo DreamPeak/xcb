@@ -93,21 +93,26 @@ static void on_front_connected(void) {
 	xcb_log(XCB_LOG_NOTICE, "Login %s for user '%s'", res == 0 ? "succeeded" : "failed", userid);
 }
 
+static void on_front_disconnected(int reason) {
+	xcb_log(XCB_LOG_NOTICE, "Front disconnected: reason=%d", reason);
+}
+
 static void on_user_login(struct CThostFtdcRspUserLoginField *userlogin,
 	struct CThostFtdcRspInfoField *rspinfo, int rid, int islast) {
 	/* FIXME */
-	if (islast && rspinfo && rspinfo->ErrorID == 0 && contracts) {
-		dstr *fields = NULL;
-		int nfield = 0, i;
+	if (islast && rspinfo && rspinfo->ErrorID == 0)
+		if (contracts) {
+			dstr *fields = NULL;
+			int nfield = 0, i;
 
-		fields = dstr_split_len(contracts, strlen(contracts), ",", 1, &nfield);
-		for (i = 0; i < nfield; ++i)
-			if (ctp_mdapi_subscribe_market_data(mdapi, &fields[i], 1) == 0)
-				xcb_log(XCB_LOG_INFO, "Subscribe '%s' succeeded", fields[i]);
-			else
-				xcb_log(XCB_LOG_INFO, "Subscribe '%s' failed", fields[i]);
-		dstr_free_tokens(fields, nfield);
-	}
+			fields = dstr_split_len(contracts, strlen(contracts), ",", 1, &nfield);
+			for (i = 0; i < nfield; ++i)
+				if (ctp_mdapi_subscribe_market_data(mdapi, &fields[i], 1) == 0)
+					xcb_log(XCB_LOG_INFO, "Subscribe contract '%s' succeeded", fields[i]);
+				else
+					xcb_log(XCB_LOG_INFO, "Subscribe contract '%s' failed", fields[i]);
+			dstr_free_tokens(fields, nfield);
+		}
 }
 
 static void on_deep_market_data(struct CThostFtdcDepthMarketDataField *deepmd) {
@@ -120,14 +125,6 @@ static void on_deep_market_data(struct CThostFtdcDepthMarketDataField *deepmd) {
 		quote->thyquote.m_nLen   = sizeof (THYQuote);
 		RMCHR(deepmd->UpdateTime, ':');
 		quote->thyquote.m_nTime  = atoi(deepmd->UpdateTime) * 1000 + deepmd->UpdateMillisec;
-		if (!strcmp(deepmd->ExchangeID, "SHFE"))
-			strcpy(quote->thyquote.m_cJYS, "SQ");
-		else if (!strcmp(deepmd->ExchangeID, "DCE"))
-			strcpy(quote->thyquote.m_cJYS, "DL");
-		else if (!strcmp(deepmd->ExchangeID, "CZCE"))
-			strcpy(quote->thyquote.m_cJYS, "ZZ");
-		else if (!strcmp(deepmd->ExchangeID, "CFFEX"))
-			strcpy(quote->thyquote.m_cJYS, "ZJ");
 		strcpy(quote->thyquote.m_cHYDM, deepmd->InstrumentID);
 		if (deepmd->PreSettlementPrice != DBL_MAX)
 			quote->thyquote.m_dZJSJ  = deepmd->PreSettlementPrice;
@@ -190,6 +187,7 @@ static int load_module(void) {
 	}
 	mdspi = ctp_mdspi_create();
 	ctp_mdspi_on_front_connected(mdspi, on_front_connected);
+	ctp_mdspi_on_front_disconnected(mdspi, on_front_disconnected);
 	ctp_mdspi_on_user_login(mdspi, on_user_login);
 	ctp_mdspi_on_deep_market_data(mdspi, on_deep_market_data);
 	/* FIXME */
