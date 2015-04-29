@@ -48,6 +48,7 @@ AC_CONFIG_FILES([Makefile
                  ctp/Makefile
                  devel/Makefile
                  include/Makefile
+                 sec/Makefile
                  src/Makefile
                  xspeed/Makefile])
 AC_OUTPUT
