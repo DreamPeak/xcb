@@ -45,6 +45,7 @@ strcasecmp strchr strerror strncasecmp strspn strstr])
 
 AC_CONFIG_FILES([Makefile
                  conf/Makefile
+                 ctp/Makefile
                  devel/Makefile
                  include/Makefile
                  src/Makefile

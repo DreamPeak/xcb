@@ -26,18 +26,21 @@ extern "C" {
 
 /* FIXME */
 struct ctp_mdapi_t {
-	CThostFtdcMdApi			*rep;
+	CThostFtdcMdApi				*rep;
 };
 struct ctp_mdspi_t : public CThostFtdcMdSpi {
-	ctp_on_front_connected		on_front_connected_;
-	ctp_on_front_disconnected	on_front_disconnected_;
-	ctp_on_heartbeat_warning	on_heartbeat_warning_;
-	ctp_on_user_login		on_user_login_;
-	ctp_on_user_logout		on_user_logout_;
-	ctp_on_error			on_error_;
-	ctp_on_subscribe_market_data	on_subscribe_market_data_;
-	ctp_on_unsubscribe_market_data	on_unsubscribe_market_data_;
-	ctp_on_deep_market_data		on_deep_market_data_;
+	ctp_on_front_connected			on_front_connected_;
+	ctp_on_front_disconnected		on_front_disconnected_;
+	ctp_on_heartbeat_warning		on_heartbeat_warning_;
+	ctp_on_user_login			on_user_login_;
+	ctp_on_user_logout			on_user_logout_;
+	ctp_on_error				on_error_;
+	ctp_on_subscribe_market_data		on_subscribe_market_data_;
+	ctp_on_unsubscribe_market_data		on_unsubscribe_market_data_;
+	ctp_on_subscribe_quote_response		on_subscribe_quote_response_;
+	ctp_on_unsubscribe_quote_response	on_unsubscribe_quote_response_;
+	ctp_on_deep_market_data			on_deep_market_data_;
+	ctp_on_quote_response			on_quote_response_;
 	/* make gcc happy */
 	virtual ~ctp_mdspi_t() {};
 	void OnFrontConnected() {
@@ -78,9 +81,25 @@ struct ctp_mdspi_t : public CThostFtdcMdSpi {
 			(*on_unsubscribe_market_data_)(pSpecificInstrument,
 				pRspInfo, nRequestID, bIsLast ? 1 : 0);
 	}
+	void OnRspSubForQuoteRsp(CThostFtdcSpecificInstrumentField *pSpecificInstrument,
+		CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
+		if (on_subscribe_quote_response_)
+			(*on_subscribe_quote_response_)(pSpecificInstrument,
+				pRspInfo, nRequestID, bIsLast ? 1 : 0);
+	}
+	void OnRspUnSubForQuoteRsp(CThostFtdcSpecificInstrumentField *pSpecificInstrument,
+		CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
+		if (on_unsubscribe_quote_response_)
+			(*on_unsubscribe_quote_response_)(pSpecificInstrument,
+				pRspInfo, nRequestID, bIsLast ? 1 : 0);
+	}
 	void OnRtnDepthMarketData(CThostFtdcDepthMarketDataField *pDepthMarketData) {
 		if (on_deep_market_data_)
 			(*on_deep_market_data_)(pDepthMarketData);
+	}
+	void OnRtnForQuoteRsp(CThostFtdcForQuoteRspField *pForQuoteRsp) {
+		if (on_quote_response_)
+			(*on_quote_response_)(pForQuoteRsp);
 	}
 };
 
@@ -107,7 +126,7 @@ void ctp_mdapi_init(ctp_mdapi_t *mdapi) {
 int ctp_mdapi_join(ctp_mdapi_t *mdapi) {
 	if (mdapi)
 		return mdapi->rep->Join();
-	return 0;
+	return -1;
 }
 
 /* FIXME */
@@ -142,28 +161,42 @@ void ctp_mdapi_register_spi(ctp_mdapi_t *mdapi, ctp_mdspi_t *mdspi) {
 int ctp_mdapi_subscribe_market_data(ctp_mdapi_t *mdapi, char **instruments, int count) {
 	if (mdapi)
 		return mdapi->rep->SubscribeMarketData(instruments, count);
-	return 0;
+	return -1;
 }
 
 /* FIXME */
 int ctp_mdapi_unsubscribe_market_data(ctp_mdapi_t *mdapi, char **instruments, int count) {
 	if (mdapi)
 		return mdapi->rep->UnSubscribeMarketData(instruments, count);
-	return 0;
+	return -1;
+}
+
+/* FIXME */
+int ctp_mdapi_subscribe_quote_response(ctp_mdapi_t *mdapi, char **instruments, int count) {
+	if (mdapi)
+		return mdapi->rep->SubscribeForQuoteRsp(instruments, count);
+	return -1;
+}
+
+/* FIXME */
+int ctp_mdapi_unsubscribe_quote_response(ctp_mdapi_t *mdapi, char **instruments, int count) {
+	if (mdapi)
+		return mdapi->rep->UnSubscribeForQuoteRsp(instruments, count);
+	return -1;
 }
 
 /* FIXME */
 int ctp_mdapi_login_user(ctp_mdapi_t *mdapi, struct CThostFtdcReqUserLoginField *userlogin, int rid) {
 	if (mdapi)
 		return mdapi->rep->ReqUserLogin(userlogin, rid);
-	return 0;
+	return -1;
 }
 
 /* FIXME */
 int ctp_mdapi_logout_user(ctp_mdapi_t *mdapi, struct CThostFtdcUserLogoutField *userlogout, int rid) {
 	if (mdapi)
 		return mdapi->rep->ReqUserLogout(userlogout, rid);
-	return 0;
+	return -1;
 }
 
 ctp_mdspi_t *ctp_mdspi_create() {
@@ -215,9 +248,24 @@ void ctp_mdspi_on_unsubscribe_market_data(ctp_mdspi_t *mdspi, ctp_on_unsubscribe
 		mdspi->on_unsubscribe_market_data_ = func;
 }
 
+void ctp_mdspi_on_subscribe_quote_response(ctp_mdspi_t *mdspi, ctp_on_subscribe_quote_response func) {
+	if (mdspi && func)
+		mdspi->on_subscribe_quote_response_ = func;
+}
+
+void ctp_mdspi_on_unsubscribe_quote_response(ctp_mdspi_t *mdspi, ctp_on_unsubscribe_quote_response func) {
+	if (mdspi && func)
+		mdspi->on_unsubscribe_quote_response_ = func;
+}
+
 void ctp_mdspi_on_deep_market_data(ctp_mdspi_t *mdspi, ctp_on_deep_market_data func) {
 	if (mdspi && func)
 		mdspi->on_deep_market_data_ = func;
+}
+
+void ctp_mdspi_on_quote_response(ctp_mdspi_t *mdspi, ctp_on_quote_response func) {
+	if (mdspi && func)
+		mdspi->on_quote_response_ = func;
 }
 
 }

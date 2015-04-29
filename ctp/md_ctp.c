@@ -100,19 +100,27 @@ static void on_front_disconnected(int reason) {
 static void on_user_login(struct CThostFtdcRspUserLoginField *userlogin,
 	struct CThostFtdcRspInfoField *rspinfo, int rid, int islast) {
 	/* FIXME */
-	if (islast && rspinfo && rspinfo->ErrorID == 0)
-		if (contracts) {
-			dstr *fields = NULL;
-			int nfield = 0, i;
+	if (rspinfo && rspinfo->ErrorID != 0) {
+		xcb_log(XCB_LOG_ERROR, "Error occurred: errorid=%d", rspinfo->ErrorID);
+		return;
+	}
+	if (islast && contracts) {
+		dstr *fields = NULL;
+		int nfield = 0, i;
 
-			fields = dstr_split_len(contracts, strlen(contracts), ",", 1, &nfield);
-			for (i = 0; i < nfield; ++i)
-				if (ctp_mdapi_subscribe_market_data(mdapi, &fields[i], 1) == 0)
-					xcb_log(XCB_LOG_INFO, "Subscribe contract '%s' succeeded", fields[i]);
-				else
-					xcb_log(XCB_LOG_INFO, "Subscribe contract '%s' failed", fields[i]);
-			dstr_free_tokens(fields, nfield);
-		}
+		fields = dstr_split_len(contracts, strlen(contracts), ",", 1, &nfield);
+		for (i = 0; i < nfield; ++i)
+			if (ctp_mdapi_subscribe_market_data(mdapi, &fields[i], 1) == 0)
+				xcb_log(XCB_LOG_INFO, "Subscribe contract '%s' succeeded", fields[i]);
+			else
+				xcb_log(XCB_LOG_INFO, "Subscribe contract '%s' failed", fields[i]);
+		dstr_free_tokens(fields, nfield);
+	}
+}
+
+static void on_error(struct CThostFtdcRspInfoField *rspinfo, int rid, int islast) {
+	if (rspinfo && rspinfo->ErrorID != 0)
+		xcb_log(XCB_LOG_ERROR, "Error occurred: errorid=%d", rspinfo->ErrorID);
 }
 
 static void on_deep_market_data(struct CThostFtdcDepthMarketDataField *deepmd) {
@@ -189,6 +197,7 @@ static int load_module(void) {
 	ctp_mdspi_on_front_connected(mdspi, on_front_connected);
 	ctp_mdspi_on_front_disconnected(mdspi, on_front_disconnected);
 	ctp_mdspi_on_user_login(mdspi, on_user_login);
+	ctp_mdspi_on_error(mdspi, on_error);
 	ctp_mdspi_on_deep_market_data(mdspi, on_deep_market_data);
 	/* FIXME */
 	snprintf(path, sizeof path, "/var/log/xcb/%s/", userid);

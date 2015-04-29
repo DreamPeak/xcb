@@ -892,7 +892,7 @@ void out2rmp(const char *res) {
 }
 
 /* FIXME */
-int out2msgs(char *res, struct msgs *msgs) {
+int out2msgs(void *res, struct msgs *msgs) {
 	struct msg *msg;
 
 	if (res == NULL || msgs == NULL)

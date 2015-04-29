@@ -21,12 +21,12 @@
 #ifndef CTP_INCLUDED
 #define CTP_INCLUDED
 
-#include "ThostFtdcUserApiDataType.h"
-#include "ThostFtdcUserApiStruct.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include "ThostFtdcUserApiDataType.h"
+#include "ThostFtdcUserApiStruct.h"
 
 /* FIXME: exported types */
 typedef struct ctp_mdapi_t ctp_mdapi_t;
@@ -43,7 +43,12 @@ typedef void (*ctp_on_subscribe_market_data)(struct CThostFtdcSpecificInstrument
 	struct CThostFtdcRspInfoField *rspinfo, int rid, int islast);
 typedef void (*ctp_on_unsubscribe_market_data)(struct CThostFtdcSpecificInstrumentField *instrument,
 	struct CThostFtdcRspInfoField *rspinfo, int rid, int islast);
+typedef void (*ctp_on_subscribe_quote_response)(struct CThostFtdcSpecificInstrumentField *instrument,
+	struct CThostFtdcRspInfoField *rspinfo, int rid, int islast);
+typedef void (*ctp_on_unsubscribe_quote_response)(struct CThostFtdcSpecificInstrumentField *instrument,
+	struct CThostFtdcRspInfoField *rspinfo, int rid, int islast);
 typedef void (*ctp_on_deep_market_data)(struct CThostFtdcDepthMarketDataField *deepmd);
+typedef void (*ctp_on_quote_response)(struct CThostFtdcForQuoteRspField *quotersp);
 
 /* exported functions */
 extern ctp_mdapi_t *ctp_mdapi_create(const char *flowpath, int isudp, int ismulticast);
@@ -59,6 +64,8 @@ extern void         ctp_mdapi_register_fens_user(ctp_mdapi_t *mdapi,
 extern void         ctp_mdapi_register_spi(ctp_mdapi_t *mdapi, ctp_mdspi_t *mdspi);
 extern int          ctp_mdapi_subscribe_market_data(ctp_mdapi_t *mdapi, char **instruments, int count);
 extern int          ctp_mdapi_unsubscribe_market_data(ctp_mdapi_t *mdapi, char **instruments, int count);
+extern int          ctp_mdapi_subscribe_quote_response(ctp_mdapi_t *mdapi, char **instruments, int count);
+extern int          ctp_mdapi_unsubscribe_quote_response(ctp_mdapi_t *mdapi, char **instruments, int count);
 extern int          ctp_mdapi_login_user(ctp_mdapi_t *mdapi,
 			struct CThostFtdcReqUserLoginField *userlogin, int rid);
 extern int          ctp_mdapi_logout_user(ctp_mdapi_t *mdapi,
@@ -72,8 +79,14 @@ extern void         ctp_mdspi_on_user_login(ctp_mdspi_t *mdspi, ctp_on_user_logi
 extern void         ctp_mdspi_on_user_logout(ctp_mdspi_t *mdspi, ctp_on_user_logout func);
 extern void         ctp_mdspi_on_error(ctp_mdspi_t *mdspi, ctp_on_error func);
 extern void         ctp_mdspi_on_subscribe_market_data(ctp_mdspi_t *mdspi, ctp_on_subscribe_market_data func);
-extern void         ctp_mdspi_on_unsubscribe_market_data(ctp_mdspi_t *mdspi, ctp_on_unsubscribe_market_data func);
+extern void         ctp_mdspi_on_unsubscribe_market_data(ctp_mdspi_t *mdspi,
+			ctp_on_unsubscribe_market_data func);
+extern void         ctp_mdspi_on_subscribe_quote_response(ctp_mdspi_t *mdspi,
+			ctp_on_subscribe_quote_response func);
+extern void         ctp_mdspi_on_unsubscribe_quote_response(ctp_mdspi_t *mdspi,
+			ctp_on_unsubscribe_quote_response func);
 extern void         ctp_mdspi_on_deep_market_data(ctp_mdspi_t *mdspi, ctp_on_deep_market_data func);
+extern void         ctp_mdspi_on_quote_response(ctp_mdspi_t *mdspi, ctp_on_quote_response func);
 
 #ifdef __cplusplus
 }

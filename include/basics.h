@@ -131,7 +131,7 @@ extern int  check_msgs(struct msgs *msgs);
 /* output to rmp */
 extern void out2rmp(const char *res);
 /* output to another queue */
-extern int  out2msgs(char *res, struct msgs *msgs);
+extern int  out2msgs(void *res, struct msgs *msgs);
 
 #endif /* BASICS_INCLUDED */
 
