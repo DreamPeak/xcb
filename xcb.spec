@@ -55,6 +55,7 @@ install -D -m 0755 xspeed/DFITCTraderApi.so %{buildroot}%{_libdir}/DFITCTraderAp
 install -D -m 0755 misc/stl.so              %{buildroot}%{_libdir}/stl.so
 rm -rf %{buildroot}%{_libdir}/*.la
 mkdir -p %{buildroot}%{_sharedstatedir}/%{name}/
+mv -f %{buildroot}%{_libdir}/md_*.so  %{buildroot}%{_sharedstatedir}/%{name}/
 mv -f %{buildroot}%{_libdir}/app_*.so %{buildroot}%{_sharedstatedir}/%{name}/
 mv -f misc/app_ema.so                 %{buildroot}%{_sharedstatedir}/%{name}/
 
@@ -73,8 +74,7 @@ rm -rf %{buildroot}
 %config(noreplace) %{_sysconfdir}/%{name}/*
 %config(noreplace) %{_sysconfdir}/logrotate.d/%{name}
 %{_initrddir}/*
-%{_libdir}/DFITCTraderApi.so
-%{_libdir}/stl.so
+%{_libdir}/*
 %{_sbindir}/*
 %{_sharedstatedir}/%{name}/*
 
