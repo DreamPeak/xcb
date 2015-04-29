@@ -77,7 +77,7 @@ static inline void load_config(void) {
 			}
 			cat = category_browse(cfg, cat);
 		}
-	}	
+	}
 }
 
 static void on_front_connected(void) {

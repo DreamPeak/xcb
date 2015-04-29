@@ -2,7 +2,7 @@
  * 版权所有(C)2012-2016, 大连飞创信息技术有限公司
  * 文件名称：DFITCSECApiStruct.h
  * 文件说明：定义接口所需的数据接口
- * 当前版本：1.3.2.0
+ * 当前版本：1.5.4.0
  * 作者：XSpeed证券项目组
  * 发布日期：2015年01月
  */
@@ -1909,17 +1909,17 @@ struct APISTRUCT DFITCSharedDataField
 
 struct APISTRUCT DFITCSOPDepthMarketDataField
 {
-    	struct DFITCSOPSpecificDataField            specificDataField;        //特有的
-    	struct DFITCStaticDataField                 staticDataField;          //共有的静态
-    	struct DFITCSharedDataField                 sharedDataField ;         //公有的动态 
+    struct DFITCSOPSpecificDataField            specificDataField;        //特有的
+    struct DFITCStaticDataField                 staticDataField;          //共有的静态
+    struct DFITCSharedDataField                 sharedDataField ;         //公有的动态 
 
 };
 
 struct APISTRUCT DFITCStockDepthMarketDataField
 {
 	struct DFITCSharedDataField                 sharedDataField ;        //公有的动态 
-    	struct DFITCStockSpecificDataField          specificDataField;       //特有的
-    	struct DFITCStaticDataField                 staticDataField;         //共有的静态
+    struct DFITCStockSpecificDataField          specificDataField;       //特有的
+    struct DFITCStaticDataField                 staticDataField;         //共有的静态
   
 };
 

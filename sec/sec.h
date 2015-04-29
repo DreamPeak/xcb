@@ -41,19 +41,19 @@ typedef void (*sec_on_user_logout)(struct DFITCSECRspUserLogoutField *userlogout
 typedef void (*sec_on_subscribe_market_data)(struct DFITCSECSpecificInstrumentField *instrument,
 		struct DFITCSECRspInfoField *rspinfo);
 typedef void (*sec_on_unsubscribe_market_data)(struct DFITCSECSpecificInstrumentField *instrument,
-	struct DFITCSECRspInfoField * rspinfo);
+		struct DFITCSECRspInfoField *rspinfo);
 typedef void (*sec_on_deep_market_data)(struct DFITCStockDepthMarketDataField *deepmd);
 
 /* FIXME: exported functions */
 extern sec_mdapi_t *sec_mdapi_create(void);
 extern int          sec_mdapi_init(sec_mdapi_t *mdapi, char *svraddr, sec_mdspi_t *mdspi);
 extern void         sec_mdapi_release(sec_mdapi_t *mdapi);
+extern int          sec_mdapi_user_login(sec_mdapi_t *mdapi, struct DFITCSECReqUserLoginField *userlogin);
+extern int          sec_mdapi_user_logout(sec_mdapi_t *mdapi, struct DFITCSECReqUserLogoutField *userlogout);
 extern int          sec_mdapi_subscribe_market_data(sec_mdapi_t *mdapi,
 			char **instruments, int count, int requsets);
 extern int          sec_mdapi_unsubscribe_market_data(sec_mdapi_t *mdapi,
 			char **instruments, int count, int requsets);
-extern int          sec_mdapi_user_login(sec_mdapi_t *mdapi, struct DFITCSECReqUserLoginField *userlogin);
-extern int          sec_mdapi_user_logout(sec_mdapi_t *mdapi, struct DFITCSECReqUserLogoutField *userlogout);
 extern sec_mdspi_t *sec_mdspi_create(void);
 extern void         sec_mdspi_destroy(sec_mdspi_t *mdspi);
 extern void         sec_mdspi_on_front_connected(sec_mdspi_t *mdspi, sec_on_front_connected func);

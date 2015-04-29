@@ -26,17 +26,17 @@ extern "C" {
 
 /* FIXME */
 struct sec_mdapi_t {
-	DFITCSECMdApi                  *rep;
+	DFITCSECMdApi			*rep;
 };
 struct sec_mdspi_t : public DFITCSECMdSpi {
-	sec_on_front_connected         on_front_connected_;
-	sec_on_front_disconnected      on_front_disconnected_;
-	sec_on_error                   on_error_;
-	sec_on_user_login              on_user_login_;
-	sec_on_user_logout             on_user_logout_;
-	sec_on_subscribe_market_data   on_subscribe_market_data_;
-	sec_on_unsubscribe_market_data on_unsubscribe_market_data_;
-	sec_on_deep_market_data        on_deep_market_data_;
+	sec_on_front_connected		on_front_connected_;
+	sec_on_front_disconnected	on_front_disconnected_;
+	sec_on_error			on_error_;
+	sec_on_user_login		on_user_login_;
+	sec_on_user_logout		on_user_logout_;
+	sec_on_subscribe_market_data	on_subscribe_market_data_;
+	sec_on_unsubscribe_market_data	on_unsubscribe_market_data_;
+	sec_on_deep_market_data		on_deep_market_data_;
 	/* make gcc happy */
 	virtual ~sec_mdspi_t() {};
 	void OnFrontConnected() {
@@ -94,18 +94,6 @@ void sec_mdapi_release(sec_mdapi_t *mdapi) {
 		mdapi->rep->Release();
 }
 
-int sec_mdapi_subscribe_market_data(sec_mdapi_t *mdapi, char **instruments, int count, int requsets) {
-	if (mdapi)
-		return mdapi->rep->SubscribeStockMarketData(instruments, count, requsets);
-	return -1;
-}
-
-int sec_mdapi_unsubscribe_market_data(sec_mdapi_t *mdapi, char **instruments, int count, int requsets) {
-	if (mdapi)
-		return mdapi->rep->UnSubscribeStockMarketData(instruments, count, requsets);
-	return -1;
-}
-
 int sec_mdapi_user_login(sec_mdapi_t *mdapi, struct DFITCSECReqUserLoginField *userlogin) {
 	if (mdapi)
 		return mdapi->rep->ReqStockUserLogin(userlogin);
@@ -115,6 +103,18 @@ int sec_mdapi_user_login(sec_mdapi_t *mdapi, struct DFITCSECReqUserLoginField *u
 int sec_mdapi_user_logout(sec_mdapi_t *mdapi, struct DFITCSECReqUserLogoutField *userlogout) {
 	if (mdapi)
 		return mdapi->rep->ReqStockUserLogout(userlogout);
+	return -1;
+}
+
+int sec_mdapi_subscribe_market_data(sec_mdapi_t *mdapi, char **instruments, int count, int requsets) {
+	if (mdapi)
+		return mdapi->rep->SubscribeStockMarketData(instruments, count, requsets);
+	return -1;
+}
+
+int sec_mdapi_unsubscribe_market_data(sec_mdapi_t *mdapi, char **instruments, int count, int requsets) {
+	if (mdapi)
+		return mdapi->rep->UnSubscribeStockMarketData(instruments, count, requsets);
 	return -1;
 }
 
