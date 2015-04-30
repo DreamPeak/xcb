@@ -26,17 +26,22 @@ extern "C" {
 
 /* FIXME */
 struct sec_mdapi_t {
-	DFITCSECMdApi			*rep;
+	DFITCSECMdApi				*rep;
 };
 struct sec_mdspi_t : public DFITCSECMdSpi {
-	sec_on_front_connected		on_front_connected_;
-	sec_on_front_disconnected	on_front_disconnected_;
-	sec_on_error			on_error_;
-	sec_on_user_login		on_user_login_;
-	sec_on_user_logout		on_user_logout_;
-	sec_on_subscribe_market_data	on_subscribe_market_data_;
-	sec_on_unsubscribe_market_data	on_unsubscribe_market_data_;
-	sec_on_deep_market_data		on_deep_market_data_;
+	sec_on_front_connected			on_front_connected_;
+	sec_on_front_disconnected		on_front_disconnected_;
+	sec_on_error				on_error_;
+	sec_on_stock_user_login			on_stock_user_login_;
+	sec_on_stock_user_logout		on_stock_user_logout_;
+	sec_on_stock_subscribe_market_data	on_stock_subscribe_market_data_;
+	sec_on_stock_unsubscribe_market_data	on_stock_unsubscribe_market_data_;
+	sec_on_stock_deep_market_data		on_stock_deep_market_data_;
+	sec_on_sop_user_login			on_sop_user_login_;
+	sec_on_sop_user_logout			on_sop_user_logout_;
+	sec_on_sop_subscribe_market_data	on_sop_subscribe_market_data_;
+	sec_on_sop_unsubscribe_market_data	on_sop_unsubscribe_market_data_;
+	sec_on_sop_deep_market_data		on_sop_deep_market_data_;
 	/* make gcc happy */
 	virtual ~sec_mdspi_t() {};
 	void OnFrontConnected() {
@@ -53,27 +58,51 @@ struct sec_mdspi_t : public DFITCSECMdSpi {
 	}
 	void OnRspStockUserLogin(struct DFITCSECRspUserLoginField *pRspUserLogin,
 		struct DFITCSECRspInfoField *pRspInfo) {
-		if (on_user_login_)
-			(*on_user_login_)(pRspUserLogin, pRspInfo);
+		if (on_stock_user_login_)
+			(*on_stock_user_login_)(pRspUserLogin, pRspInfo);
 	}
 	void OnRspStockUserLogout(struct DFITCSECRspUserLogoutField *pRspUsrLogout,
 		struct DFITCSECRspInfoField *pRspInfo) {
-		if (on_user_logout_)
-			(*on_user_logout_)(pRspUsrLogout, pRspInfo);
+		if (on_stock_user_logout_)
+			(*on_stock_user_logout_)(pRspUsrLogout, pRspInfo);
 	}
 	void OnRspStockSubMarketData(struct DFITCSECSpecificInstrumentField *pSpecificInstrument,
 		struct DFITCSECRspInfoField *pRspInfo) {
-		if (on_subscribe_market_data_)
-			(*on_subscribe_market_data_)(pSpecificInstrument, pRspInfo);
+		if (on_stock_subscribe_market_data_)
+			(*on_stock_subscribe_market_data_)(pSpecificInstrument, pRspInfo);
 	}
 	void OnRspStockUnSubMarketData(struct DFITCSECSpecificInstrumentField *pSpecificInstrument,
 		struct DFITCSECRspInfoField *pRspInfo) {
-		if (on_unsubscribe_market_data_)
-			(*on_unsubscribe_market_data_)(pSpecificInstrument, pRspInfo);
+		if (on_stock_unsubscribe_market_data_)
+			(*on_stock_unsubscribe_market_data_)(pSpecificInstrument, pRspInfo);
 	}
 	void OnStockMarketData(struct DFITCStockDepthMarketDataField *pMarketDataField) {
-		if (on_deep_market_data_)
-			(*on_deep_market_data_)(pMarketDataField);
+		if (on_stock_deep_market_data_)
+			(*on_stock_deep_market_data_)(pMarketDataField);
+	}
+	void OnRspSOPUserLogin(struct DFITCSECRspUserLoginField *pRspUserLogin,
+		struct DFITCSECRspInfoField *pRspInfo) {
+		if (on_sop_user_login_)
+			(*on_sop_user_login_)(pRspUserLogin, pRspInfo);
+	}
+	void OnRspSOPUserLogout(struct DFITCSECRspUserLogoutField *pRspUsrLogout,
+		struct DFITCSECRspInfoField *pRspInfo) {
+		if (on_sop_user_logout_)
+			(*on_sop_user_logout_)(pRspUsrLogout, pRspInfo);
+	}
+	void OnRspSOPSubMarketData(struct DFITCSECSpecificInstrumentField *pSpecificInstrument,
+		struct DFITCSECRspInfoField *pRspInfo) {
+		if (on_sop_subscribe_market_data_)
+			(*on_sop_subscribe_market_data_)(pSpecificInstrument, pRspInfo);
+	}
+	void OnRspSOPUnSubMarketData(struct DFITCSECSpecificInstrumentField *pSpecificInstrument,
+		struct DFITCSECRspInfoField *pRspInfo) {
+		if (on_sop_unsubscribe_market_data_)
+			(*on_sop_unsubscribe_market_data_)(pSpecificInstrument, pRspInfo);
+	}
+	void OnSOPMarketData(struct DFITCSOPDepthMarketDataField *pMarketDataField) {
+		if (on_sop_deep_market_data_)
+			(*on_sop_deep_market_data_)(pMarketDataField);
 	}
 };
 
@@ -94,27 +123,51 @@ void sec_mdapi_release(sec_mdapi_t *mdapi) {
 		mdapi->rep->Release();
 }
 
-int sec_mdapi_user_login(sec_mdapi_t *mdapi, struct DFITCSECReqUserLoginField *userlogin) {
+int sec_mdapi_stock_user_login(sec_mdapi_t *mdapi, struct DFITCSECReqUserLoginField *userlogin) {
 	if (mdapi)
 		return mdapi->rep->ReqStockUserLogin(userlogin);
 	return -1;
 }
 
-int sec_mdapi_user_logout(sec_mdapi_t *mdapi, struct DFITCSECReqUserLogoutField *userlogout) {
+int sec_mdapi_stock_user_logout(sec_mdapi_t *mdapi, struct DFITCSECReqUserLogoutField *userlogout) {
 	if (mdapi)
 		return mdapi->rep->ReqStockUserLogout(userlogout);
 	return -1;
 }
 
-int sec_mdapi_subscribe_market_data(sec_mdapi_t *mdapi, char **instruments, int count, int requsets) {
+int sec_mdapi_stock_subscribe_market_data(sec_mdapi_t *mdapi, char **instruments, int count, int requsets) {
 	if (mdapi)
 		return mdapi->rep->SubscribeStockMarketData(instruments, count, requsets);
 	return -1;
 }
 
-int sec_mdapi_unsubscribe_market_data(sec_mdapi_t *mdapi, char **instruments, int count, int requsets) {
+int sec_mdapi_stock_unsubscribe_market_data(sec_mdapi_t *mdapi, char **instruments, int count, int requsets) {
 	if (mdapi)
 		return mdapi->rep->UnSubscribeStockMarketData(instruments, count, requsets);
+	return -1;
+}
+
+int sec_mdapi_sop_user_login(sec_mdapi_t *mdapi, struct DFITCSECReqUserLoginField *userlogin) {
+	if (mdapi)
+		return mdapi->rep->ReqSOPUserLogin(userlogin);
+	return -1;
+}
+
+int sec_mdapi_sop_user_logout(sec_mdapi_t *mdapi, struct DFITCSECReqUserLogoutField *userlogout) {
+	if (mdapi)
+		return mdapi->rep->ReqSOPUserLogout(userlogout);
+	return -1;
+}
+
+int sec_mdapi_sop_subscribe_market_data(sec_mdapi_t *mdapi, char **instruments, int count, int requsets) {
+	if (mdapi)
+		return mdapi->rep->SubscribeSOPMarketData(instruments, count, requsets);
+	return -1;
+}
+
+int sec_mdapi_sop_unsubscribe_market_data(sec_mdapi_t *mdapi, char **instruments, int count, int requsets) {
+	if (mdapi)
+		return mdapi->rep->UnSubscribeSOPMarketData(instruments, count, requsets);
 	return -1;
 }
 
@@ -142,29 +195,55 @@ void sec_mdspi_on_error(sec_mdspi_t *mdspi, sec_on_error func) {
 		mdspi->on_error_ = func;
 }
 
-void sec_mdspi_on_user_login(sec_mdspi_t *mdspi, sec_on_user_login func) {
+void sec_mdspi_on_stock_user_login(sec_mdspi_t *mdspi, sec_on_stock_user_login func) {
 	if (mdspi && func)
-		mdspi->on_user_login_ = func;
+		mdspi->on_stock_user_login_ = func;
 }
 
-void sec_mdspi_on_user_logout(sec_mdspi_t *mdspi, sec_on_user_logout func) {
+void sec_mdspi_on_stock_user_logout(sec_mdspi_t *mdspi, sec_on_stock_user_logout func) {
 	if (mdspi && func)
-		mdspi->on_user_logout_ = func;
+		mdspi->on_stock_user_logout_ = func;
 }
 
-void sec_mdspi_on_subscribe_market_data(sec_mdspi_t *mdspi, sec_on_subscribe_market_data func) {
+void sec_mdspi_on_stock_subscribe_market_data(sec_mdspi_t *mdspi, sec_on_stock_subscribe_market_data func) {
 	if (mdspi && func)
-		mdspi->on_subscribe_market_data_ = func;
+		mdspi->on_stock_subscribe_market_data_ = func;
 }
 
-void sec_mdspi_on_unsubscribe_market_data(sec_mdspi_t *mdspi, sec_on_unsubscribe_market_data func) {
+void sec_mdspi_on_stock_unsubscribe_market_data(sec_mdspi_t *mdspi,
+	sec_on_stock_unsubscribe_market_data func) {
 	if (mdspi && func)
-		mdspi->on_unsubscribe_market_data_ = func;
+		mdspi->on_stock_unsubscribe_market_data_ = func;
 }
 
-void sec_mdspi_on_deep_market_data(sec_mdspi_t *mdspi, sec_on_deep_market_data func) {
+void sec_mdspi_on_stock_deep_market_data(sec_mdspi_t *mdspi, sec_on_stock_deep_market_data func) {
 	if (mdspi && func)
-		mdspi->on_deep_market_data_ = func;
+		mdspi->on_stock_deep_market_data_ = func;
+}
+
+void sec_mdspi_on_sop_user_login(sec_mdspi_t *mdspi, sec_on_sop_user_login func) {
+	if (mdspi && func)
+		mdspi->on_sop_user_login_ = func;
+}
+
+void sec_mdspi_on_sop_user_logout(sec_mdspi_t *mdspi, sec_on_sop_user_logout func) {
+	if (mdspi && func)
+		mdspi->on_sop_user_logout_ = func;
+}
+
+void sec_mdspi_on_sop_subscribe_market_data(sec_mdspi_t *mdspi, sec_on_sop_subscribe_market_data func) {
+	if (mdspi && func)
+		mdspi->on_sop_subscribe_market_data_ = func;
+}
+
+void sec_mdspi_on_sop_unsubscribe_market_data(sec_mdspi_t *mdspi, sec_on_sop_unsubscribe_market_data func) {
+	if (mdspi && func)
+		mdspi->on_sop_unsubscribe_market_data_ = func;
+}
+
+void sec_mdspi_on_sop_deep_market_data(sec_mdspi_t *mdspi, sec_on_sop_deep_market_data func) {
+	if (mdspi && func)
+		mdspi->on_sop_deep_market_data_ = func;
 }
 
 }
