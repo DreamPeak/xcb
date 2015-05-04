@@ -100,43 +100,57 @@ static void on_front_connected(void) {
 
 	memset(&stk_req, 0, sizeof stk_req);
 	memset(&sop_req, 0, sizeof sop_req);
-	/* FIXME */
-	strcpy(stk_req.accountID, stk_userid);
-	strcpy(stk_req.passWord, stk_passwd);
-	stk_req.requestID = stk_reqid;
-	strcpy(sop_req.accountID, sop_userid);
-	strcpy(sop_req.passWord, sop_passwd);
-	sop_req.requestID = sop_reqid;
-	stk_res = sec_mdapi_stk_user_login(mdapi, &stk_req);
-	xcb_log(XCB_LOG_NOTICE, "Stock login %s for user '%s'",
-		stk_res == 0 ? "succeeded" : "failed", stk_userid);
-	sop_res = sec_mdapi_sop_user_login(mdapi, &sop_req);
-	xcb_log(XCB_LOG_NOTICE, "Sop login %s for user '%s'",
-		sop_res == 0 ? "succeeded" : "failed", sop_userid);
+	if (stk_userid && stk_passwd) {
+		/* FIXME */
+		strcpy(stk_req.accountID, stk_userid);
+		strcpy(stk_req.passWord, stk_passwd);
+		stk_req.requestID = stk_reqid;
+		stk_res = sec_mdapi_stk_user_login(mdapi, &stk_req);
+		xcb_log(XCB_LOG_NOTICE, "Stock login %s for user '%s'",
+			stk_res == 0 ? "succeeded" : "failed", stk_userid);
+	}
+	if (sop_userid && sop_passwd) {
+		/* FIXME */
+		strcpy(sop_req.accountID, sop_userid);
+		strcpy(sop_req.passWord, sop_passwd);
+		sop_req.requestID = sop_reqid;
+		sop_res = sec_mdapi_sop_user_login(mdapi, &sop_req);
+		xcb_log(XCB_LOG_NOTICE, "Sop login %s for user '%s'",
+			sop_res == 0 ? "succeeded" : "failed", sop_userid);
+	}
 }
 
 static void on_front_disconnected(int reason) {
 	xcb_log(XCB_LOG_NOTICE, "Front disconnected: reason = '%d'", reason);
 }
 
+static void on_error(struct DFITCSECRspInfoField *rspinfo) {
+	if (rspinfo && rspinfo->errorID != 0)
+		xcb_log(XCB_LOG_ERROR, "Error occurred: errorid=%d", rspinfo->errorID);
+}
+
 static void on_stk_user_login(struct DFITCSECRspUserLoginField *userlogin,
 	struct DFITCSECRspInfoField *rspinfo) {
-	/* FIXME */
-	if (rspinfo == NULL)
-		if (stk_contracts) {
-			dstr *fields = NULL;
-			int nfield = 0, i;
+	if (rspinfo && rspinfo->errorID != 0)
+		xcb_log(XCB_LOG_ERROR, "Error occurred: errorid=%d", rspinfo->errorID);
+	else if (stk_contracts) {
+		dstr *fields = NULL;
+		int nfield = 0, i;
 
-			fields = dstr_split_len(stk_contracts, strlen(stk_contracts), ",", 1, &nfield);
-			for (i = 0; i < nfield; ++i)
-				if (sec_mdapi_stk_subscribe_market_data(mdapi, &fields[i], 1, stk_reqid) == 0)
-					xcb_log(XCB_LOG_INFO,
-						"Stock subscribe contract '%s' succeeded", fields[i]);
-				else
-					xcb_log(XCB_LOG_INFO,
-						"Stock subscribe contract '%s' failed", fields[i]);
-			dstr_free_tokens(fields, nfield);
-		}
+		fields = dstr_split_len(stk_contracts, strlen(stk_contracts), ",", 1, &nfield);
+		for (i = 0; i < nfield; ++i)
+			if (sec_mdapi_stk_subscribe_market_data(mdapi, &fields[i], 1, stk_reqid) == 0)
+				xcb_log(XCB_LOG_INFO, "Stock subscribe contract '%s' succeeded", fields[i]);
+			else
+				xcb_log(XCB_LOG_INFO, "Stock subscribe contract '%s' failed", fields[i]);
+		dstr_free_tokens(fields, nfield);
+	}
+}
+
+static void on_stk_subscribe_market_data(struct DFITCSECSpecificInstrumentField *instrument,
+	struct DFITCSECRspInfoField *rspinfo) {
+	if (rspinfo && rspinfo->errorID != 0)
+		xcb_log(XCB_LOG_ERROR, "Error occurred: errorid=%d", rspinfo->errorID);
 }
 
 static void on_stk_deep_market_data(struct DFITCStockDepthMarketDataField *deepmd) {
@@ -148,7 +162,8 @@ static void on_stk_deep_market_data(struct DFITCStockDepthMarketDataField *deepm
 	if (NEW0(quote)) {
 		/* FIXME */
 		quote->thyquote.m_nLen   = sizeof (THYQuote);
-		quote->thyquote.m_nTime  = atoi(deepmd->sharedDataField.updateTime);
+		RMCHR(deepmd->sharedDataField.updateTime, ':');
+		quote->thyquote.m_nTime  = atoi(deepmd->sharedDataField.updateTime) * 1000;
 		strcpy(quote->thyquote.m_cJYS, deepmd->staticDataField.exchangeID);
 		strcpy(contract, deepmd->staticDataField.exchangeID);
 		strcat(contract, deepmd->staticDataField.securityID);
@@ -198,22 +213,26 @@ static void on_stk_deep_market_data(struct DFITCStockDepthMarketDataField *deepm
 
 static void on_sop_user_login(struct DFITCSECRspUserLoginField *userlogin,
 	struct DFITCSECRspInfoField *rspinfo) {
-	/* FIXME */
-	if (rspinfo == NULL)
-		if (sop_contracts) {
-			dstr *fields = NULL;
-			int nfield = 0, i;
+	if (rspinfo && rspinfo->errorID != 0)
+		xcb_log(XCB_LOG_ERROR, "Error occurred: errorid=%d", rspinfo->errorID);
+	else if (sop_contracts) {
+		dstr *fields = NULL;
+		int nfield = 0, i;
 
-			fields = dstr_split_len(sop_contracts, strlen(sop_contracts), ",", 1, &nfield);
-			for (i = 0; i < nfield; ++i)
-				if (sec_mdapi_sop_subscribe_market_data(mdapi, &fields[i], 1, sop_reqid) == 0)
-					xcb_log(XCB_LOG_INFO,
-						"Sop subscribe contract '%s' succeeded", fields[i]);
-				else
-					xcb_log(XCB_LOG_INFO,
-						"Sop Subscribe contract '%s' failed", fields[i]);
-			dstr_free_tokens(fields, nfield);
-		}
+		fields = dstr_split_len(sop_contracts, strlen(sop_contracts), ",", 1, &nfield);
+		for (i = 0; i < nfield; ++i)
+			if (sec_mdapi_sop_subscribe_market_data(mdapi, &fields[i], 1, sop_reqid) == 0)
+				xcb_log(XCB_LOG_INFO, "Sop subscribe contract '%s' succeeded", fields[i]);
+			else
+				xcb_log(XCB_LOG_INFO, "Sop Subscribe contract '%s' failed", fields[i]);
+		dstr_free_tokens(fields, nfield);
+	}
+}
+
+static void on_sop_subscribe_market_data(struct DFITCSECSpecificInstrumentField *instrument,
+	struct DFITCSECRspInfoField *rspinfo) {
+	if (rspinfo && rspinfo->errorID != 0)
+		xcb_log(XCB_LOG_ERROR, "Error occurred: errorid=%d", rspinfo->errorID);
 }
 
 static void on_sop_deep_market_data(struct DFITCSOPDepthMarketDataField *deepmd) {
@@ -224,6 +243,8 @@ static void on_sop_deep_market_data(struct DFITCSOPDepthMarketDataField *deepmd)
 	if (NEW0(quote)) {
 		/* FIXME */
 		quote->thyquote.m_nLen   = sizeof (THYQuote);
+		RMCHR(deepmd->sharedDataField.updateTime, ':');
+		RMCHR(deepmd->sharedDataField.updateTime, '.');
 		quote->thyquote.m_nTime  = atoi(deepmd->sharedDataField.updateTime);
 		strcpy(quote->thyquote.m_cJYS, deepmd->staticDataField.exchangeID);
 		strcpy(quote->thyquote.m_cHYDM, deepmd->specificDataField.contractID);
@@ -282,16 +303,19 @@ static int load_module(void) {
 
 	load_config();
 	if (front_ip == NULL || front_port == NULL ||
-		stk_userid == NULL || stk_passwd == NULL || sop_userid == NULL || sop_passwd == NULL) {
+		((stk_userid == NULL || stk_passwd == NULL) && (sop_userid == NULL || sop_passwd == NULL))) {
 		xcb_log(XCB_LOG_ERROR, "front_ip, front_port, userid or passwd can't be empty");
 		return MODULE_LOAD_FAILURE;
 	}
 	mdspi = sec_mdspi_create();
 	sec_mdspi_on_front_connected(mdspi, on_front_connected);
 	sec_mdspi_on_front_disconnected(mdspi, on_front_disconnected);
+	sec_mdspi_on_error(mdspi, on_error);
 	sec_mdspi_on_stk_user_login(mdspi, on_stk_user_login);
+	sec_mdspi_on_stk_subscribe_market_data(mdspi, on_stk_subscribe_market_data);
 	sec_mdspi_on_stk_deep_market_data(mdspi, on_stk_deep_market_data);
 	sec_mdspi_on_sop_user_login(mdspi, on_sop_user_login);
+	sec_mdspi_on_sop_subscribe_market_data(mdspi, on_sop_subscribe_market_data);
 	sec_mdspi_on_sop_deep_market_data(mdspi, on_sop_deep_market_data);
 	mdapi = sec_mdapi_create();
 	/* FIXME */

@@ -123,6 +123,12 @@ static void on_error(struct CThostFtdcRspInfoField *rspinfo, int rid, int islast
 		xcb_log(XCB_LOG_ERROR, "Error occurred: errorid=%d", rspinfo->ErrorID);
 }
 
+static void on_subscribe_market_data(struct CThostFtdcSpecificInstrumentField *instrument,
+	struct CThostFtdcRspInfoField *rspinfo, int rid, int islast) {
+	if (rspinfo && rspinfo->ErrorID != 0)
+		xcb_log(XCB_LOG_ERROR, "Error occurred: errorid=%d", rspinfo->ErrorID);
+}
+
 static void on_deep_market_data(struct CThostFtdcDepthMarketDataField *deepmd) {
 	Quote *quote;
 
@@ -198,6 +204,7 @@ static int load_module(void) {
 	ctp_mdspi_on_front_disconnected(mdspi, on_front_disconnected);
 	ctp_mdspi_on_user_login(mdspi, on_user_login);
 	ctp_mdspi_on_error(mdspi, on_error);
+	ctp_mdspi_on_subscribe_market_data(mdspi, on_subscribe_market_data);
 	ctp_mdspi_on_deep_market_data(mdspi, on_deep_market_data);
 	/* FIXME */
 	snprintf(path, sizeof path, "/var/log/xcb/%s/", userid);
