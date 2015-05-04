@@ -35,7 +35,7 @@
 #define TABLE_INCLUDED
 
 /* FIXME */
-#define TABLE_INIT_SIZE 64
+#define TABLE_INIT_SIZE 1024
 
 /* exported types */
 typedef struct table_t      *table_t;

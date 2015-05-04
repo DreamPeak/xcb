@@ -1,0 +1,13 @@
+diff -Nur leveldb-1.18-old/build_detect_platform leveldb-1.18-new/build_detect_platform
+--- leveldb-1.18-old/build_detect_platform	2015-05-04 00:00:00.000000000 +0800
++++ leveldb-1.18-new/build_detect_platform	2015-05-04 00:00:00.000000000 +0800
+@@ -205,9 +205,6 @@
+     $CXX $CXXFLAGS -x c++ - -o $CXXOUTPUT -ltcmalloc 2>/dev/null  <<EOF
+       int main() {}
+ EOF
+-    if [ "$?" = 0 ]; then
+-        PLATFORM_LIBS="$PLATFORM_LIBS -ltcmalloc"
+-    fi
+ 
+     rm -f $CXXOUTPUT 2>/dev/null
+ fi

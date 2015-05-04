@@ -40,8 +40,8 @@ static sec_mdspi_t *mdspi;
 static sec_mdapi_t *mdapi;
 static struct config *cfg;
 static const char *front_ip, *front_port;
-static const char *stock_userid, *stock_passwd, *stock_reqid = "1", *stock_contracts;
-static const char *sop_userid, *sop_passwd, *sop_reqid = "1", *sop_contracts;
+static const char *stk_userid, *stk_passwd, *stk_contracts, *sop_userid, *sop_passwd, *sop_contracts;
+static int stk_reqid = 1, sop_reqid = 1;
 
 static inline void load_config(void) {
 	/* FIXME */
@@ -59,18 +59,18 @@ static inline void load_config(void) {
 					} else if (!strcasecmp(var->name, "front_port")) {
 						if (strcasecmp(var->value, ""))
 							front_port = var->value;
-					} else if (!strcasecmp(var->name, "stock_userid")) {
+					} else if (!strcasecmp(var->name, "stk_userid")) {
 						if (strcasecmp(var->value, ""))
-							stock_userid = var->value;
-					} else if (!strcasecmp(var->name, "stock_passwd")) {
+							stk_userid = var->value;
+					} else if (!strcasecmp(var->name, "stk_passwd")) {
 						if (strcasecmp(var->value, ""))
-							stock_passwd = var->value;
-					} else if (!strcasecmp(var->name, "stock_reqid")) {
+							stk_passwd = var->value;
+					} else if (!strcasecmp(var->name, "stk_reqid")) {
 						if (strcasecmp(var->value, ""))
-							stock_reqid = var->value;
-					} else if (!strcasecmp(var->name, "stock_contracts")) {
+							stk_reqid = atoi(var->value);
+					} else if (!strcasecmp(var->name, "stk_contracts")) {
 						if (strcasecmp(var->value, ""))
-							stock_contracts = var->value;
+							stk_contracts = var->value;
 					} else if (!strcasecmp(var->name, "sop_userid")) {
 						if (strcasecmp(var->value, ""))
 							sop_userid = var->value;
@@ -79,7 +79,7 @@ static inline void load_config(void) {
 							sop_passwd = var->value;
 					} else if (!strcasecmp(var->name, "sop_reqid")) {
 						if (strcasecmp(var->value, ""))
-							sop_reqid = var->value;
+							sop_reqid = atoi(var->value);
 					} else if (!strcasecmp(var->name, "sop_contracts")) {
 						if (strcasecmp(var->value, ""))
 							sop_contracts = var->value;
@@ -95,47 +95,51 @@ static inline void load_config(void) {
 }
 
 static void on_front_connected(void) {
-	struct DFITCSECReqUserLoginField stock_req, sop_req;
-	int stock_res, sop_res;
+	struct DFITCSECReqUserLoginField stk_req, sop_req;
+	int stk_res, sop_res;
 
-	memset(&stock_req, 0, sizeof stock_req);
+	memset(&stk_req, 0, sizeof stk_req);
 	memset(&sop_req, 0, sizeof sop_req);
 	/* FIXME */
-	strcpy(stock_req.accountID, stock_userid);
-	strcpy(stock_req.passWord, stock_passwd);
-	stock_req.requestID = atoi(stock_reqid);
+	strcpy(stk_req.accountID, stk_userid);
+	strcpy(stk_req.passWord, stk_passwd);
+	stk_req.requestID = stk_reqid;
 	strcpy(sop_req.accountID, sop_userid);
 	strcpy(sop_req.passWord, sop_passwd);
-	sop_req.requestID = atoi(sop_reqid);
-	stock_res = sec_mdapi_stock_user_login(mdapi, &stock_req);
+	sop_req.requestID = sop_reqid;
+	stk_res = sec_mdapi_stk_user_login(mdapi, &stk_req);
 	xcb_log(XCB_LOG_NOTICE, "Stock login %s for user '%s'",
-		stock_res == 0 ? "succeeded" : "failed", stock_userid);
+		stk_res == 0 ? "succeeded" : "failed", stk_userid);
 	sop_res = sec_mdapi_sop_user_login(mdapi, &sop_req);
-	xcb_log(XCB_LOG_NOTICE, "Sop login %s for user '%s'", sop_res == 0 ? "succeeded" : "failed", sop_userid);
+	xcb_log(XCB_LOG_NOTICE, "Sop login %s for user '%s'",
+		sop_res == 0 ? "succeeded" : "failed", sop_userid);
 }
 
 static void on_front_disconnected(int reason) {
 	xcb_log(XCB_LOG_NOTICE, "Front disconnected: reason = '%d'", reason);
 }
 
-static void on_stock_user_login(struct DFITCSECRspUserLoginField *userlogin, struct DFITCSECRspInfoField *rspinfo) {
+static void on_stk_user_login(struct DFITCSECRspUserLoginField *userlogin,
+	struct DFITCSECRspInfoField *rspinfo) {
 	/* FIXME */
 	if (rspinfo == NULL)
-		if (stock_contracts) {
+		if (stk_contracts) {
 			dstr *fields = NULL;
 			int nfield = 0, i;
 
-			fields = dstr_split_len(stock_contracts, strlen(stock_contracts), ",", 1, &nfield);
+			fields = dstr_split_len(stk_contracts, strlen(stk_contracts), ",", 1, &nfield);
 			for (i = 0; i < nfield; ++i)
-				if (sec_mdapi_stock_subscribe_market_data(mdapi, &fields[i], 1, atoi(stock_reqid)) == 0)
-					xcb_log(XCB_LOG_INFO, "Stock subscribe contract '%s' succeeded", fields[i]);
+				if (sec_mdapi_stk_subscribe_market_data(mdapi, &fields[i], 1, stk_reqid) == 0)
+					xcb_log(XCB_LOG_INFO,
+						"Stock subscribe contract '%s' succeeded", fields[i]);
 				else
-					xcb_log(XCB_LOG_INFO, "Stock subscribe contract '%s' failed", fields[i]);
+					xcb_log(XCB_LOG_INFO,
+						"Stock subscribe contract '%s' failed", fields[i]);
 			dstr_free_tokens(fields, nfield);
 		}
 }
 
-static void on_stock_deep_market_data(struct DFITCStockDepthMarketDataField *deepmd) {
+static void on_stk_deep_market_data(struct DFITCStockDepthMarketDataField *deepmd) {
 	Quote *quote;
 	char contract[256];
 
@@ -192,7 +196,8 @@ static void on_stock_deep_market_data(struct DFITCStockDepthMarketDataField *dee
 		xcb_log(XCB_LOG_WARNING, "Error allocating memory for quote");
 }
 
-static void on_sop_user_login(struct DFITCSECRspUserLoginField *userlogin, struct DFITCSECRspInfoField *rspinfo) {
+static void on_sop_user_login(struct DFITCSECRspUserLoginField *userlogin,
+	struct DFITCSECRspInfoField *rspinfo) {
 	/* FIXME */
 	if (rspinfo == NULL)
 		if (sop_contracts) {
@@ -201,10 +206,12 @@ static void on_sop_user_login(struct DFITCSECRspUserLoginField *userlogin, struc
 
 			fields = dstr_split_len(sop_contracts, strlen(sop_contracts), ",", 1, &nfield);
 			for (i = 0; i < nfield; ++i)
-				if (sec_mdapi_sop_subscribe_market_data(mdapi, &fields[i], 1, atoi(sop_reqid)) == 0)
-					xcb_log(XCB_LOG_INFO, "Sop subscribe contract '%s' succeeded", fields[i]);
+				if (sec_mdapi_sop_subscribe_market_data(mdapi, &fields[i], 1, sop_reqid) == 0)
+					xcb_log(XCB_LOG_INFO,
+						"Sop subscribe contract '%s' succeeded", fields[i]);
 				else
-					xcb_log(XCB_LOG_INFO, "Sop Subscribe contract '%s' failed", fields[i]);
+					xcb_log(XCB_LOG_INFO,
+						"Sop Subscribe contract '%s' failed", fields[i]);
 			dstr_free_tokens(fields, nfield);
 		}
 }
@@ -275,15 +282,15 @@ static int load_module(void) {
 
 	load_config();
 	if (front_ip == NULL || front_port == NULL ||
-		stock_userid == NULL || stock_passwd == NULL || sop_userid == NULL || sop_passwd == NULL) {
-		xcb_log(XCB_LOG_ERROR, "protocol, front_ip, front_port, userid or passwd can't be empty");
+		stk_userid == NULL || stk_passwd == NULL || sop_userid == NULL || sop_passwd == NULL) {
+		xcb_log(XCB_LOG_ERROR, "front_ip, front_port, userid or passwd can't be empty");
 		return MODULE_LOAD_FAILURE;
 	}
 	mdspi = sec_mdspi_create();
 	sec_mdspi_on_front_connected(mdspi, on_front_connected);
 	sec_mdspi_on_front_disconnected(mdspi, on_front_disconnected);
-	sec_mdspi_on_stock_user_login(mdspi, on_stock_user_login);
-	sec_mdspi_on_stock_deep_market_data(mdspi, on_stock_deep_market_data);
+	sec_mdspi_on_stk_user_login(mdspi, on_stk_user_login);
+	sec_mdspi_on_stk_deep_market_data(mdspi, on_stk_deep_market_data);
 	sec_mdspi_on_sop_user_login(mdspi, on_sop_user_login);
 	sec_mdspi_on_sop_deep_market_data(mdspi, on_sop_deep_market_data);
 	mdapi = sec_mdapi_create();
