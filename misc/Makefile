@@ -23,21 +23,15 @@ C++      = g++
 CC       = gcc
 CPPFLAGS = -I../include/
 CFLAGS   = -fPIC -Wall -march=corei7 -g -O2
-LDFLAGS1 = -ltcmalloc
-LDFLAGS2 = stl.so
-RPATH    = /var/lib/xcb
-TARGET1  = stl.so
-TARGET2  = app_ema.so
+LDFLAGS  = -ltcmalloc
+TARGET   = app_ema.so
 OBJ1     = stl.o
 OBJ2     = app_ema.o
 
-all : $(TARGET1) $(TARGET2)
+all : $(TARGET)
 
-$(TARGET1) : $(OBJ1)
-	$(C++) -shared $^ $(LDFLAGS1) -Wl,-soname -Wl,$@ -o $@
-
-$(TARGET2) : $(OBJ2)
-	$(CC)  -shared $^ $(LDFLAGS2) -Wl,-rpath,$(RPATH) -Wl,-soname -Wl,$@ -o $@
+$(TARGET) : $(OBJ1) $(OBJ2)
+	$(C++) -shared $^ $(LDFLAGS) -Wl,-soname -Wl,$@ -o $@
 
 $(OBJ1) : stl.cpp
 	$(C++) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
@@ -48,5 +42,5 @@ $(OBJ2) : app_ema.c
 .PHONY: all clean
 
 clean:
-	rm -f $(TARGET1) $(TARGET2) $(OBJ1) $(OBJ2)
+	rm -f $(TARGET) $(OBJ1) $(OBJ2)
 

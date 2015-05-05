@@ -149,9 +149,10 @@
     public:
         /**
          * 创建行情API实例
+         * @pszLogAddr: log所在的路径。如果pszLogAddr为NULL，则不生成log。
          * @return 创建出的UserApi
          */
-        static DFITCSECMdApi * CreateDFITCMdApi();
+        static DFITCSECMdApi * CreateDFITCMdApi(const char* pszLogAddr = "");
 
         /**
          * 进行一系列初始化工作:注册回调函数接口,连接行情前置。
@@ -162,7 +163,7 @@
          * @param *pSpi:类DFITCMdSpi对象实例
          * @return 0 - 成功;1 - 失败。
          */
-        virtual int Init(char * pszSvrAddr, DFITCSECMdSpi * pSpi) = 0;
+        virtual int Init(const char * pszSvrAddr, DFITCSECMdSpi * pSpi) = 0;
 
         /**
          * 删除接口对象

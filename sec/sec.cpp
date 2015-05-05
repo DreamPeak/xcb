@@ -108,7 +108,7 @@ struct sec_mdspi_t : public DFITCSECMdSpi {
 
 sec_mdapi_t *sec_mdapi_create(void) {
 	sec_mdapi_t *mdapi = new sec_mdapi_t;
-	mdapi->rep = DFITCSECMdApi::CreateDFITCMdApi();
+	mdapi->rep = DFITCSECMdApi::CreateDFITCMdApi(NULL);
 	return mdapi;
 }
 

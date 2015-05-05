@@ -556,8 +556,9 @@ class DFITCSEC_TRADER_API DFITCSECTraderApi
 public:
      /**
       * 创建DFITCSECTraderApi接口对象
+	  * @ pszLogAddr log所在的路径，如果pszLogAddress为NULL，则不生成log。
       */
-     static DFITCSECTraderApi *CreateDFITCSECTraderApi(void);
+     static DFITCSECTraderApi *CreateDFITCSECTraderApi(const char* pszLogAddr = "");
      /**
       * 释放DFITCSECTraderApi接口对象
       */
@@ -568,7 +569,7 @@ public:
       * @param pSpi:指向回调函数集的指针
       * @return 0表示请求发送成功，其他值表示请求发送失败，具体错误请对照error.xml
       */
-     virtual int Init(char *pszFrontAddress, DFITCSECTraderSpi *pSpi) = 0;
+     virtual int Init(const char *pszFrontAddress, DFITCSECTraderSpi *pSpi) = 0;
      /**
       * STOCK-登录请求
       * @param p:指向用户登录请求结构体的地址

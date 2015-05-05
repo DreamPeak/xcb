@@ -57,3 +57,5 @@ rm -rf %{buildroot}
 %{_includedir}/%{name}/
 %{_libdir}/lib%{name}.so
 
+%changelog
+
