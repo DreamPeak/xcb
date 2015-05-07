@@ -107,20 +107,20 @@ static int ema_exec(void *data, void *data2) {
 	deq_push_back(prices, price);
 	if ((size = deq_size(prices)) == n) {
 		int i;
-		float sum = *((float *)deq_at(prices, 0));
+		float ema = *((float *)deq_at(prices, 0));
 		time_t t = (time_t)quote->thyquote.m_nTime;
 		struct tm lt;
 		char datestr[64], res[256];
 		float *front;
 
 		for (i = 1; i < size; ++i)
-			sum = (2.0 / (n + 1)) * *((float *)deq_at(prices, i)) + (1 - (2.0 / (n + 1))) * sum;
+			ema = (2.0 / (n + 1)) * *((float *)deq_at(prices, i)) + (1 - (2.0 / (n + 1))) * ema;
 		strftime(datestr, sizeof datestr, "%F %T", localtime_r(&t, &lt));
 		snprintf(res, sizeof res, "EMA,%s.%03d,%s,%.2f",
 			datestr,
 			quote->m_nMSec,
 			quote->thyquote.m_cHYDM,
-			sum / n);
+			ema);
 		out2rmp(res);
 		front = deq_front(prices);
 		FREE(front);
