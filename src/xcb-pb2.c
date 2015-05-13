@@ -77,7 +77,9 @@ static void monitor_command(client c);
 static void database_command(client c);
 static void shutdown_command(client c);
 extern void s_command(client c);
+extern void sall_command(client c);
 extern void u_command(client c);
+extern void uall_command(client c);
 extern void q_command(client c);
 extern void qc_command(client c);
 extern void index_command(client c);
@@ -97,7 +99,9 @@ static struct cmd commands[] = {
 static table_t ctm_cmds;
 static struct cmd ctm_commands[] = {
 	{"S",		s_command,		"Subscribe",				-1},
+	{"SALL",	sall_command,		"Subscribe all",			1},
 	{"U",		u_command,		"Unsubscribe",				-1},
+	{"UALL",	uall_command,		"Unsubscribe all",			1},
 	{"Q",		q_command,		"Query",				5},
 	{"QC",		qc_command,		"Query cancellation",			2},
 	{"INDEX",	index_command,		"Index",				2},
@@ -235,7 +239,7 @@ static int prepare_for_shutdown(void) {
 	return 0;
 }
 
-static dstr get_indices(void) {
+dstr get_indices(void) {
 	table_iter_t titer;
 	table_node_t tnode;
 	dlist_t dlist = dlist_new(cmpstr, vfree);
@@ -1042,7 +1046,9 @@ static int process_command(client c) {
 	if (c->sock == ctmsock) {
 		dstr ctm_cmd = dstr_new_len(c->argv[0], 1);
 
-		if (!strcmp(c->argv[0], "QC") || !strcmp(c->argv[0], "INDEX") || !strcmp(c->argv[0], "AUTH"))
+		if (!strcmp(c->argv[0], "QC") || !strcmp(c->argv[0], "INDEX") ||
+			!strcmp(c->argv[0], "AUTH") || !strcmp(c->argv[0], "SALL") ||
+			!strcmp(c->argv[0], "UALL") || !strcmp(c->argv[0], "INDICES"))
 			c->cmd = table_get_value(ctm_cmds, c->argv[0]);
 		else {
 			c->cmd = table_get_value(ctm_cmds, ctm_cmd);

@@ -25,6 +25,7 @@
 #include <string.h>
 #include <strings.h>
 #include <time.h>
+#include "macros.h"
 #include "mem.h"
 #include "dlist.h"
 #include "table.h"
@@ -52,6 +53,9 @@ extern table_t idxfmts;
 extern const char *password;
 extern const char *dpip;
 extern int dpport;
+
+/* FIXME */
+extern dstr get_indices(void);
 
 /* FIXME */
 static table_t rids = NULL;
@@ -203,6 +207,60 @@ void s_command(client c) {
 }
 
 /* FIXME */
+void sall_command(client c) {
+	dstr res = get_indices();
+	dstr *fields = NULL;
+	int nfield = 0, i;
+
+	RTRIM(res);
+	fields = dstr_split_len(res, dstr_length(res), ",", 1, &nfield);
+	for (i = 1; i < nfield; ++i) {
+		dstr pkey = dstr_new(fields[i]);
+		dstr skey = dstr_new(pkey);
+		dlist_t dlist;
+		struct kvd *kvd;
+
+		table_rwlock_wrlock(subscribers);
+		if ((dlist = table_get_value(subscribers, pkey)) == NULL) {
+			if (NEW(kvd)) {
+				kvd->key = skey;
+				kvd->u.dlist = dlist_new(NULL, NULL);
+				dlist_insert_tail(kvd->u.dlist, c);
+				dlist = dlist_new(cmpkvd, kdfree);
+				dlist_insert_sort(dlist, kvd);
+				table_insert(subscribers, pkey, dlist);
+			} else {
+				add_reply_error(c, "error allocating memory for kvd\r\n");
+				dstr_free(skey);
+				dstr_free(pkey);
+			}
+		} else {
+			if (NEW(kvd)) {
+				dlist_node_t node;
+
+				kvd->key     = skey;
+				kvd->u.dlist = dlist_new(NULL, NULL);
+				if ((node = dlist_find(dlist, kvd)) == NULL) {
+					dlist_insert_tail(kvd->u.dlist, c);
+					dlist_insert_sort(dlist, kvd);
+				} else {
+					kdfree(kvd);
+					kvd = (struct kvd *)dlist_node_value(node);
+					if (dlist_find(kvd->u.dlist, c) == NULL)
+						dlist_insert_tail(kvd->u.dlist, c);
+				}
+			} else {
+				add_reply_error(c, "error allocating memory for kvd\r\n");
+				dstr_free(skey);
+			}
+			dstr_free(pkey);
+		}
+		table_rwlock_unlock(subscribers);
+	}
+	dstr_free(res);
+}
+
+/* FIXME */
 void u_command(client c) {
 	dstr pkey, skey;
 	dlist_t dlist;
@@ -251,6 +309,53 @@ void u_command(client c) {
 	dstr_free(skey);
 	dstr_free(pkey);
 	add_reply_string(c, "\r\n", 2);
+}
+
+/* FIXME */
+void uall_command(client c) {
+	dstr res = get_indices();
+	dstr *fields = NULL;
+	int nfield = 0, i;
+
+	RTRIM(res);
+	fields = dstr_split_len(res, dstr_length(res), ",", 1, &nfield);
+	for (i = 1; i < nfield; ++i) {
+		dstr pkey = dstr_new(fields[i]);
+		dstr skey = dstr_new(pkey);
+		dlist_t dlist;
+
+		table_rwlock_wrlock(subscribers);
+		if ((dlist = table_get_value(subscribers, pkey))) {
+			struct kvd *kvd;
+
+			if (NEW(kvd)) {
+				dlist_node_t node, node2;
+
+				kvd->key = skey;
+				if ((node = dlist_find(dlist, kvd))) {
+					FREE(kvd);
+					kvd = (struct kvd *)dlist_node_value(node);
+					if ((node2 = dlist_find(kvd->u.dlist, c)))
+						dlist_remove(kvd->u.dlist, node2);
+					if (dlist_length(kvd->u.dlist) == 0) {
+						dlist_remove(dlist, node);
+						kdfree(kvd);
+					}
+					if (dlist_length(dlist) == 0) {
+						table_remove(subscribers, pkey);
+						dlist_free(&dlist);
+					}
+				} else
+					FREE(kvd);
+			} else
+				add_reply_error(c, "error allocating memory for kvd");
+		}
+		table_rwlock_unlock(subscribers);
+		dstr_free(skey);
+		dstr_free(pkey);
+	}
+	add_reply_string(c, "\r\n", 2);
+	dstr_free(res);
 }
 
 /* FIXME */
