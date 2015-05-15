@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2013-2015, Dalian Futures Information Technology Co., Ltd.
  *
+ * Bo Wang     <futurewb at dce dot com dot cn>
  * Xiaoye Meng <mengxiaoye at dce dot com dot cn>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -43,12 +44,12 @@
 #undef MIN
 #undef MAX
 #include "mem.h"
-#include "module.h"
 #include "dlist.h"
 #include "table.h"
 #include "dstr.h"
 #include "logger.h"
 #include "config.h"
+#include "module.h"
 #include "net.h"
 #include "event.h"
 #include "thrpool.h"
@@ -557,9 +558,9 @@ static void read_quote(event_loop el, int fd, int mask, void *data) {
 	if ((buf = CALLOC(1, sizeof (Quote))) == NULL)
 		return;
 	/* FIXME */
-	if ((nread = recvfrom(fd, buf, sizeof (Quote), 0, (struct sockaddr *)&si, &slen)) > 0) {
+	if ((nread = recvfrom(fd, buf, sizeof (Quote), 0, (struct sockaddr *)&si, &slen)) > 0)
 		process_quote(buf);
-	} else
+	else
 		FREE(buf);
 }
 

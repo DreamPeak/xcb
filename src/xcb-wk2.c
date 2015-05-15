@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2013-2015, Dalian Futures Information Technology Co., Ltd.
  *
+ * Bo Wang     <futurewb at dce dot com dot cn>
  * Xiaoye Meng <mengxiaoye at dce dot com dot cn>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -86,7 +87,7 @@ static struct cmd commands[] = {
 	{"help",	help_command,		"Display this text",			1},
 	{"?",		help_command,		"Synonym for 'help'",			1},
 	{"config",	config_command,		"Get or set configurations",		-3},
-	{"show",	show_command,		"Show modules, applictions or queues",	2},
+	{"show",	show_command,		"Show modules, applications or queues",	2},
 	{"module",	module_command,		"Load, unload or reload module",	3},
 	{"monitor",	monitor_command,	"Monitor on or off",			2},
 	{"database",	database_command,	"Database operations",			-1},
