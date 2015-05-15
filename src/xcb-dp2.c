@@ -20,6 +20,7 @@
 
 #include "fmacros.h"
 #include <arpa/inet.h>
+#include <dirent.h>
 #include <errno.h>
 #ifdef __linux__
 #define CONFIG_HAVE_BACKTRACE 1
@@ -42,6 +43,7 @@
 #undef MIN
 #undef MAX
 #include "mem.h"
+#include "module.h"
 #include "dlist.h"
 #include "table.h"
 #include "dstr.h"
@@ -69,6 +71,8 @@ void client_free(client c);
 static void tcp_accept_handler(event_loop el, int fd, int mask, void *data);
 static void help_command(client c);
 static void config_command(client c);
+static void show_command(client c);
+static void module_command(client c);
 static void monitor_command(client c);
 static void shutdown_command(client c);
 
@@ -78,6 +82,8 @@ static struct cmd commands[] = {
 	{"help",	help_command,		"Display this text",			1},
 	{"?",		help_command,		"Synonym for 'help'",			1},
 	{"config",	config_command,		"Get or set configurations",		-3},
+	{"show",	show_command,		"Show modules",				2},
+	{"module",	module_command,		"Load, unload or reload module",	3},
 	{"monitor",	monitor_command,	"Monitor on or off",			2},
 	{"shutdown",	shutdown_command,	"Shut down xcb-dp2",			1},
 	{"quit",	NULL,			"Quit connecting to xcb-dp2",		1}
@@ -391,6 +397,154 @@ static int send_quote(void *data, void *data2) {
 	return 0;
 }
 
+void process_quote(void *data) {
+	Quote *quote;
+	struct msg *msg;
+
+	quote = (Quote *)data;
+	if (quote->thyquote.m_nLen == sizeof (THYQuote)) {
+		dlist_iter_t iter;
+		dlist_node_t node;
+		int tlen;
+
+		quote->thyquote.m_cJYS[sizeof quote->thyquote.m_cJYS - 1] = '\0';
+		quote->thyquote.m_cHYDM[sizeof quote->thyquote.m_cHYDM - 1] = '\0';
+		quote->m_nMSec = 0;
+		/* in case of multiple monitors */
+		dlist_rwlock_rdlock(monitors);
+		if (dlist_length(monitors) > 0) {
+			char res[512];
+
+			snprintf(res, sizeof res, "RX '%d,%s,%s,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,"
+				"%.2f,%.2f,%d,%.2f,%d,%d,%.2f,%d,%.2f,%d'\r\n",
+				quote->thyquote.m_nTime,
+				quote->thyquote.m_cHYDM,
+				quote->thyquote.m_cJYS,
+				quote->thyquote.m_dZXJ,
+				quote->thyquote.m_dJKP,
+				quote->thyquote.m_dZGJ,
+				quote->thyquote.m_dZDJ,
+				quote->thyquote.m_dZSP,
+				quote->thyquote.m_dJSP,
+				quote->thyquote.m_dZJSJ,
+				quote->thyquote.m_dJJSJ,
+				quote->thyquote.m_nCJSL,
+				quote->thyquote.m_dCJJE,
+				quote->thyquote.m_nZCCL,
+				quote->thyquote.m_nCCL,
+				quote->thyquote.m_dMRJG1,
+				quote->thyquote.m_nMRSL1,
+				quote->thyquote.m_dMCJG1,
+				quote->thyquote.m_nMCSL1);
+			iter = dlist_iter_new(monitors, DLIST_START_HEAD);
+			while ((node = dlist_next(iter))) {
+				client c = (client)dlist_node_value(node);
+
+				pthread_spin_lock(&c->lock);
+				if (!(c->flags & CLIENT_CLOSE_ASAP)) {
+					if (net_try_write(c->fd, res, strlen(res),
+						10, NET_NONBLOCK) == -1) {
+						xcb_log(XCB_LOG_WARNING, "Writing to client '%p': %s",
+							c, strerror(errno));
+						if (++c->eagcount >= 3)
+							client_free_async(c);
+					} else if (c->eagcount)
+						c->eagcount = 0;
+				}
+				pthread_spin_unlock(&c->lock);
+			}
+			dlist_iter_free(&iter);
+		}
+		dlist_rwlock_unlock(monitors);
+		/* FIXME */
+		if (quote->thyquote.m_nTime == 999999999) {
+			FREE(data);
+			return;
+		/* idiosyncrasy of different timestamps */
+		} else if ((tlen = intlen(quote->thyquote.m_nTime)) < 10) {
+			struct timeval tv;
+			struct tm lt;
+
+			gettimeofday(&tv, NULL);
+			localtime_r(&tv.tv_sec, &lt);
+			if (quote->thyquote.m_cHYDM[0] == 'S' && quote->thyquote.m_cHYDM[1] == 'P')
+				quote->thyquote.m_nTime *= 1000;
+			else if (tlen == 6 || tlen == 7)
+				quote->thyquote.m_nTime *= 100;
+			lt.tm_hour = quote->thyquote.m_nTime / 10000000;
+			lt.tm_min  = quote->thyquote.m_nTime % 10000000 / 100000;
+			lt.tm_sec  = quote->thyquote.m_nTime % 100000   / 1000;
+			quote->m_nMSec = quote->thyquote.m_nTime % 1000;
+			quote->thyquote.m_nTime = mktime(&lt);
+		}
+		/* FIXME: no millisecond field in some exchanges' quotes */
+		if (addms) {
+			struct timeval tv;
+			dstr contract = dstr_new(quote->thyquote.m_cHYDM);
+			struct sms *sms;
+
+			gettimeofday(&tv, NULL);
+			if ((sms = table_get_value(times, contract)) == NULL) {
+				if (NEW(sms)) {
+					sms->qsec = quote->thyquote.m_nTime;
+					sms->sec  = tv.tv_sec;
+					sms->msec = tv.tv_usec / 1000;
+					table_insert(times, contract, sms);
+				}
+			} else if (sms->qsec != quote->thyquote.m_nTime) {
+				sms->qsec = quote->thyquote.m_nTime;
+				sms->sec  = tv.tv_sec;
+				sms->msec = tv.tv_usec / 1000;
+				dstr_free(contract);
+			} else {
+				int32_t offset;
+
+				if ((offset = (tv.tv_sec - sms->sec) * 1000 +
+					tv.tv_usec / 1000 - sms->msec) > 999)
+					offset = 999;
+				quote->m_nMSec = offset;
+				dstr_free(contract);
+			}
+		}
+		if (get_logger_level() == __LOG_DEBUG) {
+			time_t t = (time_t)quote->thyquote.m_nTime;
+			char datestr[64];
+
+			strftime(datestr, sizeof datestr, "%F %T", localtime(&t));
+			xcb_log(XCB_LOG_DEBUG, "%s.%03d,%s,%s,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,"
+				"%d,%.2f,%d,%d,%.2f,%d,%.2f,%d",
+				datestr,
+				quote->m_nMSec,
+				quote->thyquote.m_cHYDM,
+				quote->thyquote.m_cJYS,
+				quote->thyquote.m_dZXJ,
+				quote->thyquote.m_dJKP,
+				quote->thyquote.m_dZGJ,
+				quote->thyquote.m_dZDJ,
+				quote->thyquote.m_dZSP,
+				quote->thyquote.m_dJSP,
+				quote->thyquote.m_dZJSJ,
+				quote->thyquote.m_dJJSJ,
+				quote->thyquote.m_nCJSL,
+				quote->thyquote.m_dCJJE,
+				quote->thyquote.m_nZCCL,
+				quote->thyquote.m_nCCL,
+				quote->thyquote.m_dMRJG1,
+				quote->thyquote.m_nMRSL1,
+				quote->thyquote.m_dMCJG1,
+				quote->thyquote.m_nMCSL1);
+		}
+	} else
+		xcb_log(XCB_LOG_DEBUG, "Data '%s' received", data);
+	if (NEW0(msg) == NULL) {
+		FREE(data);
+		return;
+	}
+	msg->data     = data;
+	msg->refcount = 1;
+	thrpool_queue(tp, send_quote, msg, NULL, msgfree, NULL);
+}
+
 static void read_quote(event_loop el, int fd, int mask, void *data) {
 	char *buf;
 	struct sockaddr_in si;
@@ -404,122 +558,7 @@ static void read_quote(event_loop el, int fd, int mask, void *data) {
 		return;
 	/* FIXME */
 	if ((nread = recvfrom(fd, buf, sizeof (Quote), 0, (struct sockaddr *)&si, &slen)) > 0) {
-		Quote *quote;
-		struct msg *msg;
-
-		quote = (Quote *)buf;
-		if (quote->thyquote.m_nLen == sizeof (THYQuote)) {
-			int tlen;
-
-			quote->thyquote.m_cJYS[sizeof quote->thyquote.m_cJYS - 1] = '\0';
-			quote->thyquote.m_cHYDM[sizeof quote->thyquote.m_cHYDM - 1] = '\0';
-			quote->m_nMSec = 0;
-			/* in case of multiple monitors */
-			dlist_rwlock_rdlock(monitors);
-			if (dlist_length(monitors) > 0) {
-				char res[512];
-				dlist_iter_t iter = dlist_iter_new(monitors, DLIST_START_HEAD);
-				dlist_node_t node;
-
-				snprintf(res, sizeof res, "RX '%d,%s,%s,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,"
-					"%.2f,%.2f,%d,%.2f,%d,%d,%.2f,%d,%.2f,%d'\r\n",
-					quote->thyquote.m_nTime,
-					quote->thyquote.m_cHYDM,
-					quote->thyquote.m_cJYS,
-					quote->thyquote.m_dZXJ,
-					quote->thyquote.m_dJKP,
-					quote->thyquote.m_dZGJ,
-					quote->thyquote.m_dZDJ,
-					quote->thyquote.m_dZSP,
-					quote->thyquote.m_dJSP,
-					quote->thyquote.m_dZJSJ,
-					quote->thyquote.m_dJJSJ,
-					quote->thyquote.m_nCJSL,
-					quote->thyquote.m_dCJJE,
-					quote->thyquote.m_nZCCL,
-					quote->thyquote.m_nCCL,
-					quote->thyquote.m_dMRJG1,
-					quote->thyquote.m_nMRSL1,
-					quote->thyquote.m_dMCJG1,
-					quote->thyquote.m_nMCSL1);
-				while ((node = dlist_next(iter))) {
-					client c = (client)dlist_node_value(node);
-
-					pthread_spin_lock(&c->lock);
-					if (!(c->flags & CLIENT_CLOSE_ASAP)) {
-						if (net_try_write(c->fd, res, strlen(res),
-							10, NET_NONBLOCK) == -1) {
-							xcb_log(XCB_LOG_WARNING, "Writing to client '%p': %s",
-								c, strerror(errno));
-							if (++c->eagcount >= 3)
-								client_free_async(c);
-						} else if (c->eagcount)
-							c->eagcount = 0;
-					}
-					pthread_spin_unlock(&c->lock);
-				}
-				dlist_iter_free(&iter);
-			}
-			dlist_rwlock_unlock(monitors);
-			/* FIXME */
-			if (quote->thyquote.m_nTime == 999999999) {
-				FREE(buf);
-				return;
-			/* idiosyncrasy of different timestamps */
-			} else if ((tlen = intlen(quote->thyquote.m_nTime)) < 10) {
-				struct timeval tv;
-				struct tm lt;
-
-				gettimeofday(&tv, NULL);
-				localtime_r(&tv.tv_sec, &lt);
-				if (quote->thyquote.m_cHYDM[0] == 'S' && quote->thyquote.m_cHYDM[1] == 'P')
-					quote->thyquote.m_nTime *= 1000;
-				else if (tlen == 6 || tlen == 7)
-					quote->thyquote.m_nTime *= 100;
-				lt.tm_hour = quote->thyquote.m_nTime / 10000000;
-				lt.tm_min  = quote->thyquote.m_nTime % 10000000 / 100000;
-				lt.tm_sec  = quote->thyquote.m_nTime % 100000   / 1000;
-				quote->m_nMSec = quote->thyquote.m_nTime % 1000;
-				quote->thyquote.m_nTime = mktime(&lt);
-			}
-			/* FIXME: no millisecond field in some exchanges' quotes */
-			if (addms) {
-				struct timeval tv;
-				dstr contract = dstr_new(quote->thyquote.m_cHYDM);
-				struct sms *sms;
-
-				gettimeofday(&tv, NULL);
-				if ((sms = table_get_value(times, contract)) == NULL) {
-					if (NEW(sms)) {
-						sms->qsec = quote->thyquote.m_nTime;
-						sms->sec  = tv.tv_sec;
-						sms->msec = tv.tv_usec / 1000;
-						table_insert(times, contract, sms);
-					}
-				} else if (sms->qsec != quote->thyquote.m_nTime) {
-					sms->qsec = quote->thyquote.m_nTime;
-					sms->sec  = tv.tv_sec;
-					sms->msec = tv.tv_usec / 1000;
-					dstr_free(contract);
-				} else {
-					int32_t offset;
-
-					if ((offset = (tv.tv_sec - sms->sec) * 1000 +
-						tv.tv_usec / 1000 - sms->msec) > 999)
-						offset = 999;
-					quote->m_nMSec = offset;
-					dstr_free(contract);
-				}
-			}
-		}
-		if (NEW0(msg) == NULL) {
-			FREE(buf);
-			return;
-		}
-		msg->data     = buf;
-		msg->refcount = 1;
-		/* send quotes as soon as possible */
-		thrpool_queue(tp, send_quote, msg, NULL, msgfree, NULL);
+		process_quote(buf);
 	} else
 		FREE(buf);
 }
@@ -599,6 +638,45 @@ int main(int argc, char **argv) {
 		goto err;
 	}
 	create_time_event(el, 1, server_cron, NULL, NULL);
+	/* FIXME */
+	if ((tmp = variable_retrieve(cfg, "modules", "module_path")) && strcmp(tmp, "")) {
+		struct variable *var = variable_browse(cfg, "modules");
+		dlist_t noloads = dlist_new(cmpstr, NULL);
+		DIR *dir;
+		struct dirent *dirent;
+
+		while (var) {
+			if (!strcasecmp(var->name, "preload")) {
+				if (strcmp(var->value, "")) {
+					int len = strlen(var->value);
+
+					if (len >= 4 && !strcasecmp(var->value + len - 3, ".so") &&
+						!strncasecmp(var->value, "md", 2))
+						module_load(tmp, var->value);
+				}
+			} else if (!strcasecmp(var->name, "noload") && !strncasecmp(var->value, "md", 2))
+				if (strcmp(var->value, ""))
+					dlist_insert_tail(noloads, (void *)var->value);
+			var = var->next;
+		}
+		if ((dir = opendir(tmp))) {
+			while ((dirent = readdir(dir))) {
+				int len = strlen(dirent->d_name);
+
+				if (len < 4)
+					continue;
+				if (strcasecmp(dirent->d_name + len - 3, ".so") ||
+					strncasecmp(dirent->d_name, "md", 2))
+					continue;
+				if (dlist_find(noloads, dirent->d_name))
+					continue;
+				module_load(tmp, dirent->d_name);
+			}
+			closedir(dir);
+		} else
+			xcb_log(XCB_LOG_WARNING, "Unable to open modules directory '%s'", tmp);
+		dlist_free(&noloads);
+	}
 	if ((tmp = variable_retrieve(cfg, "general", "udp_port")) && strcmp(tmp, "")) {
 		if ((udpsock = net_udp_server(NULL, atoi(tmp), neterr, sizeof neterr)) == -1) {
 			xcb_log(XCB_LOG_ERROR, "Opening port '%s': %s", tmp, neterr);
@@ -857,6 +935,42 @@ static void config_command(client c) {
 		} else
 			add_reply_string(c, "-1\r\n", 4);
 		pthread_mutex_unlock(&cfg_lock);
+	} else
+		add_reply_error_format(c, "unknown action '%s'", c->argv[1]);
+	add_reply_string(c, "\r\n", 2);
+}
+
+/* FIXME */
+static void show_command(client c) {
+	if (!strcasecmp(c->argv[1], "modules")) {
+		struct module *mod = get_module_list_head();
+
+		for (; mod; mod = mod->link)
+			add_reply_string_format(c, "%30.30s  %s [Status: %s]\r\n", mod->name, mod->info->desc,
+				mod->flags.running == 1 ? "Running" :
+					(mod->flags.declined == 1 ? "Declined" : "Failed"));
+	} else
+		add_reply_error_format(c, "unknown property '%s'", c->argv[1]);
+	add_reply_string(c, "\r\n", 2);
+}
+
+static void module_command(client c) {
+	if (!strcasecmp(c->argv[1], "load")) {
+		/* FIXME */
+		if (module_load("/var/lib/xcb", c->argv[2]) != MODULE_LOAD_SUCCESS)
+			add_reply_error_format(c, "module '%s' loaded NOT OK", c->argv[2]);
+		else
+			add_reply_string_format(c, "module '%s' loaded OK\r\n", c->argv[2]);
+	} else if (!strcasecmp(c->argv[1], "unload")) {
+		if (module_unload(c->argv[2]) != MODULE_LOAD_SUCCESS)
+			add_reply_error_format(c, "module '%s' unloaded NOT OK", c->argv[2]);
+		else
+			add_reply_string_format(c, "module '%s' unloaded OK\r\n", c->argv[2]);
+	} else if (!strcasecmp(c->argv[1], "reload")) {
+		if (module_reload(c->argv[2]) != MODULE_RELOAD_SUCCESS)
+			add_reply_error_format(c, "module '%s' reloaded NOT OK", c->argv[2]);
+		else
+			add_reply_string_format(c, "module '%s' reloaded OK\r\n", c->argv[2]);
 	} else
 		add_reply_error_format(c, "unknown action '%s'", c->argv[1]);
 	add_reply_string(c, "\r\n", 2);

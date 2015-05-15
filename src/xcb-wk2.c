@@ -1001,10 +1001,11 @@ int main(int argc, char **argv) {
 				if (strcmp(var->value, "")) {
 					int len = strlen(var->value);
 
-					if (len >= 4 && !strcasecmp(var->value + len - 3, ".so"))
+					if (len >= 4 && !strcasecmp(var->value + len - 3, ".so") &&
+						strncasecmp(var->value, "md", 2))
 						module_load(tmp, var->value);
 				}
-			} else if (!strcasecmp(var->name, "noload"))
+			} else if (!strcasecmp(var->name, "noload") && strncasecmp(var->value, "md", 2))
 				if (strcmp(var->value, ""))
 					dlist_insert_tail(noloads, (void *)var->value);
 			var = var->next;
@@ -1015,7 +1016,8 @@ int main(int argc, char **argv) {
 
 				if (len < 4)
 					continue;
-				if (strcasecmp(dirent->d_name + len - 3, ".so"))
+				if (strcasecmp(dirent->d_name + len - 3, ".so") ||
+					!strncasecmp(dirent->d_name, "md", 2))
 					continue;
 				if (dlist_find(noloads, dirent->d_name))
 					continue;

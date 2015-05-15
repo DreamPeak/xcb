@@ -116,11 +116,12 @@ xcb_compact_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 am_xcb_dp2_OBJECTS = xcb_dp2-mem.$(OBJEXT) xcb_dp2-dlist.$(OBJEXT) \
 	xcb_dp2-table.$(OBJEXT) xcb_dp2-ring.$(OBJEXT) \
 	xcb_dp2-heap.$(OBJEXT) xcb_dp2-dstr.$(OBJEXT) \
-	xcb_dp2-utilities.$(OBJEXT) xcb_dp2-logger.$(OBJEXT) \
-	xcb_dp2-config.$(OBJEXT) xcb_dp2-event.$(OBJEXT) \
-	xcb_dp2-net.$(OBJEXT) xcb_dp2-thrpool.$(OBJEXT) \
-	xcb_dp2-pgmsock.$(OBJEXT) xcb_dp2-networking.$(OBJEXT) \
-	xcb_dp2-basics.$(OBJEXT) xcb_dp2-xcb-dp2.$(OBJEXT)
+	xcb_dp2-utilities.$(OBJEXT) xcb_dp2-loader.$(OBJEXT) \
+	xcb_dp2-logger.$(OBJEXT) xcb_dp2-config.$(OBJEXT) \
+	xcb_dp2-event.$(OBJEXT) xcb_dp2-net.$(OBJEXT) \
+	xcb_dp2-thrpool.$(OBJEXT) xcb_dp2-pgmsock.$(OBJEXT) \
+	xcb_dp2-networking.$(OBJEXT) xcb_dp2-basics.$(OBJEXT) \
+	xcb_dp2-xcb-dp2.$(OBJEXT)
 xcb_dp2_OBJECTS = $(am_xcb_dp2_OBJECTS)
 xcb_dp2_LDADD = $(LDADD)
 xcb_dp2_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
@@ -302,12 +303,11 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 xcb_dp2_SOURCES = mem.c dlist.c table.c ring.c heap.c dstr.c utilities.c       \
-logger.c config.c event.c net.c thrpool.c pgmsock.c networking.c basics.c      \
-xcb-dp2.c
+loader.c logger.c config.c event.c net.c thrpool.c pgmsock.c networking.c basics.c xcb-dp2.c
 
 xcb_dp2_CPPFLAGS = -I$(top_srcdir)/include -I/usr/include/pgm-5.1
-xcb_dp2_CFLAGS = -Wall -Winline -pthread
-xcb_dp2_LDFLAGS = -lrt -lpgm -ltcmalloc
+xcb_dp2_CFLAGS = -Wall -Winline -pthread -rdynamic
+xcb_dp2_LDFLAGS = -lrt -ldl -lpgm -ltcmalloc
 xcb_wk2_SOURCES = mem.c dlist.c table.c ring.c heap.c dstr.c utilities.c       \
 logger.c config.c event.c net.c loader.c thrpool.c db.c pgmsock.c networking.c \
 basics.c xcb-wk2.c
@@ -520,6 +520,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_dp2-dstr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_dp2-event.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_dp2-heap.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_dp2-loader.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_dp2-logger.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_dp2-mem.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_dp2-net.Po@am__quote@
@@ -1018,6 +1019,20 @@ xcb_dp2-utilities.obj: utilities.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='utilities.c' object='xcb_dp2-utilities.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_dp2_CPPFLAGS) $(CPPFLAGS) $(xcb_dp2_CFLAGS) $(CFLAGS) -c -o xcb_dp2-utilities.obj `if test -f 'utilities.c'; then $(CYGPATH_W) 'utilities.c'; else $(CYGPATH_W) '$(srcdir)/utilities.c'; fi`
+
+xcb_dp2-loader.o: loader.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_dp2_CPPFLAGS) $(CPPFLAGS) $(xcb_dp2_CFLAGS) $(CFLAGS) -MT xcb_dp2-loader.o -MD -MP -MF $(DEPDIR)/xcb_dp2-loader.Tpo -c -o xcb_dp2-loader.o `test -f 'loader.c' || echo '$(srcdir)/'`loader.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_dp2-loader.Tpo $(DEPDIR)/xcb_dp2-loader.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='loader.c' object='xcb_dp2-loader.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_dp2_CPPFLAGS) $(CPPFLAGS) $(xcb_dp2_CFLAGS) $(CFLAGS) -c -o xcb_dp2-loader.o `test -f 'loader.c' || echo '$(srcdir)/'`loader.c
+
+xcb_dp2-loader.obj: loader.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_dp2_CPPFLAGS) $(CPPFLAGS) $(xcb_dp2_CFLAGS) $(CFLAGS) -MT xcb_dp2-loader.obj -MD -MP -MF $(DEPDIR)/xcb_dp2-loader.Tpo -c -o xcb_dp2-loader.obj `if test -f 'loader.c'; then $(CYGPATH_W) 'loader.c'; else $(CYGPATH_W) '$(srcdir)/loader.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_dp2-loader.Tpo $(DEPDIR)/xcb_dp2-loader.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='loader.c' object='xcb_dp2-loader.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_dp2_CPPFLAGS) $(CPPFLAGS) $(xcb_dp2_CFLAGS) $(CFLAGS) -c -o xcb_dp2-loader.obj `if test -f 'loader.c'; then $(CYGPATH_W) 'loader.c'; else $(CYGPATH_W) '$(srcdir)/loader.c'; fi`
 
 xcb_dp2-logger.o: logger.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_dp2_CPPFLAGS) $(CPPFLAGS) $(xcb_dp2_CFLAGS) $(CFLAGS) -MT xcb_dp2-logger.o -MD -MP -MF $(DEPDIR)/xcb_dp2-logger.Tpo -c -o xcb_dp2-logger.o `test -f 'logger.c' || echo '$(srcdir)/'`logger.c
