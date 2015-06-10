@@ -43,6 +43,10 @@ struct crss {
 	dstr	rid, match, start, stop;
 	int	cancel;
 };
+struct cri {
+	client	c;
+	dstr	rid, indices;
+};
 
 /* FIXME */
 extern table_t cache;
@@ -60,6 +64,7 @@ extern dstr get_indices(void);
 
 /* FIXME */
 static table_t rids = NULL;
+static table_t indices_rids = NULL;
 
 /* FIXME */
 int cmpkvd(const void *x, const void *y) {
@@ -533,6 +538,70 @@ void qc_command(client c) {
 	table_unlock(rids);
 	add_reply_string(c, "\r\n", 2);
 	dstr_free(rid);
+}
+
+/* FIXME */
+static void *indices_thread(void *data) {
+	struct cri *cri = (struct cri *)data;
+	dstr res = NULL;
+
+	res = dstr_new(cri->rid);
+	res = dstr_cat(res, ",");
+	res = dstr_cat(res, cri->indices);
+	res = dstr_cat(res, "\r\n");
+	if (net_try_write(cri->c->fd, res, dstr_length(res), 10, NET_NONBLOCK) == -1) {
+		xcb_log(XCB_LOG_WARNING, "Writing to client '%p': %s", cri->c, strerror(errno));
+		pthread_spin_unlock(&cri->c->lock);
+		goto end;
+	}
+	pthread_spin_unlock(&cri->c->lock);
+	dstr_free(res);
+end:
+	dstr_free(res);
+	client_decr(cri->c);
+	dstr_free(cri->rid);
+	dstr_free(cri->indices);
+	FREE(cri);
+	return NULL;
+}
+
+/* FIXME */
+void indices_command(client c) {
+	char buf[64];
+	dstr rid;
+	struct cri *cri;
+
+	snprintf(buf, sizeof buf, "%p,", c);
+	rid = dstr_new(buf);
+	rid = dstr_cat(rid, c->argv[1]);
+	if (indices_rids == NULL)
+		indices_rids = table_new(cmpstr, hashmurmur2, kfree, NULL);
+	table_lock(indices_rids);
+	if ((cri = table_get_value(indices_rids, rid))) {
+		add_reply_error_format(c, "rid '%s' already exists\r\n", c->argv[1]);
+		dstr_free(rid);
+	} else if (NEW(cri)) {
+		pthread_t thread;
+
+		cri->c = c;
+		cri->rid = dstr_new(c->argv[1]);
+		cri->indices = get_indices();
+		if (pthread_create(&thread, NULL, indices_thread, cri) != 0) {
+			add_reply_error(c, strerror(errno));
+			add_reply_string(c, "\r\n", 2);
+			dstr_free(cri->rid);
+			dstr_free(cri->indices);
+			FREE(cri);
+			dstr_free(rid);
+		} else {
+			client_incr(cri->c);
+			table_insert(indices_rids, rid, cri);
+		}
+	} else {
+		add_reply_error(c, "error allocating memory for cri\r\n");
+		dstr_free(rid);
+	}
+	table_unlock(indices_rids);
 }
 
 /* FIXME */

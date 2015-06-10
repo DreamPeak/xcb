@@ -82,6 +82,7 @@ extern void u_command(client c);
 extern void uall_command(client c);
 extern void q_command(client c);
 extern void qc_command(client c);
+extern void indices_command(client c);
 extern void index_command(client c);
 extern void auth_command(client c);
 
@@ -104,6 +105,7 @@ static struct cmd ctm_commands[] = {
 	{"UALL",	uall_command,		"Unsubscribe all",			1},
 	{"Q",		q_command,		"Query",				5},
 	{"QC",		qc_command,		"Query cancellation",			2},
+	{"INDICES",	indices_command,	"Indices",				2},
 	{"INDEX",	index_command,		"Index",				2},
 	{"AUTH",	auth_command,		"Authenticate",				2},
 	{"QUIT",	NULL,			"Quit connecting to xcb-pb2",		1}
