@@ -1372,9 +1372,9 @@ static int process_command(client c) {
 	if (c->sock == ctmsock) {
 		dstr ctm_cmd = dstr_new_len(c->argv[0], 1);
 
-		if (!strcmp(c->argv[0], "QC") || !strcmp(c->argv[0], "INDEX") ||
-			!strcmp(c->argv[0], "AUTH") || !strcmp(c->argv[0], "SALL") ||
-			!strcmp(c->argv[0], "UALL") || !strcmp(c->argv[0], "INDICES"))
+		if (!strcmp(c->argv[0], "SALL") || !strcmp(c->argv[0], "UALL") ||
+			!strcmp(c->argv[0], "QC") || !strcmp(c->argv[0], "INDICES") ||
+			!strcmp(c->argv[0], "INDEX") || !strcmp(c->argv[0], "AUTH"))
 			c->cmd = table_get_value(ctm_cmds, c->argv[0]);
 		else {
 			c->cmd = table_get_value(ctm_cmds, ctm_cmd);

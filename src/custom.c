@@ -556,6 +556,7 @@ static void *indices_thread(void *data) {
 	}
 	pthread_spin_unlock(&cri->c->lock);
 	dstr_free(res);
+
 end:
 	dstr_free(res);
 	client_decr(cri->c);
