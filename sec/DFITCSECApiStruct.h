@@ -39,7 +39,7 @@ struct APISTRUCT DFITCSECReqUserLoginField
 {
     DFITCSECRequestIDType                requestID;                //请求ID(Y)
     DFITCSECAccountIDType                accountID;                //客户号(Y)
-    DFITCSECPasswordType                 passWord;                 //密码(Y)
+    DFITCSECPasswordType                 password;                 //密码(Y)
 };
 
 //SEC-登录响应
@@ -207,7 +207,7 @@ struct APISTRUCT DFITCStockReqQryRealTimeTradeField
     DFITCSECSecurityIDType               securityID;               //证券代码(N)
     DFITCSECEntrustBatchIDType           entrustBatchID;           //委托批次号(N)
     DFITCSECEntrustDirectionType         entrustDirection;         //委托类别(N)
-    DFITCSECSpdOrderIDType               spdOrderID;               //委托号(N)
+    DFITCSECSpdOrderIDType               spdOrderID;               //柜台委托号(N)
     DFITCSECTradeQryFlagType             queryFlag;                //查询标志(N)
 };
 
@@ -243,7 +243,7 @@ struct APISTRUCT DFITCStockReqQrySerialTradeField
     DFITCSECRequestIDType                requestID;                //请求ID(Y)
     DFITCSECExchangeIDType               exchangeID;               //交易所代码(N)
     DFITCSECAccountIDType                accountID;                //客户号(N)
-    DFITCSECSpdOrderIDType               spdOrderID;               //委托号(Y)
+    DFITCSECSpdOrderIDType               spdOrderID;               //柜台委托号(Y)
     DFITCSECEntrustDirectionType         entrustDirection;         //委托类别(N)
     DFITCSECSecurityIDType               securityID;               //证券代码(N)
     DFITCSECEntrustBatchIDType           entrustBatchID;           //委托批次号(N)
@@ -320,28 +320,28 @@ struct APISTRUCT DFITCStockRspQryPositionField
     DFITCSECQuantityType                 offsetBQty;               //买入抵消数量
     DFITCSECQuantityType                 purchaseTradeQty;         //申购成交数量
     DFITCSECQuantityType                 redemptionTradeQty;       //赎回成交数量
-    DFITCSECTradeUnitType                tradeUnit;                //交易单位
-    DFITCSECQuantityType                 totalSellQty;             //累计卖出数量
-    DFITCSECQuantityType                 totalBuyQty;              //累计买入数量
-    DFITCSECQuantityType                 rationedSharesQty;        //配股数量
-    DFITCSECQuantityType                 purchaseQty;              //申购数量
-    DFITCSECFundsType                    dilutedFloatProfitLoss;   //摊薄浮动盈亏
-    DFITCSECPriceType                    dilutedBreakevenPrice;    //摊薄保本价
-    DFITCSECPriceType                    dilutedCost;              //摊薄成本价
-    DFITCSECPriceType                    avgPositionPrice;         //持仓均价
-    DFITCSECFundsType                    floatProfitLoss;          //浮动盈亏
-    DFITCSECFundsType                    dividend;                 //红利金额
-    DFITCSECFundsType                    totalFloatProfitLoss;     //累计浮动盈亏
-    DFITCSECFundsType                    sellAmount;               //卖出金额
-    DFITCSECFundsType                    buyAmount;                //买入金额
-    DFITCSECPriceType                    buyAvgPrice;              //买入均价
-    DFITCSECFundsType                    rationedSharesAmount;     //配股金额
-    DFITCSECFundsType                    latestMarket;             //最新市值
-    DFITCSECPriceType                    breakevenPrice;           //保本价
-    DFITCSECPriceType                    latestPrice;              //最新价
-    DFITCSECFundsType                    nonCirculateMarket;       //非流通市值
-    DFITCSECFundsType                    interestQuote;            //利息报价
-    DFITCSECPriceType                    preClosePrice;            //昨收盘价
+    DFITCSECTradeUnitType                tradeUnit;                //交易单位(N)
+    DFITCSECQuantityType                 totalSellQty;             //累计卖出数量(N)
+    DFITCSECQuantityType                 totalBuyQty;              //累计买入数量(N)
+    DFITCSECQuantityType                 rationedSharesQty;        //配股数量(N)
+    DFITCSECQuantityType                 purchaseQty;              //送股数量(N)
+    DFITCSECFundsType                    dilutedFloatProfitLoss;   //摊薄浮动盈亏(N)
+    DFITCSECPriceType                    dilutedBreakevenPrice;    //摊薄保本价(N)
+    DFITCSECPriceType                    dilutedCost;              //摊薄成本价(N)
+    DFITCSECPriceType                    avgPositionPrice;         //持仓均价(N)
+    DFITCSECFundsType                    floatProfitLoss;          //浮动盈亏(N)
+    DFITCSECFundsType                    dividend;                 //红利金额(N)
+    DFITCSECFundsType                    totalFloatProfitLoss;     //累计浮动盈亏(N)
+    DFITCSECFundsType                    sellAmount;               //卖出金额(N)
+    DFITCSECFundsType                    buyAmount;                //买入金额(N)
+    DFITCSECPriceType                    buyAvgPrice;              //买入均价(N)
+    DFITCSECFundsType                    rationedSharesAmount;     //配股金额(N)
+    DFITCSECFundsType                    latestMarket;             //最新市值(N)
+    DFITCSECPriceType                    breakevenPrice;           //保本价(N)
+    DFITCSECPriceType                    latestPrice;              //最新价(N)
+    DFITCSECFundsType                    nonCirculateMarket;       //非流通市值(N)
+    DFITCSECFundsType                    interestQuote;            //利息报价(N)
+    DFITCSECPriceType                    preClosePrice;            //昨收盘价(N)
 };
 
 //STOCK-客户资金查询请求
@@ -487,7 +487,7 @@ struct APISTRUCT DFITCStockReqCalcAbleEntrustQtyField
     DFITCSECRequestIDType                requestID;                //请求ID(Y)
     DFITCSECExchangeIDType               exchangeID;               //交易所代码(Y)
     DFITCSECAccountIDType                accountID;                //客户号(Y)
-    DFITCSECPriceType                    entrustPrice;             //委托价格(N)
+    DFITCSECPriceType                    entrustPrice;             //委托价格(N)(限价订单必须送入数值)
     DFITCSECEntrustDirectionType         entrustDirection;         //委托类别(N)
     DFITCSECSecurityIDType               securityID;               //证券代码(Y)
     DFITCSECOrderTypeType                orderType;                //订单类型(Y)
@@ -1313,9 +1313,9 @@ struct APISTRUCT DFITCSOPReqQryContractObjectField
 {
     DFITCSECRequestIDType                requestID;                //请求ID
     DFITCSECAccountIDType                accountID;                //客户号
-    DFITCSECExchangeIDType               exchangeID;               //交易所代码
-    DFITCSECSecurityIDType               securityID;               //标的代码
-    DFITCSECContractObjectTypeType       securityObjectType;       //标的类型
+    DFITCSECExchangeIDType               exchangeID;               //交易所代码(N)
+    DFITCSECSecurityIDType               securityID;               //标的代码(N)
+    DFITCSECContractObjectTypeType       securityObjectType;       //标的类型(N)
 };
 
 //SOP-期权标的信息查询响应
@@ -1334,16 +1334,16 @@ struct APISTRUCT DFITCSOPRspQryContractObjectField
 struct APISTRUCT DFITCSOPReqExectueOrderField
 {
     DFITCSECRequestIDType                requestID;                //请求ID
-    DFITCSECAccountIDType                accountID;                //客户号
-    DFITCSECExchangeIDType               exchangeID;               //交易所代码
-    DFITCSECSecurityIDType               securityOptionID;         //证劵代码
-    DFITCSECSubAccountIDType             subAccountID;             //子账户编码
-    DFITCSECQuantityType                 entrustQty;               //委托数量
-    DFITCSECPriceType                    entrustPrice;             //委托价格
-    DFITCSECEntrustDirectionType         entrustDirection;         //委托类别
-    DFITCSECOpenCloseFlagType            openCloseFlag;            //开平标志
-    DFITCSECTDevIDType                   devID;                    //开发商代码
-    DFITCSECTDevDecInfoType              devDecInfo;               //开发商申报信息
+    DFITCSECAccountIDType                accountID;                //客户号(Y)
+    DFITCSECExchangeIDType               exchangeID;               //交易所代码(Y)
+    DFITCSECSecurityIDType               securityOptionID;         //证劵代码(Y)
+    DFITCSECSubAccountIDType             subAccountID;             //子账户编码(N)
+    DFITCSECQuantityType                 entrustQty;               //委托数量(Y)
+    DFITCSECPriceType                    entrustPrice;             //委托价格(Y)
+    DFITCSECEntrustDirectionType         entrustDirection;         //委托类别(Y)
+    DFITCSECOpenCloseFlagType            openCloseFlag;            //开平标志(Y)
+    DFITCSECTDevIDType                   devID;                    //开发商代码(N)
+    DFITCSECTDevDecInfoType              devDecInfo;               //开发商申报信息(N)
 };
 
 //SOP-执行委托响应

@@ -1,7 +1,8 @@
 /*
  * Copyright (c) 2013-2015, Dalian Futures Information Technology Co., Ltd.
  *
- * Bo Wang <futurewb at dce dot com dot cn>
+ * Bo Wang     <futurewb at dce dot com dot cn>
+ * Xiaoye Meng <mengxiaoye at dce dot com dot cn>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -103,7 +104,7 @@ static void on_front_connected(void) {
 	if (stk_userid && stk_passwd) {
 		/* FIXME */
 		strcpy(stk_req.accountID, stk_userid);
-		strcpy(stk_req.passWord, stk_passwd);
+		strcpy(stk_req.password, stk_passwd);
 		stk_req.requestID = stk_reqid;
 		stk_res = sec_mdapi_stk_user_login(mdapi, &stk_req);
 		xcb_log(XCB_LOG_NOTICE, "Stock login %s for user '%s'",
@@ -112,7 +113,7 @@ static void on_front_connected(void) {
 	if (sop_userid && sop_passwd) {
 		/* FIXME */
 		strcpy(sop_req.accountID, sop_userid);
-		strcpy(sop_req.passWord, sop_passwd);
+		strcpy(sop_req.password, sop_passwd);
 		sop_req.requestID = sop_reqid;
 		sop_res = sec_mdapi_sop_user_login(mdapi, &sop_req);
 		xcb_log(XCB_LOG_NOTICE, "Sop login %s for user '%s'",

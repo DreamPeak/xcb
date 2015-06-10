@@ -156,7 +156,7 @@ typedef char   DFITCSECExchangeIDType[3];
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSecurityIDType 是一个证券代码类型
 /////////////////////////////////////////////////////////////////////////
-typedef char   DFITCSECSecurityIDType[9];
+typedef char   DFITCSECSecurityIDType[11];
 
 ////////////////////////////////////////////////////////////
 ///DFITCSECOrderQryFlagType 是一个报单查询标志类型
@@ -236,12 +236,12 @@ typedef int    DFITCSECFundsTransferFlagType;
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECEntrustBatchOrderDetailType 是一个批量委托明细类型
 /////////////////////////////////////////////////////////////////////////
-typedef char   DFITCSECEntrustBatchOrderDetailType[4097];
+typedef char   DFITCSECEntrustBatchOrderDetailType[1024];
 
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECOrderRangeID 是一个委托号范围类型
 /////////////////////////////////////////////////////////////////////////
-typedef char   DFITCSECOrderIDRangeType[60001];
+typedef char   DFITCSECOrderIDRangeType[1024];
 
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECFundsFreezeTypeType 是一个资金冻结列别类型
@@ -468,7 +468,7 @@ typedef int   DFITCSECShareholderCtlPropType;
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECOrderRangeID 是一个委托号范围类型
 /////////////////////////////////////////////////////////////////////////
-typedef char  DFITCSECOrderRangeID[60001];
+typedef char  DFITCSECOrderRangeID[1024];
 
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECBidTradeFlagType 是一个竞价交易标志类型
@@ -765,7 +765,7 @@ typedef int   DFITCSECPositionNOType;
 /////////////////////////////////////////////////////////////////////////
 typedef int   DFITCSECClearFlagType;
 ///成交引起
-#define DFITCSEC_CF_TradeCause                     <=1
+#define DFITCSEC_CF_TradeCause                     1
 ///清算引起
 #define DFITCSEC_CF_ClearCause                     2
 ///权益补偿引起
@@ -808,6 +808,3 @@ typedef int   DFITCSECOrderConfirmFlagType;
 #define DFITCSEC_ORDER_FAIL                        1
 
 #endif//DFITCStockAPIDATATYPE_H
-
-
-
