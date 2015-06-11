@@ -1,8 +1,8 @@
 %undefine _missing_build_ids_terminate_build
 
 Name:		xcb
-Version:	1.0.0
-Release:	2%{?dist}
+Version:	1.0.1
+Release:	1%{?dist}
 Summary:	Reliable Multicast Computing
 Group:		Applications/Internet
 License:	GPLv2

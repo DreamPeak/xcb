@@ -90,7 +90,7 @@ static int kline_output(event_loop el, unsigned long id, void *data) {
 	NOT_USED(id);
 
 	pthread_spin_lock(&ohlc->lock);
-	ohlc->id = -1;
+	ohlc->id = 0;
 	t = (time_t)ohlc->time;
 	strftime(datestr, sizeof datestr, "%F %T", localtime_r(&t, &lt));
 	snprintf(res, sizeof res, "KLINE,%s.000,%s|%.2f,%.2f,%.2f,%.2f,%d,%d",
@@ -226,7 +226,7 @@ static int kline_exec(void *data, void *data2) {
 			ohlc->preopenint = ohlc->openint;
 			ohlc->volume     = -1;
 			ohlc->openint    = -1;
-			ohlc->id         = -1;
+			ohlc->id         = 0;
 			/* only if volume or open interest has changed */
 			if (quote->thyquote.m_nCJSL != ohlc->prevolume ||
 				quote->thyquote.m_nCCL != ohlc->preopenint) {
@@ -260,7 +260,7 @@ static void kfree(const void *key) {
 static void vfree(void *value) {
 	struct ohlc *ohlc = (struct ohlc *)value;
 
-	if (ohlc->id != -1) {
+	if (ohlc->id != 0) {
 		xcb_log(XCB_LOG_INFO, "Deleting pending time event '%d'", ohlc->id);
 		delete_time_event(el, ohlc->id);
 	}
