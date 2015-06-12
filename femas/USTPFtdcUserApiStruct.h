@@ -681,35 +681,23 @@ struct CUstpFtdcInvestorMarginField
 	///空头保证金按手数
 	TUstpFtdcRatioType	ShortMarginAmt;
 };
-///行情用户
-struct CUstpFtdcMDUserField
+///交叉外汇汇率查询
+struct CUstpFtdcQryExchangeRateField
 {
-	///经纪公司编号
-	TUstpFtdcBrokerIDType	BrokerID;
-	///用户代码
-	TUstpFtdcUserIDType	UserID;
-	///用户登录密码
-	TUstpFtdcPasswordType	Password;
-	///是否活跃
-	TUstpFtdcIsActiveType	IsActive;
-	///用户名称
-	TUstpFtdcUserNameType	UserName;
-	///用户类型
-	TUstpFtdcUserTypeType	UserType;
-	///允许登录的IP
-	TUstpFtdcIPAddressType	AllowedIP;
-	///允许登录的Mac
-	TUstpFtdcMacAddressType	AllowedMac;
-	///用户的有效期开始时间
-	TUstpFtdcDateType	ValidityBegin;
-	///用户的有效期终止时间
-	TUstpFtdcDateType	ValidityEnd;
-	///修改用户编号
-	TUstpFtdcUserIDType	SetUserID;
-	///操作日期
-	TUstpFtdcDateType	CommandDate;
-	///操作时间
-	TUstpFtdcTimeType	CommandTime;
+	///交易所代码
+	TUstpFtdcExchangeIDType	ExchangeID;
+	///品种代码
+	TUstpFtdcProductIDType	ProductID;
+};
+///交叉外汇汇率查询应答
+struct CUstpFtdcRspExchangeRateField
+{
+	///交易所代码
+	TUstpFtdcExchangeIDType	ExchangeID;
+	///品种代码
+	TUstpFtdcProductIDType	ProductID;
+	///折算汇率
+	TUstpFtdcExchangeRateType	ExchangeRate;
 };
 ///成交
 struct CUstpFtdcTradeField
@@ -1226,6 +1214,130 @@ struct CUstpFtdcSpecificInstrumentField
 {
 	///合约代码
 	TUstpFtdcInstrumentIDType	InstrumentID;
+};
+///申请组合
+struct CUstpFtdcInputMarginCombActionField
+{
+	///经纪公司编号
+	TUstpFtdcBrokerIDType	BrokerID;
+	///交易所代码
+	TUstpFtdcExchangeIDType	ExchangeID;
+	///交易用户代码
+	TUstpFtdcUserIDType	UserID;
+	///投资者编号
+	TUstpFtdcInvestorIDType	InvestorID;
+	///投机套保标志
+	TUstpFtdcHedgeFlagType	HedgeFlag;
+	///用户本地编号
+	TUstpFtdcUserOrderLocalIDType	UserActionLocalID;
+	///组合合约代码
+	TUstpFtdcInstrumentIDType	CombInstrumentID;
+	///组合数量
+	TUstpFtdcVolumeType	CombVolume;
+	///组合动作方向
+	TUstpFtdcCombDirectionType	CombDirection;
+	///本地编号
+	TUstpFtdcOrderLocalIDType	ActionLocalID;
+};
+///交易编码组合持仓查询
+struct CUstpFtdcQryInvestorCombPositionField
+{
+	///经纪公司编号
+	TUstpFtdcBrokerIDType	BrokerID;
+	///交易所代码
+	TUstpFtdcExchangeIDType	ExchangeID;
+	///投资者编号
+	TUstpFtdcInvestorIDType	InvestorID;
+	///投机套保标志
+	TUstpFtdcHedgeFlagType	HedgeFlag;
+	///组合合约代码
+	TUstpFtdcInstrumentIDType	CombInstrumentID;
+};
+///交易编码组合持仓
+struct CUstpFtdcRspInvestorCombPositionField
+{
+	///经纪公司编号
+	TUstpFtdcBrokerIDType	BrokerID;
+	///交易所代码
+	TUstpFtdcExchangeIDType	ExchangeID;
+	///投资者编号
+	TUstpFtdcInvestorIDType	InvestorID;
+	///投机套保标志
+	TUstpFtdcHedgeFlagType	HedgeFlag;
+	///客户代码
+	TUstpFtdcClientIDType	ClientID;
+	///组合合约代码
+	TUstpFtdcInstrumentIDType	CombInstrumentID;
+	///组合持仓
+	TUstpFtdcVolumeType	CombPosition;
+	///冻结组合持仓
+	TUstpFtdcVolumeType	CombFrozenPosition;
+	///组合一手释放的保证金
+	TUstpFtdcMoneyType	CombFreeMargin;
+};
+///组合规则
+struct CUstpFtdcMarginCombinationLegField
+{
+	///交易所代码
+	TUstpFtdcExchangeIDType	ExchangeID;
+	///组合合约代码
+	TUstpFtdcInstrumentIDType	CombInstrumentID;
+	///单腿编号
+	TUstpFtdcLegIDType	LegID;
+	///单腿合约代码
+	TUstpFtdcInstrumentIDType	LegInstrumentID;
+	///买卖方向
+	TUstpFtdcDirectionType	Direction;
+	///单腿乘数
+	TUstpFtdcLegMultipleType	LegMultiple;
+	///优先级
+	TUstpFtdcPriorityType	Priority;
+};
+///交易编码单腿持仓查询
+struct CUstpFtdcQryInvestorLegPositionField
+{
+	///经纪公司编号
+	TUstpFtdcBrokerIDType	BrokerID;
+	///交易所代码
+	TUstpFtdcExchangeIDType	ExchangeID;
+	///投资者编号
+	TUstpFtdcInvestorIDType	InvestorID;
+	///投机套保标志
+	TUstpFtdcHedgeFlagType	HedgeFlag;
+	///单腿合约代码
+	TUstpFtdcInstrumentIDType	LegInstrumentID;
+};
+///交易编码单腿持仓
+struct CUstpFtdcRspInvestorLegPositionField
+{
+	///经纪公司编号
+	TUstpFtdcBrokerIDType	BrokerID;
+	///交易所代码
+	TUstpFtdcExchangeIDType	ExchangeID;
+	///投资者编号
+	TUstpFtdcInvestorIDType	InvestorID;
+	///投机套保标志
+	TUstpFtdcHedgeFlagType	HedgeFlag;
+	///客户代码
+	TUstpFtdcClientIDType	ClientID;
+	///单腿合约代码
+	TUstpFtdcInstrumentIDType	InstrumentID;
+	///多头持仓
+	TUstpFtdcVolumeType	LongPosition;
+	///空头持仓
+	TUstpFtdcVolumeType	ShortPosition;
+	///多头占用保证金
+	TUstpFtdcMoneyType	LongMargin;
+	///空头占用保证金
+	TUstpFtdcMoneyType	ShortMargin;
+	///多头冻结持仓
+	TUstpFtdcVolumeType	LongFrozenPosition;
+	///空头冻结持仓
+	TUstpFtdcVolumeType	ShortFrozenPosition;
+	///多头冻结保证金
+	TUstpFtdcMoneyType	LongFrozenMargin;
+	///空头冻结保证金
+	TUstpFtdcMoneyType	ShortFrozenMargin;
 };
 
 
