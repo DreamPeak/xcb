@@ -1,10 +1,10 @@
 /////////////////////////////////////////////////////////////////////////
-///@system 风控前置系统
-///@company 上海金融期货信息技术有限公司
+///@system 路莽驴脴脟掳脰脙脧碌脥鲁
+///@company 脡脧潞拢陆冒脠脷脝脷禄玫脨脜脧垄录录脢玫脫脨脧脼鹿芦脣戮
 ///@file USTPFtdcMduserApi.h
-///@brief 定义了客户端接口
+///@brief 露篓脪氓脕脣驴脥禄搂露脣陆脫驴脷
 ///@history 
-///20130520	徐忠华	创建该文件
+///20130520	脨矛脰脪禄陋	麓麓陆篓赂脙脦脛录镁
 /////////////////////////////////////////////////////////////////////////
 
 #if !defined(USTP_FTDCMDUSERAPI_H)
@@ -29,174 +29,167 @@
 class CUstpFtdcMduserSpi
 {
 public:
-	///当客户端与交易后台建立起通信连接时（还未登录前），该方法被调用。
+	///碌卤驴脥禄搂露脣脫毛陆禄脪脳潞贸脤篓陆篓脕垄脝冒脥篓脨脜脕卢陆脫脢卤拢篓禄鹿脦麓碌脟脗录脟掳拢漏拢卢赂脙路陆路篓卤禄碌梅脫脙隆拢
 	virtual void OnFrontConnected(){};
 	
-	///当客户端与交易后台通信连接断开时，该方法被调用。当发生这个情况后，API会自动重新连接，客户端可不做处理。
-	///@param nReason 错误原因
-	///        0x1001 网络读失败
-	///        0x1002 网络写失败
-	///        0x2001 接收心跳超时
-	///        0x2002 发送心跳失败
-	///        0x2003 收到错误报文
+	///碌卤驴脥禄搂露脣脫毛陆禄脪脳潞贸脤篓脥篓脨脜脕卢陆脫露脧驴陋脢卤拢卢赂脙路陆路篓卤禄碌梅脫脙隆拢碌卤路垄脡煤脮芒赂枚脟茅驴枚潞贸拢卢API禄谩脳脭露炉脰脴脨脗脕卢陆脫拢卢驴脥禄搂露脣驴脡虏禄脳枚麓娄脌铆隆拢
+	///@param nReason 麓铆脦贸脭颅脪貌
+	///        0x1001 脥酶脗莽露脕脢搂掳脺
+	///        0x1002 脥酶脗莽脨麓脢搂掳脺
+	///        0x2001 陆脫脢脮脨脛脤酶鲁卢脢卤
+	///        0x2002 路垄脣脥脨脛脤酶脢搂掳脺
+	///        0x2003 脢脮碌陆麓铆脦贸卤篓脦脛
 	virtual void OnFrontDisconnected(int nReason){};
 		
-	///心跳超时警告。当长时间未收到报文时，该方法被调用。
-	///@param nTimeLapse 距离上次接收报文的时间
+	///脨脛脤酶鲁卢脢卤戮炉赂忙隆拢碌卤鲁陇脢卤录盲脦麓脢脮碌陆卤篓脦脛脢卤拢卢赂脙路陆路篓卤禄碌梅脫脙隆拢
+	///@param nTimeLapse 戮脿脌毛脡脧麓脦陆脫脢脮卤篓脦脛碌脛脢卤录盲
 	virtual void OnHeartBeatWarning(int nTimeLapse){};
 	
-	///报文回调开始通知。当API收到一个报文后，首先调用本方法，然后是各数据域的回调，最后是报文回调结束通知。
-	///@param nTopicID 主题代码（如私有流、公共流、行情流等）
-	///@param nSequenceNo 报文序号
+	///卤篓脦脛禄脴碌梅驴陋脢录脥篓脰陋隆拢碌卤API脢脮碌陆脪禄赂枚卤篓脦脛潞贸拢卢脢脳脧脠碌梅脫脙卤戮路陆路篓拢卢脠禄潞贸脢脟赂梅脢媒戮脻脫貌碌脛禄脴碌梅拢卢脳卯潞贸脢脟卤篓脦脛禄脴碌梅陆谩脢酶脥篓脰陋隆拢
+	///@param nTopicID 脰梅脤芒麓煤脗毛拢篓脠莽脣陆脫脨脕梅隆垄鹿芦鹿虏脕梅隆垄脨脨脟茅脕梅碌脠拢漏
+	///@param nSequenceNo 卤篓脦脛脨貌潞脜
 	virtual void OnPackageStart(int nTopicID, int nSequenceNo){};
 	
-	///报文回调结束通知。当API收到一个报文后，首先调用报文回调开始通知，然后是各数据域的回调，最后调用本方法。
-	///@param nTopicID 主题代码（如私有流、公共流、行情流等）
-	///@param nSequenceNo 报文序号
+	///卤篓脦脛禄脴碌梅陆谩脢酶脥篓脰陋隆拢碌卤API脢脮碌陆脪禄赂枚卤篓脦脛潞贸拢卢脢脳脧脠碌梅脫脙卤篓脦脛禄脴碌梅驴陋脢录脥篓脰陋拢卢脠禄潞贸脢脟赂梅脢媒戮脻脫貌碌脛禄脴碌梅拢卢脳卯潞贸碌梅脫脙卤戮路陆路篓隆拢
+	///@param nTopicID 脰梅脤芒麓煤脗毛拢篓脠莽脣陆脫脨脕梅隆垄鹿芦鹿虏脕梅隆垄脨脨脟茅脕梅碌脠拢漏
+	///@param nSequenceNo 卤篓脦脛脨貌潞脜
 	virtual void OnPackageEnd(int nTopicID, int nSequenceNo){};
 
 
-	///错误应答
+	///麓铆脦贸脫娄麓冒
 	virtual void OnRspError(CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {};
 
-	///风控前置系统用户登录应答
+	///路莽驴脴脟掳脰脙脧碌脥鲁脫脙禄搂碌脟脗录脫娄麓冒
 	virtual void OnRspUserLogin(CUstpFtdcRspUserLoginField *pRspUserLogin, CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {};
 
-	///用户退出应答
+	///脫脙禄搂脥脣鲁枚脫娄麓冒
 	virtual void OnRspUserLogout(CUstpFtdcRspUserLogoutField *pRspUserLogout, CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {};
 
-	///订阅主题应答
+	///脫脙禄搂脙脺脗毛脨脼赂脛脫娄麓冒
+	virtual void OnRspUserPasswordUpdate(CUstpFtdcUserPasswordUpdateField *pUserPasswordUpdate, CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {};
+
+	///露漏脭脛脰梅脤芒脫娄麓冒
 	virtual void OnRspSubscribeTopic(CUstpFtdcDisseminationField *pDissemination, CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {};
 
-	///主题查询应答
+	///脰梅脤芒虏茅脩炉脫娄麓冒
 	virtual void OnRspQryTopic(CUstpFtdcDisseminationField *pDissemination, CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {};
 
-	///深度行情通知
+	///脡卯露脠脨脨脟茅脥篓脰陋
 	virtual void OnRtnDepthMarketData(CUstpFtdcDepthMarketDataField *pDepthMarketData) {};
 
-	///订阅合约的相关信息
+	///露漏脭脛潞脧脭录碌脛脧脿鹿脴脨脜脧垄
 	virtual void OnRspSubMarketData(CUstpFtdcSpecificInstrumentField *pSpecificInstrument, CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {};
 
-	///退订合约的相关信息
+	///脥脣露漏潞脧脭录碌脛脧脿鹿脴脨脜脧垄
 	virtual void OnRspUnSubMarketData(CUstpFtdcSpecificInstrumentField *pSpecificInstrument, CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {};
 };
 
 class MDUSER_API_EXPORT CUstpFtdcMduserApi
 {
 public:
-	///创建MduserApi
-	///@param pszFlowPath 存贮订阅信息文件的目录，默认为当前目录
-	///@return 创建出的UserApi
+	///麓麓陆篓MduserApi
+	///@param pszFlowPath 麓忙脰眉露漏脭脛脨脜脧垄脦脛录镁碌脛脛驴脗录拢卢脛卢脠脧脦陋碌卤脟掳脛驴脗录
+	///@return 麓麓陆篓鲁枚碌脛UserApi
 	static CUstpFtdcMduserApi *CreateFtdcMduserApi(const char *pszFlowPath = "");
 	
-	///获取系统版本号
-	///@param nMajorVersion 主版本号
-	///@param nMinorVersion 子版本号
-	///@return 系统标识字符串
+	///禄帽脠隆脧碌脥鲁掳忙卤戮潞脜
+	///@param nMajorVersion 脰梅掳忙卤戮潞脜
+	///@param nMinorVersion 脳脫掳忙卤戮潞脜
+	///@return 脧碌脥鲁卤锚脢露脳脰路没麓庐
 	static const char *GetVersion(int &nMajorVersion, int &nMinorVersion);
 	
-	///删除接口对象本身
-	///@remark 不再使用本接口对象时,调用该函数删除接口对象
+	///脡戮鲁媒陆脫驴脷露脭脧贸卤戮脡铆
+	///@remark 虏禄脭脵脢鹿脫脙卤戮陆脫驴脷露脭脧贸脢卤,碌梅脫脙赂脙潞炉脢媒脡戮鲁媒陆脫驴脷露脭脧贸
 	virtual void Release() = 0;
 	
-	///初始化
-	///@remark 初始化运行环境,只有调用后,接口才开始工作
+	///鲁玫脢录禄炉
+	///@remark 鲁玫脢录禄炉脭脣脨脨禄路戮鲁,脰禄脫脨碌梅脫脙潞贸,陆脫驴脷虏脜驴陋脢录鹿陇脳梅
 	virtual void Init() = 0;
 	
-	///等待接口线程结束运行
-	///@return 线程退出代码
+	///碌脠麓媒陆脫驴脷脧脽鲁脤陆谩脢酶脭脣脨脨
+	///@return 脧脽鲁脤脥脣鲁枚麓煤脗毛
 	virtual int Join() = 0;
-
-	/// 是否使用多播方式接收行情
-	/// @param bUseMulti 默认为false，表示不使用多播接收行情
-	/// @remark 如果使用多播，则无需登录，也使用不了需要登录才能使用的接口
-	virtual void SetUseMultiChannel(bool bUseMulti = false) = 0;
 	
-	///注册多播通道
-	///@param pMultiChannel 多播通道地址地址，
-	///@remark 网络地址的例子：”multi://172.25.125@232.0.0.1:5131”。 
-	///@remark “multi”代表使用多播传输；“172.25.125”用来确定接收多播的网卡；”232.0.0.1:5131”代表多播通道及端口。
-	///@remark 可以多次调用，注册多个通道，接收多个通道中速度最优的行情
-	virtual void RegisterMultiChannel(const char *pMultiChannel) = 0;
-
-	
-	///获取当前交易日
-	///@retrun 获取到的交易日
-	///@remark 只有登录成功后,才能得到正确的交易日
+	///禄帽脠隆碌卤脟掳陆禄脪脳脠脮
+	///@retrun 禄帽脠隆碌陆碌脛陆禄脪脳脠脮
+	///@remark 脰禄脫脨碌脟脗录鲁脡鹿娄潞贸,虏脜脛脺碌脙碌陆脮媒脠路碌脛陆禄脪脳脠脮
 	virtual const char *GetTradingDay() = 0;
 	
-	///注册前置机网络地址
-	///@param pszFrontAddress：前置机网络地址。
-	///@remark 网络地址的格式为：“protocol://ipaddress:port”，如：”tcp://127.0.0.1:17001”。 
-	///@remark “tcp”代表传输协议，“127.0.0.1”代表服务器地址。”17001”代表服务器端口号。
+	///脳垄虏谩脟掳脰脙禄煤脥酶脗莽碌脴脰路
+	///@param pszFrontAddress拢潞脟掳脰脙禄煤脥酶脗莽碌脴脰路隆拢
+	///@remark 脥酶脗莽碌脴脰路碌脛赂帽脢陆脦陋拢潞隆掳protocol://ipaddress:port隆卤拢卢脠莽拢潞隆卤tcp://127.0.0.1:17001隆卤隆拢 
+	///@remark 隆掳tcp隆卤麓煤卤铆麓芦脢盲脨颅脪茅拢卢隆掳127.0.0.1隆卤麓煤卤铆路镁脦帽脝梅碌脴脰路隆拢隆卤17001隆卤麓煤卤铆路镁脦帽脝梅露脣驴脷潞脜隆拢
 	virtual void RegisterFront(char *pszFrontAddress) = 0;
 	
-	///注册名字服务器网络地址
-	///@param pszNsAddress：名字服务器网络地址。
-	///@remark 网络地址的格式为：“protocol://ipaddress:port”，如：”tcp://127.0.0.1:12001”。 
-	///@remark “tcp”代表传输协议，“127.0.0.1”代表服务器地址。”12001”代表服务器端口号。
-	///@remark RegisterFront优先于RegisterNameServer
+	///脳垄虏谩脙没脳脰路镁脦帽脝梅脥酶脗莽碌脴脰路
+	///@param pszNsAddress拢潞脙没脳脰路镁脦帽脝梅脥酶脗莽碌脴脰路隆拢
+	///@remark 脥酶脗莽碌脴脰路碌脛赂帽脢陆脦陋拢潞隆掳protocol://ipaddress:port隆卤拢卢脠莽拢潞隆卤tcp://127.0.0.1:12001隆卤隆拢 
+	///@remark 隆掳tcp隆卤麓煤卤铆麓芦脢盲脨颅脪茅拢卢隆掳127.0.0.1隆卤麓煤卤铆路镁脦帽脝梅碌脴脰路隆拢隆卤12001隆卤麓煤卤铆路镁脦帽脝梅露脣驴脷潞脜隆拢
+	///@remark RegisterFront脫脜脧脠脫脷RegisterNameServer
 	virtual void RegisterNameServer(char *pszNsAddress) = 0;
 	
-	///注册回调接口
-	///@param pSpi 派生自回调接口类的实例
+	///脳垄虏谩禄脴碌梅陆脫驴脷
+	///@param pSpi 脜脡脡煤脳脭禄脴碌梅陆脫驴脷脌脿碌脛脢碌脌媒
 	virtual void RegisterSpi(CUstpFtdcMduserSpi *pSpi) = 0;
 	
-	///加载证书
-	///@param pszCertFileName 用户证书文件名
-	///@param pszKeyFileName 用户私钥文件名
-	///@param pszCaFileName 可信任CA证书文件名
-	///@param pszKeyFilePassword 用户私钥文件密码
-	///@return 0 操作成功
-	///@return -1 可信任CA证书载入失败
-	///@return -2 用户证书载入失败
-	///@return -3 用户私钥载入失败	
-	///@return -4 用户证书校验失败
+	///录脫脭脴脰陇脢茅
+	///@param pszCertFileName 脫脙禄搂脰陇脢茅脦脛录镁脙没
+	///@param pszKeyFileName 脫脙禄搂脣陆脭驴脦脛录镁脙没
+	///@param pszCaFileName 驴脡脨脜脠脦CA脰陇脢茅脦脛录镁脙没
+	///@param pszKeyFilePassword 脫脙禄搂脣陆脭驴脦脛录镁脙脺脗毛
+	///@return 0 虏脵脳梅鲁脡鹿娄
+	///@return -1 驴脡脨脜脠脦CA脰陇脢茅脭脴脠毛脢搂掳脺
+	///@return -2 脫脙禄搂脰陇脢茅脭脴脠毛脢搂掳脺
+	///@return -3 脫脙禄搂脣陆脭驴脭脴脠毛脢搂掳脺	
+	///@return -4 脫脙禄搂脰陇脢茅脨拢脩茅脢搂掳脺
 	virtual int RegisterCertificateFile(const char *pszCertFileName, const char *pszKeyFileName, 
 		const char *pszCaFileName, const char *pszKeyFilePassword) = 0;
 
-	///订阅市场行情。
-	///@param nTopicID 市场行情主题  
-	///@param nResumeType 市场行情重传方式  
-	///        USTP_TERT_RESTART:从本交易日开始重传
-	///        USTP_TERT_RESUME:从上次收到的续传(非订阅全部合约时，不支持续传模式)
-	///        USTP_TERT_QUICK:先传送当前行情快照,再传送登录后市场行情的内容
-	///@remark 该方法要在Init方法前调用。若不调用则不会收到私有流的数据。
+	///露漏脭脛脢脨鲁隆脨脨脟茅隆拢
+	///@param nTopicID 脢脨鲁隆脨脨脟茅脰梅脤芒  
+	///@param nResumeType 脢脨鲁隆脨脨脟茅脰脴麓芦路陆脢陆  
+	///        USTP_TERT_RESTART:麓脫卤戮陆禄脪脳脠脮驴陋脢录脰脴麓芦
+	///        USTP_TERT_RESUME:麓脫脡脧麓脦脢脮碌陆碌脛脨酶麓芦(路脟露漏脭脛脠芦虏驴潞脧脭录脢卤拢卢虏禄脰搂鲁脰脨酶麓芦脛拢脢陆)
+	///        USTP_TERT_QUICK:脧脠麓芦脣脥碌卤脟掳脨脨脟茅驴矛脮脮,脭脵麓芦脣脥碌脟脗录潞贸脢脨鲁隆脨脨脟茅碌脛脛脷脠脻
+	///@remark 赂脙路陆路篓脪陋脭脷Init路陆路篓脟掳碌梅脫脙隆拢脠么虏禄碌梅脫脙脭貌虏禄禄谩脢脮碌陆脣陆脫脨脕梅碌脛脢媒戮脻隆拢
 	virtual void SubscribeMarketDataTopic(int nTopicID, USTP_TE_RESUME_TYPE nResumeType) = 0;
 
-	///订阅合约行情。
-	///@param ppInstrumentID 合约ID  
-	///@param nCount 要订阅/退订行情的合约个数
+	///露漏脭脛潞脧脭录脨脨脟茅隆拢
+	///@param ppInstrumentID 潞脧脭录ID  
+	///@param nCount 脪陋露漏脭脛/脥脣露漏脨脨脟茅碌脛潞脧脭录赂枚脢媒
 	///@remark 
 	virtual int SubMarketData(char *ppInstrumentID[], int nCount)=0;
 
-	///退订合约行情。
-	///@param ppInstrumentID 合约ID  
-	///@param nCount 要订阅/退订行情的合约个数
+	///脥脣露漏潞脧脭录脨脨脟茅隆拢
+	///@param ppInstrumentID 潞脧脭录ID  
+	///@param nCount 脪陋露漏脭脛/脥脣露漏脨脨脟茅碌脛潞脧脭录赂枚脢媒
 	///@remark 
 	virtual int UnSubMarketData(char *ppInstrumentID[], int nCount)=0;		
 	
-	///设置心跳超时时间。
-	///@param timeout 心跳超时时间(秒)  
+	///脡猫脰脙脨脛脤酶鲁卢脢卤脢卤录盲隆拢
+	///@param timeout 脨脛脤酶鲁卢脢卤脢卤录盲(脙毛)  
 	virtual void SetHeartbeatTimeout(unsigned int timeout) = 0;
 
 
-	///风控前置系统用户登录请求
+	///路莽驴脴脟掳脰脙脧碌脥鲁脫脙禄搂碌脟脗录脟毛脟贸
 	virtual int ReqUserLogin(CUstpFtdcReqUserLoginField *pReqUserLogin, int nRequestID) = 0;
 
-	///用户退出请求
+	///脫脙禄搂脥脣鲁枚脟毛脟贸
 	virtual int ReqUserLogout(CUstpFtdcReqUserLogoutField *pReqUserLogout, int nRequestID) = 0;
 
-	///订阅主题请求
+	///脫脙禄搂脙脺脗毛脨脼赂脛脟毛脟贸
+	virtual int ReqUserPasswordUpdate(CUstpFtdcUserPasswordUpdateField *pUserPasswordUpdate, int nRequestID) = 0;
+
+	///露漏脭脛脰梅脤芒脟毛脟贸
 	virtual int ReqSubscribeTopic(CUstpFtdcDisseminationField *pDissemination, int nRequestID) = 0;
 
-	///主题查询请求
+	///脰梅脤芒虏茅脩炉脟毛脟贸
 	virtual int ReqQryTopic(CUstpFtdcDisseminationField *pDissemination, int nRequestID) = 0;
 
-	///订阅合约的相关信息
+	///露漏脭脛潞脧脭录碌脛脧脿鹿脴脨脜脧垄
 	virtual int ReqSubMarketData(CUstpFtdcSpecificInstrumentField *pSpecificInstrument, int nRequestID) = 0;
 
-	///退订合约的相关信息
+	///脥脣露漏潞脧脭录碌脛脧脿鹿脴脨脜脧垄
 	virtual int ReqUnSubMarketData(CUstpFtdcSpecificInstrumentField *pSpecificInstrument, int nRequestID) = 0;
 protected:
 	~CUstpFtdcMduserApi(){};

@@ -18836,7 +18836,7 @@ fi
 done
 
 
-ac_config_files="$ac_config_files Makefile conf/Makefile ctp/Makefile devel/Makefile include/Makefile sec/Makefile src/Makefile xspeed/Makefile"
+ac_config_files="$ac_config_files Makefile conf/Makefile ctp/Makefile devel/Makefile include/Makefile femas/Makefile sec/Makefile src/Makefile xspeed/Makefile xspeed2/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -19852,9 +19852,11 @@ do
     "ctp/Makefile") CONFIG_FILES="$CONFIG_FILES ctp/Makefile" ;;
     "devel/Makefile") CONFIG_FILES="$CONFIG_FILES devel/Makefile" ;;
     "include/Makefile") CONFIG_FILES="$CONFIG_FILES include/Makefile" ;;
+    "femas/Makefile") CONFIG_FILES="$CONFIG_FILES femas/Makefile" ;;
     "sec/Makefile") CONFIG_FILES="$CONFIG_FILES sec/Makefile" ;;
     "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
     "xspeed/Makefile") CONFIG_FILES="$CONFIG_FILES xspeed/Makefile" ;;
+    "xspeed2/Makefile") CONFIG_FILES="$CONFIG_FILES xspeed2/Makefile" ;;
 
   *) { { $as_echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
 $as_echo "$as_me: error: invalid argument: $ac_config_target" >&2;}

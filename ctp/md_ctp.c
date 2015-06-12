@@ -136,7 +136,7 @@ static void on_deep_market_data(struct CThostFtdcDepthMarketDataField *deepmd) {
 		return;
 	if (NEW0(quote)) {
 		/* FIXME */
-		quote->thyquote.m_nLen   = sizeof (THYQuote);
+		quote->thyquote.m_nLen   = sizeof (tHYQuote);
 		RMCHR(deepmd->UpdateTime, ':');
 		quote->thyquote.m_nTime  = atoi(deepmd->UpdateTime) * 1000 + deepmd->UpdateMillisec;
 		strcpy(quote->thyquote.m_cHYDM, deepmd->InstrumentID);

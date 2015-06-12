@@ -315,7 +315,7 @@ static int send_quote(void *data, void *data2) {
 	NOT_USED(data2);
 
 	quote = (Quote *)msg->data;
-	if (quote->thyquote.m_nLen == sizeof (THYQuote)) {
+	if (quote->thyquote.m_nLen == sizeof (tHYQuote)) {
 		if (get_logger_level() == __LOG_DEBUG) {
 			time_t t = (time_t)quote->thyquote.m_nTime;
 			char datestr[64];
@@ -403,7 +403,7 @@ void process_quote(void *data) {
 	struct msg *msg;
 
 	quote = (Quote *)data;
-	if (quote->thyquote.m_nLen == sizeof (THYQuote)) {
+	if (quote->thyquote.m_nLen == sizeof (tHYQuote)) {
 		dlist_iter_t iter;
 		dlist_node_t node;
 		int tlen;

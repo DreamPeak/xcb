@@ -72,10 +72,10 @@ typedef struct tagHYQuote {
 	float		m_dMCJG5;
 	int32_t		m_nMRSL5;
 	int32_t		m_nMCSL5;
-} THYQuote;
+} tHYQuote;
 #pragma pack(pop)
 typedef struct Quote {
-	THYQuote	thyquote;
+	tHYQuote	thyquote;
 	int32_t		m_nMSec;
 } Quote;
 

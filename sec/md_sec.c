@@ -162,7 +162,7 @@ static void on_stk_deep_market_data(struct DFITCStockDepthMarketDataField *deepm
 		return;
 	if (NEW0(quote)) {
 		/* FIXME */
-		quote->thyquote.m_nLen   = sizeof (THYQuote);
+		quote->thyquote.m_nLen   = sizeof (tHYQuote);
 		RMCHR(deepmd->sharedDataField.updateTime, ':');
 		quote->thyquote.m_nTime  = atoi(deepmd->sharedDataField.updateTime) * 1000;
 		strcpy(quote->thyquote.m_cJYS, deepmd->staticDataField.exchangeID);
@@ -243,7 +243,7 @@ static void on_sop_deep_market_data(struct DFITCSOPDepthMarketDataField *deepmd)
 		return;
 	if (NEW0(quote)) {
 		/* FIXME */
-		quote->thyquote.m_nLen   = sizeof (THYQuote);
+		quote->thyquote.m_nLen   = sizeof (tHYQuote);
 		RMCHR(deepmd->sharedDataField.updateTime, ':');
 		RMCHR(deepmd->sharedDataField.updateTime, '.');
 		quote->thyquote.m_nTime  = atoi(deepmd->sharedDataField.updateTime);

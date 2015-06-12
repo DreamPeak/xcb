@@ -395,7 +395,7 @@ static void *wk_thread(void *data) {
 			msg = next;
 			next = msg->link;
 			quote = (Quote *)msg->data;
-			if (msgs != &default_msgs || quote->thyquote.m_nLen == sizeof (THYQuote)) {
+			if (msgs != &default_msgs || quote->thyquote.m_nLen == sizeof (tHYQuote)) {
 				dlist_lock(msgs->appouts);
 				if (dlist_length(msgs->appouts) > 0) {
 					dlist_iter_t iter = dlist_iter_new(msgs->appouts, DLIST_START_HEAD);
@@ -461,7 +461,7 @@ static int on_msgv(struct pgm_msgv_t *msgv, size_t len) {
 		++i;
 		len -= aqdu_len;
 		quote = (Quote *)pskb->data;
-		if (quote->thyquote.m_nLen == sizeof (THYQuote)) {
+		if (quote->thyquote.m_nLen == sizeof (tHYQuote)) {
 			dlist_iter_t iter;
 			dlist_node_t node;
 
