@@ -6,3 +6,4 @@ md_femas_la_LDFLAGS = -module -avoid-version -L$(top_srcdir)/femas -lUSTPmdusera
 
 femasdir = $(libdir)
 femas_DATA = libUSTPmduserapi.so
+

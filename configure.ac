@@ -47,12 +47,12 @@ AC_CONFIG_FILES([Makefile
                  conf/Makefile
                  ctp/Makefile
                  devel/Makefile
-		 femas/Makefile
+                 femas/Makefile
                  include/Makefile
                  sec/Makefile
                  src/Makefile
                  xspeed/Makefile
-		 xspeed2/Makefile])
+                 xspeed2/Makefile])
 AC_OUTPUT
 
 echo "

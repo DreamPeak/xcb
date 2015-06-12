@@ -35,7 +35,7 @@
 
 /* FIXME */
 static char *app = "xspeed2";
-static char *desc = "XSpeed level2 API";
+static char *desc = "XSpeed Level2 API";
 static xspeed_l2spi_t *l2spi;
 static xspeed_l2api_t *l2api;
 static struct config *cfg;
@@ -93,7 +93,7 @@ static void on_front_connected(void) {
 }
 
 static void on_front_disconnected(int reason) {
-	xcb_log(XCB_LOG_NOTICE, "Front disconnected: reason = '%d'", reason);
+	xcb_log(XCB_LOG_NOTICE, "Front disconnected: reason='%d'", reason);
 }
 
 static void on_user_login(struct ErrorRtnField *rspinfo) {
@@ -135,13 +135,13 @@ static void on_best_and_deep(struct MDBestAndDeep *deepmd) {
 	Quote *quote;
 
 	if (deepmd == NULL) {
-		xcb_log(XCB_LOG_WARNING, "deepmd is NULL");
+		xcb_log(XCB_LOG_WARNING, "deepmd is NULL!");
 		return;
 	}
 	if (NEW0(quote)) {
 		/* FIXME */
-		quote->thyquote.m_nLen = sizeof(tHYQuote);
-		quote->thyquote.m_nTime = atoi(deepmd->GenTime);
+		quote->thyquote.m_nLen   = sizeof(tHYQuote);
+		quote->thyquote.m_nTime  = atoi(deepmd->GenTime);
 		strcpy(quote->thyquote.m_cJYS, deepmd->Exchange);
 		strcpy(quote->thyquote.m_cHYDM, deepmd->Contract);
 		quote->thyquote.m_bTPBZ  = deepmd->SuspensionSign;
@@ -231,5 +231,5 @@ static int reload_module(void) {
 	return MODULE_LOAD_SUCCESS;
 }
 
-MODULE_INFO(load_module, unload_module, reload_module, "XSpeed level2 API application");
+MODULE_INFO(load_module, unload_module, reload_module, "XSpeed Level2 API application");
 

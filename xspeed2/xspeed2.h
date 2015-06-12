@@ -41,36 +41,36 @@ typedef void (*xspeed_on_unsubscribe_all)(struct ErrorRtnField *rspinfo);
 typedef void (*xspeed_on_best_and_deep)(struct MDBestAndDeep *deepmd);
 
 /* FIXME: exported functions */
-extern xspeed_l2api_t  *xspeed_l2api_create(void);
-extern void		xspeed_l2api_destory(xspeed_l2api_t *l2api);
-extern int		xspeed_l2api_user_login(xspeed_l2api_t *l2api,
-				struct DFITCUserLoginField *userlogin);
-extern int		xspeed_l2api_user_logout(xspeed_l2api_t *l2api,
-				struct DFITCUserLogoutField *userlogout);
-extern int		xspeed_l2api_connect(xspeed_l2api_t *l2api, char *svraddr,
-				xspeed_l2spi_t *l2spi, unsigned int quote_type);
-extern int		xspeed_l2api_subscribe_market_data(xspeed_l2api_t *l2api,
-				char **instruments, int count);
-extern int		xspeed_l2api_unsubscribe_market_data(xspeed_l2api_t *l2api,
-				char **instruments, int count);
-extern int		xspeed_l2api_subscribe_all(xspeed_l2api_t *l2api);
-extern int		xspeed_l2api_unsubscribe_all(xspeed_l2api_t *l2api);
-extern xspeed_l2spi_t  *xspeed_l2spi_create(void);
-extern void		xspeed_l2spi_destroy(xspeed_l2spi_t *l2spi);
-extern void		xspeed_l2spi_on_front_connected(xspeed_l2spi_t *l2spi,
-				xspeed_on_front_connected func);
-extern void		xspeed_l2spi_on_front_disconnected(xspeed_l2spi_t *l2spi,
-				xspeed_on_front_disconnected func);
-extern void		xspeed_l2spi_on_user_login(xspeed_l2spi_t *l2spi, xspeed_on_user_login func);
-extern void		xspeed_l2spi_on_user_logout(xspeed_l2spi_t *l2spi, xspeed_on_user_logout func);
-extern void		xspeed_l2spi_on_subscribe_market_data(xspeed_l2spi_t *l2spi,
-				xspeed_on_subscribe_market_data func);
-extern void		xspeed_l2spi_on_unsubscribe_market_data(xspeed_l2spi_t *l2spi,
-				xspeed_on_unsubscribe_market_data func);
-extern void		xspeed_l2spi_on_subscribe_all(xspeed_l2spi_t *l2spi, xspeed_on_subscribe_all func);
-extern void		xspeed_l2spi_on_unsubscribe_all(xspeed_l2spi_t *l2spi,
-				xspeed_on_unsubscribe_all func);
-extern void		xspeed_l2spi_on_best_and_deep(xspeed_l2spi_t *l2spi, xspeed_on_best_and_deep func);
+extern xspeed_l2api_t *xspeed_l2api_create(void);
+extern void            xspeed_l2api_destory(xspeed_l2api_t *l2api);
+extern int             xspeed_l2api_user_login(xspeed_l2api_t *l2api,
+			struct DFITCUserLoginField *userlogin);
+extern int             xspeed_l2api_user_logout(xspeed_l2api_t *l2api,
+			struct DFITCUserLogoutField *userlogout);
+extern int             xspeed_l2api_connect(xspeed_l2api_t *l2api, char *svraddr,
+			xspeed_l2spi_t *l2spi, unsigned int quote_type);
+extern int             xspeed_l2api_subscribe_market_data(xspeed_l2api_t *l2api,
+			char **instruments, int count);
+extern int             xspeed_l2api_unsubscribe_market_data(xspeed_l2api_t *l2api,
+			char **instruments, int count);
+extern int             xspeed_l2api_subscribe_all(xspeed_l2api_t *l2api);
+extern int             xspeed_l2api_unsubscribe_all(xspeed_l2api_t *l2api);
+extern xspeed_l2spi_t *xspeed_l2spi_create(void);
+extern void            xspeed_l2spi_destroy(xspeed_l2spi_t *l2spi);
+extern void            xspeed_l2spi_on_front_connected(xspeed_l2spi_t *l2spi,
+			xspeed_on_front_connected func);
+extern void            xspeed_l2spi_on_front_disconnected(xspeed_l2spi_t *l2spi,
+			xspeed_on_front_disconnected func);
+extern void            xspeed_l2spi_on_user_login(xspeed_l2spi_t *l2spi, xspeed_on_user_login func);
+extern void            xspeed_l2spi_on_user_logout(xspeed_l2spi_t *l2spi, xspeed_on_user_logout func);
+extern void            xspeed_l2spi_on_subscribe_market_data(xspeed_l2spi_t *l2spi,
+			xspeed_on_subscribe_market_data func);
+extern void            xspeed_l2spi_on_unsubscribe_market_data(xspeed_l2spi_t *l2spi,
+			xspeed_on_unsubscribe_market_data func);
+extern void            xspeed_l2spi_on_subscribe_all(xspeed_l2spi_t *l2spi, xspeed_on_subscribe_all func);
+extern void            xspeed_l2spi_on_unsubscribe_all(xspeed_l2spi_t *l2spi,
+			xspeed_on_unsubscribe_all func);
+extern void            xspeed_l2spi_on_best_and_deep(xspeed_l2spi_t *l2spi, xspeed_on_best_and_deep func);
 
 #ifdef __cplusplus
 }

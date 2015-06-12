@@ -83,7 +83,8 @@ struct xspeed_l2spi_t : public DFITCL2Spi {
 };
 
 xspeed_l2api_t  *xspeed_l2api_create(void) {
-	xspeed_l2api_t  *l2api = new xspeed_l2api_t;
+	xspeed_l2api_t *l2api = new xspeed_l2api_t;
+
 	l2api->rep = DFITCL2Api::CreateDFITCMdApi();
 	return l2api;
 }

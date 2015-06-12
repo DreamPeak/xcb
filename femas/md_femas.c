@@ -18,7 +18,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-
 #include <float.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -36,7 +35,7 @@
 
 /* FIXME */
 static char *app = "femas";
-static char *desc = "";
+static char *desc = "FEMAS API";
 static femas_mdspi_t *mdspi;
 static femas_mdapi_t *mdapi;
 static struct config *cfg;
@@ -89,7 +88,7 @@ static void on_front_connected(void) {
 	memset(&req, 0, sizeof req);
 	/* FIXME */
 	strcpy(req.TradingDay, trading_day);
-	xcb_log(XCB_LOG_WARNING, "trading_day %s", trading_day);
+	xcb_log(XCB_LOG_WARNING, "trading day is %s", trading_day);
 	strcpy(req.UserID, userid);
 	strcpy(req.BrokerID, brokerid);
 	if (passwd != NULL)
@@ -142,9 +141,9 @@ static void on_deep_market_data(struct CUstpFtdcDepthMarketDataField *deepmd) {
 	}
 	if (NEW0(quote)) {
 		/* FIXME */
-		quote->thyquote.m_nLen	= sizeof(tHYQuote);
+		quote->thyquote.m_nLen	 = sizeof(tHYQuote);
 		RMCHR(deepmd->UpdateTime, ':');
-		quote->thyquote.m_nTime = atoi(deepmd->UpdateTime) * 1000 + deepmd->UpdateMillisec;
+		quote->thyquote.m_nTime  = atoi(deepmd->UpdateTime) * 1000 + deepmd->UpdateMillisec;
 		strcpy(quote->thyquote.m_cHYDM, deepmd->InstrumentID);
 		quote->thyquote.m_dZJSJ  = deepmd->PreSettlementPrice;
 		quote->thyquote.m_dJJSJ  = deepmd->SettlementPrice;
@@ -237,5 +236,5 @@ static int reload_module(void) {
 	return MODULE_LOAD_SUCCESS;
 }
 
-MODULE_INFO(load_module, unload_module, reload_module, "");
+MODULE_INFO(load_module, unload_module, reload_module, "FEMAS API Application");
 

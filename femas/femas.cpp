@@ -26,7 +26,7 @@ extern "C" {
 
 /* FIXME */
 struct femas_mdapi_t {
-	CUstpFtdcMduserApi		*rep;
+	CUstpFtdcMduserApi			*rep;
 };
 struct femas_mdspi_t : public CUstpFtdcMduserSpi {
 	femas_on_front_connected		on_front_connected_;
@@ -111,6 +111,7 @@ struct femas_mdspi_t : public CUstpFtdcMduserSpi {
 
 femas_mdapi_t *femas_mdapi_create(const char *flowpath) {
 	femas_mdapi_t *mdapi = new femas_mdapi_t;
+
 	mdapi->rep = CUstpFtdcMduserApi::CreateFtdcMduserApi(flowpath);
 	return mdapi;
 }
@@ -123,117 +124,99 @@ void femas_mdapi_destroy(femas_mdapi_t *mdapi) {
 }
 
 const char *femas_mdapi_getversion(femas_mdapi_t *mdapi, int *majorversion, int *minorversion) {
-	if (mdapi) {
+	if (mdapi)
 		mdapi->rep->GetVersion(*majorversion, *minorversion);
-	}
 }
 
 void femas_mdapi_init(femas_mdapi_t *mdapi) {
-	if (mdapi) {
+	if (mdapi)
 		mdapi->rep->Init();
-	}
 }
 
 void femas_mdapi_join(femas_mdapi_t *mdapi) {
-	if (mdapi) {
+	if (mdapi)
 		mdapi->rep->Join();
-	}
 }
 
 const char *femas_mdapi_get_trading_day(femas_mdapi_t *mdapi) {
-	if (mdapi) {
+	if (mdapi)
 		mdapi->rep->GetTradingDay();
-	}
 }
 
 void femas_mdapi_register_front(femas_mdapi_t *mdapi, char *frontaddr) {
-	if (mdapi) {
+	if (mdapi)
 		mdapi->rep->RegisterFront(frontaddr);
-	}
 }
 
 void femas_mdapi_register_name_server(femas_mdapi_t *mdapi, char *nsaddr) {
-	if (mdapi) {
+	if (mdapi)
 		mdapi->rep->RegisterNameServer(nsaddr);
-	}
 }
 
 void femas_mdapi_register_spi(femas_mdapi_t *mdapi, femas_mdspi_t *mdspi) {
-	if (mdapi && mdspi) {
+	if (mdapi && mdspi)
 		mdapi->rep->RegisterSpi(mdspi);
-	}
 }
 
 int femas_mdapi_register_certificate_file(femas_mdapi_t *mdapi, const char *certfilename,
 	const char *keyfilename, const char *cafilename, const char *keyfilepassword) {
-	if (mdapi) {
+	if (mdapi)
 		mdapi->rep->RegisterCertificateFile(certfilename, keyfilename, cafilename, keyfilepassword);
-	}
 }
 
 void femas_mdapi_subscribe_market_data_topic(femas_mdapi_t *mdapi,
 	int topicid, enum USTP_TE_RESUME_TYPE resumetype) {
-	if (mdapi) {
+	if (mdapi)
 		mdapi->rep->SubscribeMarketDataTopic(topicid, resumetype);
-	}
 }
 
 int femas_mdapi_subscribe_market_data(femas_mdapi_t *mdapi, char **instruments, int count) {
-	if (mdapi) {
+	if (mdapi)
 		mdapi->rep->SubMarketData(instruments, count);
-	}
 }
 
 int femas_mdapi_unsubscribe_market_data(femas_mdapi_t *mdapi, char **instruments, int count) {
-	if (mdapi) {
+	if (mdapi)
 		mdapi->rep->UnSubMarketData(instruments, count);
-	}
 }
 
 void femas_mdapi_heartbeat_timeout(femas_mdapi_t *mdapi, unsigned int timeout) {
-	if (mdapi) {
+	if (mdapi)
 		mdapi->rep->SetHeartbeatTimeout(timeout);
-	}
 }
 
 int femas_mdapi_user_login(femas_mdapi_t *mdapi, struct CUstpFtdcReqUserLoginField *userlogin, int rid) {
-	if (mdapi) {
+	if (mdapi)
 		mdapi->rep->ReqUserLogin(userlogin, rid);
-	}
 }
 
 int femas_mdapi_user_logout(femas_mdapi_t *mdapi, struct CUstpFtdcReqUserLogoutField *userlogout, int rid) {
-	if (mdapi) {
+	if (mdapi)
 		mdapi->rep->ReqUserLogout(userlogout, rid);
-	}
 }
 
 int femas_mdapi_subscribe_topic(femas_mdapi_t *mdapi,
 	struct CUstpFtdcDisseminationField *dissemination, int rid) {
-	if (mdapi) {
+	if (mdapi)
 		mdapi->rep->ReqSubscribeTopic(dissemination, rid);
-	}
 }
 
 int femas_mdapi_query_topic(femas_mdapi_t *mdapi,
 	struct CUstpFtdcDisseminationField *dissemination, int rid) {
-	if (mdapi) {
+	if (mdapi)
 		mdapi->rep->ReqQryTopic(dissemination, rid);
-	}
 }
 
 int femas_mdapi_request_subscribe_market_data(femas_mdapi_t *mdapi,
 	struct CUstpFtdcSpecificInstrumentField *instrument, int rid) {
-	if (mdapi) {
+	if (mdapi)
 		mdapi->rep->ReqSubMarketData(instrument, rid);
-	}
 }
 
 int femas_mdapi_request_unsubscribe_market_data(femas_mdapi_t *mdapi,
 	struct CUstpFtdcSpecificInstrumentField *instrument, int rid) {
-	if (mdapi) {
+	if (mdapi)
 		mdapi->rep->ReqUnSubMarketData(instrument, rid);
-	}
 }
 
 femas_mdspi_t *femas_mdspi_create() {
