@@ -1,0 +1,17 @@
+
+Thank you for using XCUBE!  XCUBE is a real-time computing framework for
+derivatives.  Basically, it has three major components: dispatcher(xcb-dp2),
+worker(xcb-wk2) and publisher(xcb-pb2).  Dispatchers receive quotes from
+different sources, and reliably multicast them down to workers; Workers are the
+workhorses of the whole system: they compute various useful results based on the
+quotes they got, and multicast again down to publishers; Publishers maintain a
+very simple API for clients' use, and they deliver the computing results
+according to clients' requirements.
+
+It is clear to see that reliable multicasting is a connecting tie between the
+three parts above.  But it is also a cause of time delay in the system.  So
+there exists a compactor(xcb-compact) which completely eliminates the reliable
+multicasting, thus combines three parts into one.  In other words, if you have
+a few number of machines, use the dispatcher-worker-publisher pattern; if you
+got just one machine, use the compactor only.
+
