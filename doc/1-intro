@@ -1,17 +1,66 @@
 
+Bo Wang     <futurewb at dce dot com dot cn>
+Xiaoye Meng <mengxiaoye at dce dot com dot cn>
+
 Thank you for using XCUBE!  XCUBE is a real-time computing framework for
 derivatives.  Basically, it has three major components: dispatcher(xcb-dp2),
 worker(xcb-wk2) and publisher(xcb-pb2).  Dispatchers receive quotes from
-different sources, and reliably multicast them down to workers; Workers are the
+different sources, and reliably multicast them down to workers; workers are the
 workhorses of the whole system: they compute various useful results based on the
-quotes they got, and multicast again down to publishers; Publishers maintain a
+quotes they got, and multicast again down to publishers; publishers maintain a
 very simple API for clients' use, and they deliver the computing results
 according to clients' requirements.
+
+                   ---
+                  |wk2|
+                 / --- \
+              RM/       \RM
+           --- /         \ ---
+ quotes-->|dp2|    ...    |pb2|-->results
+           --- \         / ---
+              RM\       /RM
+                 \ --- /
+                  |wk2|
+                   ---
 
 It is clear to see that reliable multicasting is a connecting tie between the
 three parts above.  But it is also a cause of time delay in the system.  So
 there exists a compactor(xcb-compact) which completely eliminates the reliable
 multicasting, thus combines three parts into one.  In other words, if you have
-a few number of machines, use the dispatcher-worker-publisher pattern; if you
+a few number of machines, adopt the dispatcher-worker-publisher pattern; if you
 got just one machine, use the compactor only.
+
+           -------
+ quotes-->|compact|-->results
+           -------
+
+A dynamic loading mechanism from Asterisk project(http://www.asterisk.org) is
+utilized to load, unload and reload various 'modules' into XCUBE.  Currently
+there are two kinds of modules in the system: md modules, whose only task is to
+receive quotes from different counter APIs, and app modules, which are computing
+blocks that can produce some useful results.  You can use management API, or
+xcb-cli, a command-line interface, to load/unload those modules.
+
+  ------   load    ---    load   ------
+ |module|-------->|xcb|<--------|module|
+  ------ <-------- --- --------> ------
+           unload       unload
+
+One last thing I want to mention is the 'queues' in XCUBE.  Among them, the most
+important one is called 'default_msgs'.  Stocks, futures and options quotes are
+flowing through 'default_msg', and consumed by applications which are hooked
+onto it by loading modules.  Each application may have its own output queue, so
+the computing results can be consumed by other applications hooked onto that
+queue.  Queues are so vital to the system that we use Disruptor to boost their
+performance.
+
+    -----------  output queue
+   |application|=======================>
+    -----------
+ ---------------------------------------
+  default_msgs                         >
+ ---------------------------------------
+               -----------
+              |application|============>
+               -----------  output queue
 

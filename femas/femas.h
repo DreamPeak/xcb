@@ -54,15 +54,15 @@ typedef void (*femas_on_deep_market_data)(struct CUstpFtdcDepthMarketDataField *
 /* exported functions */
 extern femas_mdapi_t *femas_mdapi_create(const char *flowpath);
 extern void           femas_mdapi_destroy(femas_mdapi_t *mdapi);
-extern const char    *femas_mdapi_getversion(femas_mdapi_t *mdapi, int *majorversion, int *minorversion);
+extern const char    *femas_mdapi_get_version(femas_mdapi_t *mdapi, int *major, int *minor);
 extern void           femas_mdapi_init(femas_mdapi_t *mdapi);
 extern void           femas_mdapi_join(femas_mdapi_t *mdapi);
-extern const char    *femas_mdapi_get_trading_day(femas_mdapi_t *mdapi);
+extern const char    *femas_mdapi_get_tradingday(femas_mdapi_t *mdapi);
 extern void           femas_mdapi_register_front(femas_mdapi_t *mdapi, char *frontaddr);
-extern void           femas_mdapi_register_name_server(femas_mdapi_t *mdapi, char *nsaddr);
+extern void           femas_mdapi_register_nameserver(femas_mdapi_t *mdapi, char *nsaddr);
 extern void           femas_mdapi_register_spi(femas_mdapi_t *mdapi, femas_mdspi_t *mdspi);
-extern int            femas_mdapi_register_certificate_file(femas_mdapi_t *mdapi, const char *certfilename,
-			const char *keyfilename, const char *cafilename, const char *keyfilepassword);
+extern int            femas_mdapi_register_certfile(femas_mdapi_t *mdapi, const char *certfile,
+			const char *keyfile, const char *cafile, const char *keyfilepasswd);
 extern void           femas_mdapi_subscribe_market_data_topic(femas_mdapi_t *mdapi,
 			int topicid, enum USTP_TE_RESUME_TYPE resumetype);
 extern int            femas_mdapi_subscribe_market_data(femas_mdapi_t *mdapi,

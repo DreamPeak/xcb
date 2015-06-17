@@ -123,9 +123,9 @@ void femas_mdapi_destroy(femas_mdapi_t *mdapi) {
 	}
 }
 
-const char *femas_mdapi_getversion(femas_mdapi_t *mdapi, int *majorversion, int *minorversion) {
+const char *femas_mdapi_get_version(femas_mdapi_t *mdapi, int *major, int *minor) {
 	if (mdapi)
-		mdapi->rep->GetVersion(*majorversion, *minorversion);
+		mdapi->rep->GetVersion(*major, *minor);
 }
 
 void femas_mdapi_init(femas_mdapi_t *mdapi) {
@@ -138,7 +138,7 @@ void femas_mdapi_join(femas_mdapi_t *mdapi) {
 		mdapi->rep->Join();
 }
 
-const char *femas_mdapi_get_trading_day(femas_mdapi_t *mdapi) {
+const char *femas_mdapi_get_tradingday(femas_mdapi_t *mdapi) {
 	if (mdapi)
 		mdapi->rep->GetTradingDay();
 }
@@ -148,7 +148,7 @@ void femas_mdapi_register_front(femas_mdapi_t *mdapi, char *frontaddr) {
 		mdapi->rep->RegisterFront(frontaddr);
 }
 
-void femas_mdapi_register_name_server(femas_mdapi_t *mdapi, char *nsaddr) {
+void femas_mdapi_register_nameserver(femas_mdapi_t *mdapi, char *nsaddr) {
 	if (mdapi)
 		mdapi->rep->RegisterNameServer(nsaddr);
 }
@@ -158,10 +158,10 @@ void femas_mdapi_register_spi(femas_mdapi_t *mdapi, femas_mdspi_t *mdspi) {
 		mdapi->rep->RegisterSpi(mdspi);
 }
 
-int femas_mdapi_register_certificate_file(femas_mdapi_t *mdapi, const char *certfilename,
-	const char *keyfilename, const char *cafilename, const char *keyfilepassword) {
+int femas_mdapi_register_certfile(femas_mdapi_t *mdapi, const char *certfile,
+	const char *keyfile, const char *cafile, const char *keyfilepasswd) {
 	if (mdapi)
-		mdapi->rep->RegisterCertificateFile(certfilename, keyfilename, cafilename, keyfilepassword);
+		mdapi->rep->RegisterCertificateFile(certfile, keyfile, cafile, keyfilepasswd);
 }
 
 void femas_mdapi_subscribe_market_data_topic(femas_mdapi_t *mdapi,

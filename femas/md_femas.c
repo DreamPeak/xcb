@@ -40,7 +40,7 @@ static femas_mdspi_t *mdspi;
 static femas_mdapi_t *mdapi;
 static struct config *cfg;
 static const char *front_ip, *front_port, *brokerid, *userid, *passwd, *contracts;
-static const char *trading_day;
+static const char *tradingday;
 
 static inline void load_config(void) {
 	/* FIXME */
@@ -87,8 +87,8 @@ static void on_front_connected(void) {
 
 	memset(&req, 0, sizeof req);
 	/* FIXME */
-	strcpy(req.TradingDay, trading_day);
-	xcb_log(XCB_LOG_WARNING, "trading day is %s", trading_day);
+	strcpy(req.TradingDay, tradingday);
+	xcb_log(XCB_LOG_WARNING, "trading day is %s", tradingday);
 	strcpy(req.UserID, userid);
 	strcpy(req.BrokerID, brokerid);
 	if (passwd != NULL)
@@ -218,7 +218,7 @@ static int load_module(void) {
 	snprintf(front, sizeof front, "tcp://%s:%s", front_ip, front_port);
 	femas_mdapi_register_front(mdapi, front);
 	femas_mdapi_init(mdapi);
-	trading_day = femas_mdapi_get_trading_day(mdapi);
+	tradingday = femas_mdapi_get_tradingday(mdapi);
 	return register_application(app, femas_exec, desc, NULL, mod_info->self);
 }
 
