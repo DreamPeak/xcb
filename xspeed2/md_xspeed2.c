@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
+#include <unistd.h>
 #include "macros.h"
 #include "mem.h"
 #include "dstr.h"
@@ -119,6 +120,15 @@ static void on_user_login(struct ErrorRtnField *rspinfo) {
 		else
 			xcb_log(XCB_LOG_INFO, "Subscribe all failed");
 	}
+}
+
+static void on_user_logout(struct ErrorRtnField *rspinfo) {
+	/* FIXME */
+	if (rspinfo && rspinfo->ErrorID != 0) {
+		xcb_log(XCB_LOG_ERROR, "Error occurred: errorid=%d", rspinfo->ErrorID);
+		return;
+	}
+	xcb_log(XCB_LOG_INFO, "logout succeeded");
 }
 
 static void on_subscribe_market_data(struct ErrorRtnField *rspinfo) {
@@ -219,7 +229,13 @@ static int load_module(void) {
 
 static int unload_module(void) {
 	/* FIXME */
-	xspeed_l2api_connect(l2api, NULL, NULL, 0);
+	xspeed_l2spi_on_user_logout(l2spi, on_user_logout);
+	struct DFITCUserLogoutField req = {0};
+	strcpy(req.AccountID, userid);
+	
+	xspeed_l2api_user_logout(l2api, &req);
+	/* FIXME */
+	sleep(1);
 	xspeed_l2api_destory(l2api);
 	xspeed_l2spi_destroy(l2spi);
 	config_destroy(cfg);

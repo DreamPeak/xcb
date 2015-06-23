@@ -26,9 +26,6 @@
 extern "C" {
 
 /* FIXME */
-using namespace DFITC_L2;
-
-/* FIXME */
 struct xspeed_l2api_t {
 	DFITCL2Api				*rep;
 };
@@ -194,4 +191,3 @@ void xspeed_l2spi_on_best_and_deep(xspeed_l2spi_t *l2spi, xspeed_on_best_and_dee
 }
 
 }
-
