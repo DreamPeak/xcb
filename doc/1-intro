@@ -37,30 +37,33 @@ got just one machine, use the compactor only.
 A dynamic loading mechanism from Asterisk project(http://www.asterisk.org) is
 utilized to load, unload and reload various 'modules' into XCUBE.  Currently
 there are two kinds of modules in the system: md modules, whose only task is to
-receive quotes from different counter APIs, and app modules, which are computing
-blocks that can produce some useful results.  You can use management API, or
-xcb-cli, a command-line interface, to load/unload those modules.
+receive quotes by calling different counter APIs, and app modules, which are
+computing blocks that can produce some useful results.  You can use management
+API, or xcb-cli, a command-line interface, to load/unload those modules.
 
   ------   load    ---    load   ------
  |module|-------->|xcb|<--------|module|
   ------ <-------- --- --------> ------
            unload       unload
 
-One last thing I want to mention is the 'queues' in XCUBE.  Among them, the most
-important one is called 'default_msgs'.  Stocks, futures and options quotes are
-flowing through 'default_msg', and consumed by applications which are hooked
-onto it by loading modules.  Each application may have its own output queue, so
-the computing results can be consumed by other applications hooked onto that
-queue.  Queues are so vital to the system that we use Disruptor to boost their
-performance.
+One last thing we want to mention is the 'queues' in XCUBE.  Among them, the
+most important one is called 'default_msgs'.  Stocks, futures and options quotes
+are flowing through 'default_msgs', and consumed by applications which are
+hooked onto it by loading modules.  Each application may have its own output
+queue, so the computing results can be consumed by other applications hooked
+onto that queue.  Queues are so vital to the system that we use Disruptor to
+boost their performance.
 
     -----------  output queue
    |application|=======================>
     -----------
+         j
  ---------------------------------------
   default_msgs                         >
  ---------------------------------------
+                    k
                -----------
               |application|============>
                -----------  output queue
+(VIM n00bz sure know what 'j' and 'k' stand for :-)
 

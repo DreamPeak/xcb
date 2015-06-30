@@ -40,7 +40,8 @@ static char *desc = "XSpeed Level2 API";
 static xspeed_l2spi_t *l2spi;
 static xspeed_l2api_t *l2api;
 static struct config *cfg;
-static const char *front_ip, *front_port, *userid, *passwd, *reqid = "1", *contracts;
+static const char *front_ip, *front_port, *userid, *passwd, *contracts;
+static int reqid = 1;
 
 static inline void load_config(void) {
 	/* FIXME */
@@ -66,7 +67,7 @@ static inline void load_config(void) {
 							passwd = var->value;
 					} else if (!strcasecmp(var->name, "reqid")) {
 						if (strcasecmp(var->value, ""))
-							reqid = var->value;
+							reqid = atoi(var->value);
 					} else if (!strcasecmp(var->name, "contracts")) {
 						if (strcasecmp(var->value, ""))
 							contracts = var->value;
@@ -88,7 +89,7 @@ static void on_front_connected(void) {
 	memset(&req, 0, sizeof req);
 	strcpy(req.accountID, userid);
 	strcpy(req.passwd, passwd);
-	req.lRequestID = atoi(reqid);
+	req.lRequestID = reqid;
 	res = xspeed_l2api_user_login(l2api, &req);
 	xcb_log(XCB_LOG_NOTICE, "Login %s for user '%s'", res == 0 ? "succeeded" : "failed", userid);
 }
@@ -216,6 +217,7 @@ static int load_module(void) {
 	xspeed_l2spi_on_front_connected(l2spi, on_front_connected);
 	xspeed_l2spi_on_front_disconnected(l2spi, on_front_disconnected);
 	xspeed_l2spi_on_user_login(l2spi, on_user_login);
+	xspeed_l2spi_on_user_logout(l2spi, on_user_logout);
 	xspeed_l2spi_on_subscribe_all(l2spi, on_subscribe_all);
 	xspeed_l2spi_on_subscribe_market_data(l2spi, on_subscribe_market_data);
 	xspeed_l2spi_on_best_and_deep(l2spi, on_best_and_deep);
@@ -228,13 +230,11 @@ static int load_module(void) {
 }
 
 static int unload_module(void) {
-	/* FIXME */
-	xspeed_l2spi_on_user_logout(l2spi, on_user_logout);
-	struct DFITCUserLogoutField req = {0};
+	struct DFITCUserLogoutField req = { 0 };
+
 	strcpy(req.AccountID, userid);
-	
 	xspeed_l2api_user_logout(l2api, &req);
-	/* FIXME */
+	/* FIXME: ?! */
 	sleep(1);
 	xspeed_l2api_destory(l2api);
 	xspeed_l2spi_destroy(l2spi);
