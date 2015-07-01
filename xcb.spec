@@ -2,7 +2,7 @@
 
 Name:		xcb
 Version:	1.0.1
-Release:	2%{?dist}
+Release:	3%{?dist}
 Summary:	Reliable Multicast Computing
 Group:		Applications/Internet
 License:	GPLv2
@@ -21,6 +21,13 @@ Requires:	readline
 
 %description
 Reliable Multicast Computing.
+
+%package client
+Summary:	Client APIs for XCUBE
+Group:		Development/Libraries
+
+%description client
+Client APIs for XCUBE.
 
 %package devel
 Summary:	Development files for XCUBE
@@ -70,6 +77,7 @@ rm -rf %{buildroot}
 
 %files
 %defattr(-,root,root,-)
+%exclude %{_libdir}/libxcbclient.so*
 %doc AUTHORS ChangeLog COPYING INSTALL NEWS README TODO
 %config(noreplace) %{_sysconfdir}/%{name}/*
 %config(noreplace) %{_sysconfdir}/logrotate.d/%{name}
@@ -78,8 +86,14 @@ rm -rf %{buildroot}
 %{_sbindir}/*
 %{_sharedstatedir}/%{name}/*
 
+%files client
+%defattr(-,root,root,-)
+%{_includedir}/%{name}/xcb-client.h
+%{_libdir}/libxcbclient.so*
+
 %files devel
 %defattr(-,root,root,-)
+%exclude %{_includedir}/%{name}/xcb-client.h
 %{_includedir}/%{name}/*
 %{_datadir}/%{name}/*
 
