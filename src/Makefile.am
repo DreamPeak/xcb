@@ -32,7 +32,7 @@ xcb_sim_CPPFLAGS = -I$(top_srcdir)/include
 xcb_sim_CFLAGS = -Wall -pthread
 xcb_sim_LDFLAGS = -ltcmalloc
 
-lib_LTLIBRARIES = app_test.la app_pd.la app_kline.la
+lib_LTLIBRARIES = app_test.la app_pd.la app_kline.la libxcbclient.la
 app_test_la_SOURCES = app_test.c
 app_test_la_CPPFLAGS = -I$(top_srcdir)/include
 app_test_la_CFLAGS = -fPIC -Wall
@@ -45,4 +45,8 @@ app_kline_la_SOURCES = app_kline.c
 app_kline_la_CPPFLAGS = -I$(top_srcdir)/include
 app_kline_la_CFLAGS = -fPIC -Wall -pthread
 app_kline_la_LDFLAGS = -module -avoid-version -ltcmalloc
+libxcbclient_la_SOURCES = mem.c dstr.c net.c xcb-client.c
+libxcbclient_la_CPPFLAGS = -I$(top_srcdir)/include
+libxcbclient_la_CFLAGS = -fPIC -Wall -pthread
+libxcbclient_la_LDFLAGS = -version-info 0:0:0 -ldl -ltcmalloc
 

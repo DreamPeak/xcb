@@ -2,7 +2,9 @@
 CentOS 6.x 64bit
 GCC 4.8.2 (http://people.centos.org/tru/devtools-2/)
 
-./configure; make; make install
-OR
-rpmbuild -bb --target=x86_64 xcb.spec
+1) yum -y install gperftools-libs snappy         (from EPEL)
+2) rpm -ivh leveldb-1.18-x.el6.centos.x86_64.rpm (from release tag)
+3) yum -y install openpgm                        (from EPEL)
+4) yum -y install readline
+5) rpm -ivh xcb-1.0.1-x.el6.centos.x86_64.rpm    (from release tag)
 
