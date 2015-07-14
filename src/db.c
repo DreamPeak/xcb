@@ -97,6 +97,10 @@ void db_writeoptions_destroy(db_writeoptions_t **woptr) {
 	*woptr = NULL;
 }
 
+void db_writeoptions_set_sync(db_writeoptions_t *wo, unsigned char v) {
+	leveldb_writeoptions_set_sync(wo, v);
+}
+
 db_iterator_t *db_iterator_create(db_t *db, db_readoptions_t *ro) {
 	return leveldb_create_iterator(db, ro);
 }

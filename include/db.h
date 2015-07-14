@@ -57,6 +57,7 @@ extern db_readoptions_t  *db_readoptions_create(void);
 extern void               db_readoptions_destroy(db_readoptions_t **roptr);
 extern db_writeoptions_t *db_writeoptions_create(void);
 extern void               db_writeoptions_destroy(db_writeoptions_t **woptr);
+extern void               db_writeoptions_set_sync(db_writeoptions_t *wo, unsigned char v);
 extern db_iterator_t     *db_iterator_create(db_t *db, db_readoptions_t *ro);
 extern void               db_iterator_destroy(db_iterator_t **itptr);
 extern unsigned char      db_iterator_valid(db_iterator_t *it);
