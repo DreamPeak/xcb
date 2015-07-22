@@ -143,6 +143,8 @@ static db_options_t *db_o;
 static db_writeoptions_t *db_wo;
 static db_writebatch_t *db_wb;
 static pthread_mutex_t wb_lock = PTHREAD_ADAPTIVE_MUTEX_INITIALIZER_NP;
+static int cp_time = 6;
+static int rotate = 7;
 static int dirty = 0;
 static char neterr[256];
 static int udpsock = -1;
@@ -571,6 +573,59 @@ static void *wk_thread(void *data) {
 			break;
 	}
 	return NULL;
+}
+
+/* FIXME */
+static void *rc_thread(void *data) {
+	char *datestr = (char *)data;
+	db_iterator_t *it;
+
+	it = db_iterator_create(db, db_ro);
+	db_iterator_seek_to_first(it);
+	while (db_iterator_valid(it)) {
+		const char *key;
+		size_t klen;
+		dstr *fields = NULL;
+		int nfield = 0;
+
+		key = db_iterator_key(it, &klen);
+		fields = dstr_split_len(key, klen, ",", 1, &nfield);
+		if (nfield > 1 && memcmp(datestr, fields[1], strlen(datestr)) > 0)
+			db_delete(db, db_wo, key, klen, NULL);
+		dstr_free_tokens(fields, nfield);
+		db_iterator_next(it);
+	}
+	db_iterator_destroy(&it);
+	FREE(datestr);
+	return NULL;
+}
+
+/* FIXME */
+static int rotate_n_compact(event_loop el, unsigned long id, void *data) {
+	struct timeval tv;
+	time_t t;
+	char *datestr;
+	struct tm lt;
+	NOT_USED(el);
+	NOT_USED(id);
+	NOT_USED(data);
+
+	gettimeofday(&tv, NULL);
+	t = tv.tv_sec - rotate * 24 * 60 * 60;
+	if ((datestr = ALLOC(64))) {
+		pthread_t thread;
+
+		strftime(datestr, 64, "%F %T", localtime_r(&t, &lt));
+		if (pthread_create(&thread, NULL, rc_thread, datestr) != 0){
+			xcb_log(XCB_LOG_ERROR, "Error initializing rc thread");
+			FREE(datestr);
+		}
+	}
+	localtime_r(&tv.tv_sec, &lt);
+	if (lt.tm_hour >= cp_time)
+		return (24 - lt.tm_hour + cp_time) * 60 * 60 * 1000 - tv.tv_usec / 1000;
+	else
+		return (cp_time - lt.tm_hour) * 60 * 60 * 1000 - tv.tv_usec / 1000;
 }
 
 void process_quote(void *data) {
@@ -1214,25 +1269,38 @@ int main(int argc, char **argv) {
 			dlist_insert_tail(filter, fields[i]);
 	}
 	/* FIXME */
-	if ((tmp = variable_retrieve(cfg, "general", "persistence")))
+	if ((tmp = variable_retrieve(cfg, "database", "persistence")))
 		if (atoi(tmp) == 1)
 			persistence = 1;
-	if (persistence) {
+	if (persistence && (tmp = variable_retrieve(cfg, "database", "db_path")) && strcmp(tmp, "")) {
 		char *dberr = NULL;
+		struct timeval tv;
+		struct tm lt;
 
 		db_o = db_options_create();
 		/* FIXME */
-		makedir("var/lib/xcb/db", 0777);
-		db = db_open(db_o, "/var/lib/xcb/db", &dberr);
+		makedir(tmp, 0777);
+		db = db_open(db_o, tmp, &dberr);
 		if (dberr) {
 			xcb_log(XCB_LOG_ERROR, "Opening database: %s", dberr);
 			db_free(dberr);
 			goto err;
 		}
 		db_wo = db_writeoptions_create();
-		db_writeoptions_set_sync(db_wo, 1);
+		/* db_writeoptions_set_sync(db_wo, 1); */
 		db_wb = db_writebatch_create();
 		db_ro = db_readoptions_create();
+		if ((tmp = variable_retrieve(cfg, "database", "cp_time")) && strcmp(tmp, ""))
+			if (atoi(tmp) >= 0 && atoi(tmp) <= 23)
+				cp_time = atoi(tmp);
+		gettimeofday(&tv, NULL);
+		localtime_r(&tv.tv_sec, &lt);
+		if (lt.tm_hour >= cp_time)
+			create_time_event(el, (24 - lt.tm_hour + cp_time) * 60 * 60 * 1000 - tv.tv_usec / 1000,
+				rotate_n_compact, NULL, NULL);
+		else
+			create_time_event(el, (cp_time - lt.tm_hour) * 60 * 60 * 1000 - tv.tv_usec / 1000,
+				rotate_n_compact, NULL, NULL);
 	}
 	if ((tmp = variable_retrieve(cfg, "general", "password")) && strcmp(tmp, ""))
 		password = tmp;

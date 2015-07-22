@@ -1060,7 +1060,7 @@ int main(int argc, char **argv) {
 			goto err;
 		}
 		db_wo = db_writeoptions_create();
-		db_writeoptions_set_sync(db_wo, 1);
+		/* db_writeoptions_set_sync(db_wo, 1); */
 		db_wb = db_writebatch_create();
 	}
 	/* FIXME */
