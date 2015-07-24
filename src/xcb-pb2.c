@@ -418,6 +418,7 @@ static void *rc_thread(void *data) {
 		db_iterator_next(it);
 	}
 	db_iterator_destroy(&it);
+	db_compact_range(db, NULL, 0, NULL, 0);
 	FREE(datestr);
 	return NULL;
 }
