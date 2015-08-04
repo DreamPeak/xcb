@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013-2015, Dalian Futures Information Technology Co., Ltd.
  *
- * Bo Wang <futurewb at dce dot com dot cn>
+ * Bo Wang
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -191,3 +191,4 @@ void xspeed_l2spi_on_best_and_deep(xspeed_l2spi_t *l2spi, xspeed_on_best_and_dee
 }
 
 }
+

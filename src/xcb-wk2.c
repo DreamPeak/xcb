@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013-2015, Dalian Futures Information Technology Co., Ltd.
  *
- * Bo Wang     <futurewb at dce dot com dot cn>
+ * Bo Wang
  * Xiaoye Meng <mengxiaoye at dce dot com dot cn>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -960,7 +960,7 @@ int main(int argc, char **argv) {
 	clients_to_close = dlist_new(NULL, NULL);
 	clients = dlist_new(NULL, NULL);
 	monitors = dlist_new(NULL, NULL);
-	tp = thrpool_new(16, 512, 200, NULL);
+	tp = thrpool_new(16, 256, 200, NULL);
 	if (!pgm_init(&pgm_err)) {
 		xcb_log(XCB_LOG_ERROR, "Error starting PGM engine: %s", pgm_err->message);
 		pgm_error_free(pgm_err);
