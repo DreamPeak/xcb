@@ -149,8 +149,9 @@ xcb_pb2_LDADD = $(LDADD)
 xcb_pb2_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(xcb_pb2_CFLAGS) $(CFLAGS) \
 	$(xcb_pb2_LDFLAGS) $(LDFLAGS) -o $@
-am_xcb_sim_OBJECTS = xcb_sim-mem.$(OBJEXT) xcb_sim-dstr.$(OBJEXT) \
-	xcb_sim-net.$(OBJEXT) xcb_sim-xcb-sim.$(OBJEXT)
+am_xcb_sim_OBJECTS = xcb_sim-mem.$(OBJEXT) xcb_sim-dlist.$(OBJEXT) \
+	xcb_sim-dstr.$(OBJEXT) xcb_sim-net.$(OBJEXT) \
+	xcb_sim-xcb-sim.$(OBJEXT)
 xcb_sim_OBJECTS = $(am_xcb_sim_OBJECTS)
 xcb_sim_LDADD = $(LDADD)
 xcb_sim_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
@@ -342,7 +343,7 @@ xcb_cli_SOURCES = mem.c dstr.c net.c xcb-cli.c
 xcb_cli_CPPFLAGS = -I$(top_srcdir)/include
 xcb_cli_CFLAGS = -Wall -pthread
 xcb_cli_LDFLAGS = -lreadline -ltermcap -ltcmalloc
-xcb_sim_SOURCES = mem.c dstr.c net.c xcb-sim.c
+xcb_sim_SOURCES = mem.c dlist.c dstr.c net.c xcb-sim.c
 xcb_sim_CPPFLAGS = -I$(top_srcdir)/include
 xcb_sim_CFLAGS = -Wall -pthread
 xcb_sim_LDFLAGS = -ltcmalloc
@@ -568,6 +569,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_pb2-thrpool.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_pb2-utilities.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_pb2-xcb-pb2.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_sim-dlist.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_sim-dstr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_sim-mem.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_sim-net.Po@am__quote@
@@ -1472,6 +1474,20 @@ xcb_sim-mem.obj: mem.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='mem.c' object='xcb_sim-mem.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_sim_CPPFLAGS) $(CPPFLAGS) $(xcb_sim_CFLAGS) $(CFLAGS) -c -o xcb_sim-mem.obj `if test -f 'mem.c'; then $(CYGPATH_W) 'mem.c'; else $(CYGPATH_W) '$(srcdir)/mem.c'; fi`
+
+xcb_sim-dlist.o: dlist.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_sim_CPPFLAGS) $(CPPFLAGS) $(xcb_sim_CFLAGS) $(CFLAGS) -MT xcb_sim-dlist.o -MD -MP -MF $(DEPDIR)/xcb_sim-dlist.Tpo -c -o xcb_sim-dlist.o `test -f 'dlist.c' || echo '$(srcdir)/'`dlist.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_sim-dlist.Tpo $(DEPDIR)/xcb_sim-dlist.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dlist.c' object='xcb_sim-dlist.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_sim_CPPFLAGS) $(CPPFLAGS) $(xcb_sim_CFLAGS) $(CFLAGS) -c -o xcb_sim-dlist.o `test -f 'dlist.c' || echo '$(srcdir)/'`dlist.c
+
+xcb_sim-dlist.obj: dlist.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_sim_CPPFLAGS) $(CPPFLAGS) $(xcb_sim_CFLAGS) $(CFLAGS) -MT xcb_sim-dlist.obj -MD -MP -MF $(DEPDIR)/xcb_sim-dlist.Tpo -c -o xcb_sim-dlist.obj `if test -f 'dlist.c'; then $(CYGPATH_W) 'dlist.c'; else $(CYGPATH_W) '$(srcdir)/dlist.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_sim-dlist.Tpo $(DEPDIR)/xcb_sim-dlist.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dlist.c' object='xcb_sim-dlist.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_sim_CPPFLAGS) $(CPPFLAGS) $(xcb_sim_CFLAGS) $(CFLAGS) -c -o xcb_sim-dlist.obj `if test -f 'dlist.c'; then $(CYGPATH_W) 'dlist.c'; else $(CYGPATH_W) '$(srcdir)/dlist.c'; fi`
 
 xcb_sim-dstr.o: dstr.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_sim_CPPFLAGS) $(CPPFLAGS) $(xcb_sim_CFLAGS) $(CFLAGS) -MT xcb_sim-dstr.o -MD -MP -MF $(DEPDIR)/xcb_sim-dstr.Tpo -c -o xcb_sim-dstr.o `test -f 'dstr.c' || echo '$(srcdir)/'`dstr.c

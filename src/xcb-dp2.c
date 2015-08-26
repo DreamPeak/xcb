@@ -472,9 +472,9 @@ void process_quote(void *data) {
 				quote->thyquote.m_nTime *= 1000;
 			else if (tlen == 6 || tlen == 7)
 				quote->thyquote.m_nTime *= 100;
-			lt.tm_hour = quote->thyquote.m_nTime / 10000000;
-			lt.tm_min  = quote->thyquote.m_nTime % 10000000 / 100000;
 			lt.tm_sec  = quote->thyquote.m_nTime % 100000   / 1000;
+			lt.tm_min  = quote->thyquote.m_nTime % 10000000 / 100000;
+			lt.tm_hour = quote->thyquote.m_nTime / 10000000;
 			quote->m_nMSec = quote->thyquote.m_nTime % 1000;
 			quote->thyquote.m_nTime = mktime(&lt);
 		}
@@ -558,7 +558,7 @@ static void read_quote(event_loop el, int fd, int mask, void *data) {
 	if ((buf = CALLOC(1, sizeof (Quote))) == NULL)
 		return;
 	/* FIXME */
-	if ((nread = recvfrom(fd, buf, sizeof (Quote), 0, (struct sockaddr *)&si, &slen)) > 0)
+	if ((nread = recvfrom(fd, buf, sizeof (Quote), 0, (struct sockaddr *)&si, &slen)) > 0 && strcmp(buf, ""))
 		process_quote(buf);
 	else
 		FREE(buf);

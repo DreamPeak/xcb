@@ -2,7 +2,7 @@
 
 Name:		xcb
 Version:	1.0.1
-Release:	3%{?dist}
+Release:	4%{?dist}
 Summary:	Reliable Multicast Computing
 Group:		Applications/Internet
 License:	GPLv2
@@ -40,7 +40,7 @@ Development files for XCUBE.
 %setup -q
 
 %build
-%configure --disable-static CFLAGS="-march=corei7 -g -O2 -pipe -fno-builtin-memcmp" CXXFLAGS="-march=corei7 -g -O2"
+%configure --disable-static CFLAGS="-march=corei7 -g -O3 -pipe -fno-builtin-memcmp" CXXFLAGS="-march=corei7 -g -O3"
 make %{?_smp_mflags}
 pushd misc
 make

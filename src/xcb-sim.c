@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2013-2015, Dalian Futures Information Technology Co., Ltd.
  *
+ * Gaohang Wu
  * Bo Wang
  * Xiaoye Meng <mengxiaoye at dce dot com dot cn>
  *
@@ -29,10 +30,14 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/uio.h>
+#include <time.h>
 #include <unistd.h>
+#include "macros.h"
 #include "mem.h"
+#include "dlist.h"
 #include "dstr.h"
 #include "net.h"
+#include "basics.h"
 
 /* FIXME */
 #define PAGEALIGN(len) ((len) + sysconf(_SC_PAGESIZE) - 1) & ~(sysconf(_SC_PAGESIZE) - 1)
@@ -50,12 +55,18 @@ static void usage(void) {
 	exit(1);
 }
 
+/* FIXME */
+static void vfree(void *value) {
+	FREE(value);
+}
+
 int main(int argc, char **argv) {
 	int opt, i = 1, fd, sock;
 	struct stat sb;
 	char *addr, *p, *q;
 	char neterr[256];
 	int pfd[2];
+	dlist_t dlist = dlist_new(NULL, vfree);
 
 	/* FIXME */
 	ip = dstr_new("127.0.0.1");
@@ -96,36 +107,79 @@ int main(int argc, char **argv) {
 	p = addr;
 	q = memchr(p, '\n', sb.st_size);
 	while (q) {
-		int len = PAGEALIGN(q - p + 1);
-		char *line;
+		dstr *fields = NULL;
+		int nfield = 0;
 
-		if ((line = POSIXALIGN(sysconf(_SC_PAGESIZE), len))) {
-			struct iovec iov;
+		/* FIXME */
+		fields = dstr_split_len(p, q - p, ",", 1, &nfield);
+		if (nfield > 13) {
+			int len = PAGEALIGN(sizeof (Quote));
+			Quote *quote;
 
-			memset(line, '\0', len);
-			strncpy(line, p, q - p);
-			iov.iov_base = line;
-			iov.iov_len  = len;
-			/* zero copy */
-			if (vmsplice(pfd[1], &iov, 1, SPLICE_F_GIFT) == -1) {
-				fprintf(stderr, "Error vmsplicing: %s\n", strerror(errno));
-				exit(1);
-			}
+			if ((quote = POSIXALIGN(sysconf(_SC_PAGESIZE), len))) {
+				int time, date;
+				struct tm tm;
+				struct iovec iov;
 
-again:
-			if (splice(pfd[0], NULL, sock, NULL, len, SPLICE_F_MOVE) == -1) {
-				if (errno == EAGAIN)
-					goto again;
-				else {
-					fprintf(stderr, "Error splicing: %s\n", strerror(errno));
+				memset(quote, '\0', len);
+				quote->thyquote.m_nLen   = sizeof (tHYQuote);
+				RMCHR(fields[2], ':');
+				RMCHR(fields[2], '.');
+				time = atoi(fields[2]);
+				date = atoi(fields[0]);
+				tm.tm_sec  = time % 100000   / 1000;
+				tm.tm_min  = time % 10000000 / 100000;
+				tm.tm_hour = time / 10000000;
+				tm.tm_mday = date % 100;
+				tm.tm_mon  = date / 100 % 100 - 1;
+				tm.tm_year = date / 10000 - 1900;
+				quote->thyquote.m_nTime  = mktime(&tm);
+				strcpy(quote->thyquote.m_cHYDM, fields[1]);
+				quote->thyquote.m_dJSP   = atof(fields[5]);
+				quote->thyquote.m_dJKP   = atof(fields[4]);
+				quote->thyquote.m_nCCL   = atoi(fields[9]);
+				quote->thyquote.m_dZXJ   = atof(fields[3]);
+				quote->thyquote.m_nCJSL  = atoi(fields[8]);
+				quote->thyquote.m_dZDJ   = atof(fields[7]);
+				quote->thyquote.m_dZGJ   = atof(fields[6]);
+				quote->thyquote.m_dMRJG1 = atof(fields[10]);
+				quote->thyquote.m_dMCJG1 = atof(fields[12]);
+				quote->thyquote.m_nMRSL1 = atoi(fields[11]);
+				quote->thyquote.m_nMCSL1 = atoi(fields[13]);
+				quote->m_nMSec           = time % 1000;
+				iov.iov_base = quote;
+				iov.iov_len  = len;
+				/* zero copy */
+				if (vmsplice(pfd[1], &iov, 1, SPLICE_F_GIFT) == -1) {
+					fprintf(stderr, "Error vmsplicing: %s\n", strerror(errno));
 					exit(1);
 				}
-			}
-			FREE(line);
-		} else
-			fprintf(stderr, "Error allocating memory for line\n");
+
+again:
+				if (splice(pfd[0], NULL, sock, NULL, len, SPLICE_F_MOVE) == -1) {
+					if (errno == EAGAIN) {
+						fprintf(stderr, "Repeating ...\n");
+						goto again;
+					} else {
+						fprintf(stderr, "Error splicing: %s\n", strerror(errno));
+						exit(1);
+					}
+				}
+				dlist_insert_tail(dlist, quote);
+			} else
+				fprintf(stderr, "Error allocating memory for quote\n");
+		}
+		dstr_free_tokens(fields, nfield);
 		p = q + 1;
 		q = memchr(p, '\n', sb.st_size - (q - addr));
+		if (q == NULL) {
+			p = addr;
+			q = memchr(p, '\n', sb.st_size);
+		}
+		if (dlist_length(dlist) >= 1000) {
+			dlist_free(&dlist);
+			dlist = dlist_new(NULL, vfree);
+		}
 	}
 	close(pfd[0]);
 	close(pfd[1]);
