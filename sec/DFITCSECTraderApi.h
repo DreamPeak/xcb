@@ -2,9 +2,9 @@
 * 版权所有(C)2012-2016, 大连飞创信息技术有限公司
 * 文件名称：DFITCSECTraderApi.h
 * 文件说明：定义接口所需的数据接口
-* 当前版本：1.5.4.0
+* 当前版本：1.5.76.0
 * 作者：XSpeed证券项目组
-* 发布日期：2015年01月
+* 发布日期：2015年08月
 */
 #ifndef DFITCSECTRADERAPI_H_
 #define DFITCSECTRADERAPI_H_
@@ -119,7 +119,7 @@ public:
     * @param pRspInfo:指针若非空，返回错误信息结构体的地址，表明资金调拨请求失败
     */
     virtual void OnRspStockTransferFunds(DFITCStockRspTransferFundsField *pData,DFITCSECRspInfoField *pRspInfo) {};
-	/*
+    /*
     * STOCK-批量委托响应
     * @param pData:指针若非空,返回用户批量委托响应信息结构体的地址,表明批量委托请求成功
     * @param pRspInfo:指针若非空，返回错误信息结构体的地址，表明批量委托请求失败
@@ -173,7 +173,7 @@ public:
     * @param pRspInfo:指针若非空，返回错误信息结构体的地址，表明证券信息查询请求失败
     */
     virtual void OnRspStockQryStockInfo(DFITCStockRspQryStockField *pData, DFITCSECRspInfoField *pRspInfo, bool bIsLast) {};
-	/**
+    /**
     * STOCK-证券静态信息查询响应
     * @param pData:指针若非空,返回用户证券静态信息查询响应信息结构体的地址,表明证券静态信息查询请求成功
     * @param pRspInfo:指针若非空，返回错误信息结构体的地址，表明证券静态信息查询请求失败
@@ -225,6 +225,18 @@ public:
     * @param pRspInfo:指针若非空，返回错误信息地址，表明报单请求失败
     */
     virtual void OnRspSOPEntrustOrder(DFITCSOPRspEntrustOrderField *pData, DFITCSECRspInfoField *pRspInfo) {};
+    /**
+    * SOP-组合拆分委托响应
+    * @param pData:指针若非空,返回用户响应信息结构地址,表明组合拆分委托请求成功
+    * @param pRspInfo:指针若非空，返回错误信息地址，表明组合拆分委托请求失败
+    */
+    virtual void OnRspSOPGroupSplit(DFITCSOPRspEntrustOrderField *pData, DFITCSECRspInfoField *pRspInfo) {};
+    /**
+    * SOP-查询客户组合持仓明细响应
+    * @param pData:指针若非空,返回用户查询客户组合持仓明细响应结构地址,表明查询客户组合持仓明细请求成功
+    * @param pRspInfo:指针若非空，返回错误信息地址，表明查询客户组合持仓明细请求失败
+    */
+    virtual void OnRspSOPQryGroupPosition(DFITCSOPRspQryGroupPositionField *pData, DFITCSECRspInfoField *pRspInfo, bool bIsLast) {};
     /**
     * SOP-证券锁定解锁响应
     * @param pData:指针若非空,返回用户证券锁定解锁响应信息结构地址,表明证券锁定解锁请求成功
@@ -556,7 +568,7 @@ class DFITCSEC_TRADER_API DFITCSECTraderApi
 public:
      /**
       * 创建DFITCSECTraderApi接口对象
-	  * @ pszLogAddr log所在的路径，如果pszLogAddress为NULL，则不生成log。
+      * @ pszLogAddr log所在的路径，如果pszLogAddress为NULL，则不生成log。
       */
      static DFITCSECTraderApi *CreateDFITCSECTraderApi(const char* pszLogAddr = "");
      /**
@@ -566,6 +578,9 @@ public:
      /**
       * 初始化 
       * @param pszFrontAddress:前置机地址
+      *                  网络地址的格式为:"protocol://ipaddress:port",如"tcp://127.0.0.1:10920"
+      *                  其中protocol的值必须为tcp。
+      *                  ipaddress表示交易前置的IP,port表示交易前置的端口
       * @param pSpi:指向回调函数集的指针
       * @return 0表示请求发送成功，其他值表示请求发送失败，具体错误请对照error.xml
       */
@@ -702,12 +717,12 @@ public:
       * @return : 0 表示请求发送成功，非 0 表示请求发送失败，具体错误请参考error.xml
       */
      virtual int ReqStockQryStockInfo(DFITCStockReqQryStockField *p) = 0;
-	 /**
+     /**
       * STOCK-股票静态信息查询请求
       * @param p:指向用户股票静态信息查询请求结构体的地址
       * @return : 0 表示请求发送成功，非 0 表示请求发送失败，具体错误请参考error.xml
       */
-     virtual int ReqStockQryStockStaticInfo(DFITCStockReqQryStockField *p) = 0;
+     virtual int ReqStockQryStockStaticInfo(DFITCStockReqQryStockStaticField *p) = 0;
      /**
       * STOCK-交易时间查询请求
       * @param p:指向用户交易时间查询请求结构体的地址
@@ -738,6 +753,18 @@ public:
      * @return 0表示请求发送成功，其他值表示请求发送失败，具体错误请对照error.xml
      */
     virtual int ReqSOPEntrustOrder(DFITCSOPReqEntrustOrderField *p) = 0;    
+    /**
+     * SOP-持仓组合拆分委托请求
+     * @param p:指向用户交易所持仓组合拆分委托请求结构的地址
+     * @return 0表示请求发送成功，其他值表示请求发送失败，具体错误请对照error.xml
+     */
+    virtual int ReqSOPGroupSplit(DFITCSOPReqGroupSplitField *p) = 0;
+    /**
+     * SOP-查询客户组合持仓明细请求
+     * @param p:指向用户查询客户组合持仓明细请求结构的地址
+     * @return 0表示请求发送成功，其他值表示请求发送失败，具体错误请对照error.xml
+     */
+    virtual int ReqSOPQryGroupPosition(DFITCSOPReqQryGroupPositionField *p) = 0;
     /**
      * SOP-证券锁定解锁请求
      * @param p:指向用户证券锁定解锁请求结构的地址
@@ -817,7 +844,7 @@ public:
      */
     virtual int ReqSOPExectueOrder(DFITCSOPReqExectueOrderField *p) = 0;
     /**
-     * SOP-行权指派信息查询请求
+     * SOP-行权指派信息查询请求 (暂未开放)
      * @param p:指向用户行权指派信息查询请求结构的地址
      * @return 0表示请求发送成功，其他值表示请求发送失败，具体错误请对照error.xml  
      */
