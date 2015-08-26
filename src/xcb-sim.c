@@ -70,7 +70,7 @@ int main(int argc, char **argv) {
 
 	/* FIXME */
 	ip = dstr_new("127.0.0.1");
-	port = 33330;
+	port = 33329;
 	while ((opt = getopt(argc, argv, "h:p:?")) != -1)
 		switch (opt) {
 		case 'h':
@@ -175,7 +175,7 @@ again:
 			p = addr;
 			q = memchr(p, '\n', sb.st_size);
 		}
-		if (dlist_length(dlist) >= 1000) {
+		if (dlist_length(dlist) >= 2000) {
 			dlist_free(&dlist);
 			dlist = dlist_new(NULL, vfree);
 		}
