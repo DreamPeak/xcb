@@ -157,10 +157,9 @@ int main(int argc, char **argv) {
 
 again:
 				if (splice(pfd[0], NULL, sock, NULL, len, SPLICE_F_MOVE) == -1) {
-					if (errno == EAGAIN) {
-						fprintf(stderr, "Repeating ...\n");
+					if (errno == EAGAIN)
 						goto again;
-					} else {
+					else {
 						fprintf(stderr, "Error splicing: %s\n", strerror(errno));
 						exit(1);
 					}
