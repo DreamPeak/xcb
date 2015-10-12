@@ -36,6 +36,9 @@
 #include "db.h"
 #include "utilities.h"
 #include "commons.h"
+//-------------------------------------------
+#include "ptrie.h"
+//-------------------------------------------
 
 /* FIXME */
 struct crss {
@@ -54,6 +57,10 @@ extern table_t idxfmts;
 extern const char *password;
 extern const char *dpip;
 extern int dpport;
+
+//--------------------------------------------
+extern struct radix_tree *subscribers_radix;
+//--------------------------------------------
 
 /* FIXME */
 extern dstr get_indices(void);
@@ -97,18 +104,26 @@ void s_command(client c) {
 	}
 	pkey = dstr_new(c->argv[0] + 1);
 	skey = dstr_new(pkey);
+//------------------------------------------------------------------------
+dstr pre = dstr_new(pkey);
+dstr rest = dstr_new("");
+//------------------------------------------------------------------------
 	if (c->argc > 1)
 		for (i = 1; i < c->argc; ++i) {
 			skey = dstr_cat(skey, ",");
 			skey = dstr_cat(skey, c->argv[i]);
+//------------------------------------------------------------------------
+			rest = dstr_cat(rest,c->argv[i]);
+//------------------------------------------------------------------------
 		}
+/*
 	table_lock(cache);
 	if ((dlist = table_get_value(cache, pkey))) {
 		dlist_iter_t iter = dlist_iter_new(dlist, DLIST_START_HEAD);
 		dlist_node_t node;
-
+*/
 		/* FIXME: still has room to improve */
-		while ((node = dlist_next(iter))) {
+/*		while ((node = dlist_next(iter))) {
 			kvd = (struct kvd *)dlist_node_value(node);
 			if (dstr_length(kvd->key) >= dstr_length(skey) &&
 				!memcmp(kvd->key, skey, dstr_length(skey))) {
@@ -169,7 +184,9 @@ void s_command(client c) {
 		dlist_iter_free(&iter);
 	}
 	table_unlock(cache);
-	table_rwlock_wrlock(subscribers);
+*/
+//---------------------------------------------------------------------------------------------------
+/*	table_rwlock_wrlock(subscribers);
 	if ((dlist = table_get_value(subscribers, pkey)) == NULL) {
 		if (NEW(kvd)) {
 			kvd->key     = skey;
@@ -205,6 +222,18 @@ void s_command(client c) {
 		dstr_free(pkey);
 	}
 	table_rwlock_unlock(subscribers);
+*/
+//--------------------------------------------------------------------------------------------------------------------
+//	table_rwlock_wrlock(subscribers_radix);
+	radix_block_insert(pre, ",", subscribers_radix->head);
+	radix_insert(rest, radix_match(pre, subscribers_radix->head, subscribers_radix->head));
+	pre = dstr_cat(pre,rest);
+	insert_value(pre, c, subscribers_radix->head);
+	dstr_free(pre);
+	dstr_free(rest);
+
+//	table_rwlock_unlock(subscribers_radix);
+//---------------------------------------------------------------------------------------------------
 }
 
 /* FIXME */
@@ -259,6 +288,9 @@ void sall_command(client c) {
 		table_rwlock_unlock(subscribers);
 	}
 	dstr_free(res);
+//--------------------------------------------------------------------------------------------------------------------
+//	FIXME
+//--------------------------------------------------------------------------------------------------------------------
 }
 
 /* FIXME */
