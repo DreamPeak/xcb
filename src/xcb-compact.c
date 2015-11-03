@@ -138,7 +138,6 @@ static dlist_t clients;
 static dlist_t monitors;
 static thrpool_t tp;
 static dstr indices;
-static dlist_t filter;
 static db_options_t *db_o;
 static db_writeoptions_t *db_wo;
 static db_writebatch_t *db_wb;
@@ -146,6 +145,7 @@ static pthread_mutex_t wb_lock = PTHREAD_ADAPTIVE_MUTEX_INITIALIZER_NP;
 static int cp_time = 6;
 static int rotate = 7;
 static int dirty = 0;
+static dlist_t filter;
 static char neterr[256];
 static int udpsock = -1;
 static int tcpsock = -1;
@@ -1219,6 +1219,40 @@ int main(int argc, char **argv) {
 	}
 	create_time_event(el, 1, server_cron, NULL, NULL);
 	/* FIXME */
+	if ((tmp = variable_retrieve(cfg, "database", "persistence")))
+		if (atoi(tmp) == 1)
+			persistence = 1;
+	if (persistence && (tmp = variable_retrieve(cfg, "database", "db_path")) && strcmp(tmp, "")) {
+		char *dberr = NULL;
+		struct timeval tv;
+		struct tm lt;
+
+		db_o = db_options_create();
+		/* FIXME */
+		makedir(tmp, 0777);
+		db = db_open(db_o, tmp, &dberr);
+		if (dberr) {
+			xcb_log(XCB_LOG_ERROR, "Opening database: %s", dberr);
+			db_free(dberr);
+			goto err;
+		}
+		db_wo = db_writeoptions_create();
+		/* db_writeoptions_set_sync(db_wo, 1); */
+		db_wb = db_writebatch_create();
+		db_ro = db_readoptions_create();
+		if ((tmp = variable_retrieve(cfg, "database", "cp_time")) && strcmp(tmp, ""))
+			if (atoi(tmp) >= 0 && atoi(tmp) <= 23)
+				cp_time = atoi(tmp);
+		gettimeofday(&tv, NULL);
+		localtime_r(&tv.tv_sec, &lt);
+		if (lt.tm_hour >= cp_time)
+			create_time_event(el, (24 - lt.tm_hour + cp_time) * 60 * 60 * 1000 - tv.tv_usec / 1000,
+				rotate_n_compact, NULL, NULL);
+		else
+			create_time_event(el, (cp_time - lt.tm_hour) * 60 * 60 * 1000 - tv.tv_usec / 1000,
+				rotate_n_compact, NULL, NULL);
+	}
+	/* FIXME */
 	if ((tmp = variable_retrieve(cfg, "modules", "module_path")) && strcmp(tmp, "")) {
 		struct variable *var = variable_browse(cfg, "modules");
 		dlist_t noloads = dlist_new(cmpstr, NULL);
@@ -1268,40 +1302,6 @@ int main(int argc, char **argv) {
 		fields = dstr_split_len(tmp, strlen(tmp), ",", 1, &nfield);
 		for (i = 0; i < nfield; ++i)
 			dlist_insert_tail(filter, fields[i]);
-	}
-	/* FIXME */
-	if ((tmp = variable_retrieve(cfg, "database", "persistence")))
-		if (atoi(tmp) == 1)
-			persistence = 1;
-	if (persistence && (tmp = variable_retrieve(cfg, "database", "db_path")) && strcmp(tmp, "")) {
-		char *dberr = NULL;
-		struct timeval tv;
-		struct tm lt;
-
-		db_o = db_options_create();
-		/* FIXME */
-		makedir(tmp, 0777);
-		db = db_open(db_o, tmp, &dberr);
-		if (dberr) {
-			xcb_log(XCB_LOG_ERROR, "Opening database: %s", dberr);
-			db_free(dberr);
-			goto err;
-		}
-		db_wo = db_writeoptions_create();
-		/* db_writeoptions_set_sync(db_wo, 1); */
-		db_wb = db_writebatch_create();
-		db_ro = db_readoptions_create();
-		if ((tmp = variable_retrieve(cfg, "database", "cp_time")) && strcmp(tmp, ""))
-			if (atoi(tmp) >= 0 && atoi(tmp) <= 23)
-				cp_time = atoi(tmp);
-		gettimeofday(&tv, NULL);
-		localtime_r(&tv.tv_sec, &lt);
-		if (lt.tm_hour >= cp_time)
-			create_time_event(el, (24 - lt.tm_hour + cp_time) * 60 * 60 * 1000 - tv.tv_usec / 1000,
-				rotate_n_compact, NULL, NULL);
-		else
-			create_time_event(el, (cp_time - lt.tm_hour) * 60 * 60 * 1000 - tv.tv_usec / 1000,
-				rotate_n_compact, NULL, NULL);
 	}
 	if ((tmp = variable_retrieve(cfg, "general", "password")) && strcmp(tmp, ""))
 		password = tmp;

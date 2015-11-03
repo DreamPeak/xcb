@@ -24,7 +24,10 @@
 #include <inttypes.h>
 #include <pthread.h>
 #include <stdbool.h>
+#include "mem.h"
+#include "dlist.h"
 #include "module.h"
+#include "db.h"
 
 /* long -> int32_t */
 #pragma pack(push, 1)
@@ -87,12 +90,42 @@ struct msg {
 };
 
 /* FIXME */
+typedef struct msgs {
+	char		*name;
+	struct module	*mod;
+	struct msg	*first;
+	struct msg	*last;
+	pthread_mutex_t	lock;
+	pthread_cond_t	cond;
+	pthread_t	thread;
+	dlist_t		appouts;
+} msgs_t;
+
+/* FIXME */
+struct appout {
+	int		(*app)(void *data, void *data2);
+	struct msgs	*out;
+};
+
+/* FIXME */
 #define FREEMSG(msg) \
 	do { \
 		if (msg) { \
 			FREE(msg->data); \
 			FREE(msg); \
 		} \
+	} while (0);
+
+/* FIXME */
+#define FREEMSGS(msgs) \
+	do { \
+		struct msg *next = (msgs)->first, *msg; \
+		while ((msg = next)) { \
+			next = msg->link; \
+			FREEMSG(msg); \
+		} \
+		pthread_mutex_destroy(&(msgs)->lock); \
+		pthread_cond_destroy(&(msgs)->cond); \
 	} while (0);
 
 /* FIXME */
@@ -104,6 +137,10 @@ struct msg {
 /* default queue */
 extern struct msgs default_msgs;
 extern void process_quote(void *data);
+
+/* FIXME */
+extern db_t *db;
+extern db_readoptions_t *db_ro;
 
 /* FIXME */
 extern void msg_ref(struct msg *msg, int delta);

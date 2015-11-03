@@ -69,6 +69,8 @@ struct msgs default_msgs = {
 };
 dlist_t clients_to_close;
 event_loop el;
+db_t *db;
+db_readoptions_t *db_ro;
 
 /* FIXME */
 void client_free(client c);
@@ -103,14 +105,13 @@ static dlist_t monitors;
 static thrpool_t tp;
 static struct pgm_cfg *pgm_send_cfg;
 static pgm_sock_t *pgm_sender = NULL;
-static dlist_t filter;
 static int persistence = 0;
-static db_t *db;
 static db_options_t *db_o;
 static db_writeoptions_t *db_wo;
 static db_writebatch_t *db_wb;
 static pthread_mutex_t wb_lock = PTHREAD_ADAPTIVE_MUTEX_INITIALIZER_NP;
 static int dirty = 0;
+static dlist_t filter;
 static dlist_t pgm_recv_cfgs;
 static dlist_t pgm_receivers;
 static char neterr[256];
@@ -991,6 +992,27 @@ int main(int argc, char **argv) {
 	}
 	create_time_event(el, 1, server_cron, NULL, NULL);
 	/* FIXME */
+	if ((tmp = variable_retrieve(cfg, "general", "persistence")))
+		if (atoi(tmp) == 1)
+			persistence = 1;
+	if (persistence) {
+		char *dberr = NULL;
+
+		db_o = db_options_create();
+		/* FIXME */
+		makedir("var/lib/xcb/db", 0777);
+		db = db_open(db_o, "/var/lib/xcb/db", &dberr);
+		if (dberr) {
+			xcb_log(XCB_LOG_ERROR, "Opening database: %s", dberr);
+			db_free(dberr);
+			goto err;
+		}
+		db_wo = db_writeoptions_create();
+		/* db_writeoptions_set_sync(db_wo, 1); */
+		db_wb = db_writebatch_create();
+		db_ro = db_readoptions_create();
+	}
+	/* FIXME */
 	if ((tmp = variable_retrieve(cfg, "modules", "module_path")) && strcmp(tmp, "")) {
 		struct variable *var = variable_browse(cfg, "modules");
 		dlist_t noloads = dlist_new(cmpstr, NULL);
@@ -1042,26 +1064,6 @@ int main(int argc, char **argv) {
 		fields = dstr_split_len(tmp, strlen(tmp), ",", 1, &nfield);
 		for (i = 0; i < nfield; ++i)
 			dlist_insert_tail(filter, fields[i]);
-	}
-	/* FIXME */
-	if ((tmp = variable_retrieve(cfg, "general", "persistence")))
-		if (atoi(tmp) == 1)
-			persistence = 1;
-	if (persistence) {
-		char *dberr = NULL;
-
-		db_o = db_options_create();
-		/* FIXME */
-		makedir("var/lib/xcb/db", 0777);
-		db = db_open(db_o, "/var/lib/xcb/db", &dberr);
-		if (dberr) {
-			xcb_log(XCB_LOG_ERROR, "Opening database: %s", dberr);
-			db_free(dberr);
-			goto err;
-		}
-		db_wo = db_writeoptions_create();
-		/* db_writeoptions_set_sync(db_wo, 1); */
-		db_wb = db_writebatch_create();
 	}
 	/* FIXME */
 	pgm_recv_cfgs = dlist_new(NULL, NULL);

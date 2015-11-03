@@ -21,16 +21,11 @@
 #ifndef COMMONS_INCLUDED
 #define COMMONS_INCLUDED
 
-#include <inttypes.h>
 #include <pthread.h>
 #include <time.h>
-#include "mem.h"
-#include "dlist.h"
 #include "ring.h"
 #include "dstr.h"
 #include "event.h"
-#include "module.h"
-#include "basics.h"
 
 /* FIXME */
 #define CLIENT_CLOSE_AFTER_REPLY (1 << 0)
@@ -40,24 +35,6 @@
 struct pgm_cfg {
 	const char		*network;
 	int			port;
-};
-
-/* FIXME */
-struct msgs {
-	char			*name;
-	struct module		*mod;
-	struct msg		*first;
-	struct msg		*last;
-	pthread_mutex_t		lock;
-	pthread_cond_t		cond;
-	pthread_t		thread;
-	dlist_t			appouts;
-};
-
-/* FIXME */
-struct appout {
-	int			(*app)(void *data, void *data2);
-	struct msgs		*out;
 };
 
 /* FIXME */
@@ -97,18 +74,6 @@ struct kvd {
 	dlist_t			dlist;
 	}			u;
 };
-
-/* FIXME */
-#define FREEMSGS(msgs) \
-	do { \
-		struct msg *next = (msgs)->first, *msg; \
-		while ((msg = next)) { \
-			next = msg->link; \
-			FREEMSG(msg); \
-		} \
-		pthread_mutex_destroy(&(msgs)->lock); \
-		pthread_cond_destroy(&(msgs)->cond); \
-	} while (0);
 
 /* FIXME */
 #define NANOSLEEP(nanosec) \
