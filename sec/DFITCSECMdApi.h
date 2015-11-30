@@ -2,14 +2,12 @@
  * 版权所有(C)2012-2016, 大连飞创信息技术有限公司
  * 文件名称：DFITCSECMdApi.h
  * 文件说明：定义XSpeed行情API接口
- * 当前版本：1.5.31.0
+ * 当前版本：1.5.46.0
  * 作者：XSpeed证券项目组
- * 发布日期：2015年08月
+ * 发布日期：2015年11月
  */
-
-#ifndef DLMDAPI_H_
-#define DLMDAPI_H_
-
+#ifndef DFITCSECMDAPI_H_
+#define DFITCSECMDAPI_H_
 
 #include "DFITCSECApiStruct.h"
 
@@ -73,14 +71,14 @@
          */
         virtual void OnRspSOPUserLogout(struct DFITCSECRspUserLogoutField * pRspUsrLogout, struct DFITCSECRspInfoField * pRspInfo) {}
 
-		/**
+        /**
          * FASL-登录响应
          * @param pRspUserLogin:指针若非空,返回用户登录响应信息结构地址,表明登录请求成功
          * @param pRspInfo:指针若非空，返回错误信息地址，表明登录请求失败
          */
         virtual void OnRspFASLUserLogin(struct DFITCSECRspUserLoginField * pRspUserLogin, struct DFITCSECRspInfoField * pRspInfo) {}
 
-		/**
+        /**
          * FASL-登出响应
          * @param pRspUsrLogout:指针若非空,返回用户登出响应信息结构地址,表明登出请求成功
          * @param pRspInfo:指针若非空，返回错误信息地址，表明登出请求失败
@@ -127,18 +125,19 @@
          */
         virtual void OnSOPMarketData(struct DFITCSOPDepthMarketDataField * pMarketDataField) {}
 
-		   /**
+        /**
          * STOCK-可用行情响应
          * @param pAvailableQuotInfo:指针若非空,返回可用的行情信息
          * @param pRspInfo:指针若非空，返回错误信息地址，表明指定合约行情取消订阅失败
-		 * @param flag  为真是标示最后一条，为假时表示还有后续。
+         * @param flag  为真是标示最后一条，为假时表示还有后续。
          */
         virtual void OnRspStockAvailableQuot(struct DFITCRspQuotQryField * pAvailableQuotInfo, struct DFITCSECRspInfoField * pRspInfo,bool flag) {}
-   /**
+
+        /**
          * SOP-可用行情响应
          * @param pAvailableQuotInfo:指针若非空,返回可用的行情信息
          * @param pRspInfo:指针若非空，返回错误信息地址，表明指定合约行情取消订阅失败
-		 * @param flag  为真是标示最后一条，为假时表示还有后续。
+         * @param flag  为真是标示最后一条，为假时表示还有后续。
          */
         virtual void OnRspSopAvailableQuot(struct DFITCRspQuotQryField * pAvailableQuotInfo, struct DFITCSECRspInfoField * pRspInfo,bool flag) {}
 
@@ -223,7 +222,7 @@
          */
         virtual int ReqSOPUserLogin(struct DFITCSECReqUserLoginField * pReqUserLoginField) = 0;
 
-		/**
+        /**
          * FASL-登录请求
          * @param ReqStockUserLogin:指向用户登录请求结构的地址
          * @return 0表示成功，-1表示失败
@@ -237,25 +236,25 @@
          */
         virtual int ReqSOPUserLogout(struct DFITCSECReqUserLogoutField * pReqUserLogoutField) = 0;
 
-		/**
+        /**
          * FASL-登出请求
          * @param pReqUserLogoutField:指向用户登录请出结构的地址
          * @return 0表示成功，-1表示失败
          */
         virtual int ReqFASLUserLogout(struct DFITCSECReqUserLogoutField * pReqUserLogoutField) = 0;
-		 /**
-	   * STOCK-可用行情信息查询请求
+
+        /**
+         * STOCK-可用行情信息查询请求
          * @param pReqQuotQryField:可用行情请求请求结构的地址
          * @return 0表示成功，-1表示失败
          */ 
-
         virtual int ReqStockAvailableQuotQry(struct  APISTRUCT DFITCReqQuotQryField * pReqQuotQryField) = 0;
-		 /**
-	   * SOP-可用行情信息查询请求
+
+        /**
+         * SOP-可用行情信息查询请求
          * @param pReqQuotQryField:可用行情请求请求结构的地址
          * @return 0表示成功，-1表示失败
          */ 
-
         virtual int ReqSopAvailableQuotQry(struct  APISTRUCT DFITCReqQuotQryField * pReqQuotQryField) = 0;
 
     protected:
@@ -263,4 +262,4 @@
 
     };//end of DFITCSECMdApi
 
-#endif//DLMDAPI_H_
+#endif//DFITCSECMDAPI_H_

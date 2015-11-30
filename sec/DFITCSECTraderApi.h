@@ -2,9 +2,9 @@
 * 版权所有(C)2012-2016, 大连飞创信息技术有限公司
 * 文件名称：DFITCSECTraderApi.h
 * 文件说明：定义接口所需的数据接口
-* 当前版本：1.5.76.0
+* 当前版本：1.5.99.0
 * 作者：XSpeed证券项目组
-* 发布日期：2015年08月
+* 发布日期：2015年10月
 */
 #ifndef DFITCSECTRADERAPI_H_
 #define DFITCSECTRADERAPI_H_
@@ -585,6 +585,15 @@ public:
       * @return 0表示请求发送成功，其他值表示请求发送失败，具体错误请对照error.xml
       */
      virtual int Init(const char *pszFrontAddress, DFITCSECTraderSpi *pSpi) = 0;
+     /**
+      * 订阅私有流
+      * @param nResumeType: 私有流重传方式
+      *         TERT_RESTART:从本交易日开始重传
+      *         TERT_RESUME:从上次收到的续传
+      *         TERT_QUICK:只传送登录后私有流的内容
+      * @remark 该方法要在UserLogin方法前调用。若不调用则不会收到私有流的数据。
+      */
+     virtual void SubscribePrivateTopic(RESUME_TYPE nResumeType) = 0; 
      /**
       * STOCK-登录请求
       * @param p:指向用户登录请求结构体的地址
