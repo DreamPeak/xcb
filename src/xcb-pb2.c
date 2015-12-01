@@ -36,9 +36,6 @@
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/types.h>
-//----------------------------
-#include <sys/epoll.h>
-//----------------------------
 #include <unistd.h>
 /* FIXME */
 #include "macros.h"
@@ -48,6 +45,7 @@
 #include "dlist.h"
 #include "table.h"
 #include "dstr.h"
+#include "utilities.h"
 #include "logger.h"
 #include "config.h"
 #include "net.h"
@@ -55,12 +53,8 @@
 #include "thrpool.h"
 #include "pgmsock.h"
 #include "db.h"
-#include "utilities.h"
 #include "basics.h"
 #include "commons.h"
-//-------------------------------------
-#include "ptrie.h"
-//-------------------------------------
 
 /* FIXME */
 table_t cache;
@@ -74,10 +68,6 @@ db_readoptions_t *db_ro;
 const char *password;
 const char *dpip;
 int dpport;
-
-//---------------------------------------
-struct radix_tree *subscribers_radix;
-//---------------------------------------
 
 /* FIXME */
 void client_free(client c);
@@ -500,24 +490,22 @@ static int send_quote(void *data, void *data2) {
 	res = dstr_cat(res, value);
 	res = dstr_cat(res, "\r\n");
 	/* in case of multiple subscribers */
-/*
-//-----------------------------------------------------------------------------------------------------------------------------------------
 	table_rwlock_rdlock(subscribers);
-
 	if ((dlist = table_get_value(subscribers, index))) {
 		dlist_iter_t iter = dlist_iter_new(dlist, DLIST_START_HEAD);
 		dlist_node_t node;
-*/
+
 		/* FIXME: still has room to improve */
-/*
 		while ((node = dlist_next(iter))) {
 			struct kvd *kvd = (struct kvd *)dlist_node_value(node);
+
 			if (dstr_length(kvd->key) <= dstr_length(skey) &&
 				!memcmp(kvd->key, skey, dstr_length(kvd->key))) {
 				dlist_iter_t iter2 = dlist_iter_new(kvd->u.dlist, DLIST_START_HEAD);
 
 				while ((node = dlist_next(iter2))) {
 					client c = (client)dlist_node_value(node);
+
 					pthread_spin_lock(&c->lock);
 					if (!(c->flags & CLIENT_CLOSE_ASAP)) {
 						if (net_try_write(c->fd, res, dstr_length(res),
@@ -537,55 +525,6 @@ static int send_quote(void *data, void *data2) {
 		dlist_iter_free(&iter);
 	}
 	table_rwlock_unlock(subscribers);
-*/
-//-----------------------------------------------------------------------------------------------------------------------------------------
-
-	int count1 = 0;
-	dstr *fields1 = NULL;
-	fields1 = dstr_split_len(key, strlen(key), ",", 1, &count1);
-	if (3 == count1)
-	{
-		dstr temp = dstr_new(fields1[0]);
-		temp = dstr_cat(temp, fields1[2]);
-		struct node *rn = radix_match(temp, subscribers_radix->head, subscribers_radix->head);
-		if (rn->value_num != 0)
-		{
-			int i = 0;
-			struct value_struct *q = rn->value_head;
-			for (i = 0; i < rn->value_num; i++)
-			{
-				client c = (client)q->value;
-				net_try_write(c->fd, "\r\nFrom ptrie:", strlen("\r\nFrom ptrie:"), 10, NET_NONBLOCK);
-				net_try_write(c->fd, msg->data, strlen(msg->data), 10, NET_NONBLOCK);
-				q = q->next;
-			}
-		}
-
-
-
-		while (!rn->is_root)
-		{
-			rn = rn->parent;
-			if (rn->value_num != 0)
-			{
-				int i = 0;
-				struct value_struct *q = rn->value_head;
-				for (i = 0; i < rn->value_num; i++)
-				{
-					client c = (client)q->value;
-					net_try_write(c->fd, "\r\nFrom ptrie:", strlen("\r\nFrom ptrie:"), 10, NET_NONBLOCK);
-					net_try_write(c->fd, msg->data, strlen(msg->data), 10, NET_NONBLOCK);
-					q = q->next;
-				}
-			}
-		}
-		dstr_free(temp);
-	}
-	dstr_free_tokens(fields1, count1);
-	fields1 = NULL; count1 = 0;
-
-//-----------------------------------------------------------------------------------------------------------------------------------------	
-
 	dstr_free(res);
 	dstr_free(index);
 	dstr_free(value);
@@ -593,10 +532,8 @@ static int send_quote(void *data, void *data2) {
 	dstr_free_tokens(fields, nfield);
 	dstr_free(skey);
 	msg_decr(msg);
-
 	return 0;
 }
-
 
 static int on_msgv(struct pgm_msgv_t *msgv, size_t len) {
 	int i = 0;
@@ -970,9 +907,6 @@ int main(int argc, char **argv) {
 	}
 	cache = table_new(cmpstr, hashmurmur2, kfree, lfree);
 	subscribers = table_new(cmpstr, hashmurmur2, kfree, lfree);
-//-----------------------------------------------------------------------------------
-	subscribers_radix = radix_new();
-//-----------------------------------------------------------------------------------
 	clients_to_close = dlist_new(NULL, NULL);
 	clients = dlist_new(NULL, NULL);
 	monitors = dlist_new(NULL, NULL);

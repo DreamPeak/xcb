@@ -30,11 +30,11 @@
 #include "mem.h"
 #include "table.h"
 #include "dstr.h"
+#include "utilities.h"
 #include "logger.h"
 #include "config.h"
 #include "event.h"
 #include "module.h"
-#include "utilities.h"
 #include "basics.h"
 
 /* FIXME */

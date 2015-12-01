@@ -2,6 +2,7 @@
  * Copyright (c) 2013-2015, Dalian Futures Information Technology Co., Ltd.
  *
  * Bo Wang
+ * Xiaoye Meng <mengxiaoye at dce dot com dot cn>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,12 +44,12 @@ typedef void (*xspeed_on_best_and_deep)(struct MDBestAndDeep *deepmd);
 /* FIXME: exported functions */
 extern xspeed_l2api_t *xspeed_l2api_create(void);
 extern void            xspeed_l2api_destory(xspeed_l2api_t *l2api);
+extern int             xspeed_l2api_connect(xspeed_l2api_t *l2api, char *svraddr,
+			xspeed_l2spi_t *l2spi, unsigned int quote_type);
 extern int             xspeed_l2api_user_login(xspeed_l2api_t *l2api,
 			struct DFITCUserLoginField *userlogin);
 extern int             xspeed_l2api_user_logout(xspeed_l2api_t *l2api,
 			struct DFITCUserLogoutField *userlogout);
-extern int             xspeed_l2api_connect(xspeed_l2api_t *l2api, char *svraddr,
-			xspeed_l2spi_t *l2spi, unsigned int quote_type);
 extern int             xspeed_l2api_subscribe_market_data(xspeed_l2api_t *l2api,
 			char **instruments, int count);
 extern int             xspeed_l2api_unsubscribe_market_data(xspeed_l2api_t *l2api,
@@ -67,10 +68,12 @@ extern void            xspeed_l2spi_on_subscribe_market_data(xspeed_l2spi_t *l2s
 			xspeed_on_subscribe_market_data func);
 extern void            xspeed_l2spi_on_unsubscribe_market_data(xspeed_l2spi_t *l2spi,
 			xspeed_on_unsubscribe_market_data func);
-extern void            xspeed_l2spi_on_subscribe_all(xspeed_l2spi_t *l2spi, xspeed_on_subscribe_all func);
+extern void            xspeed_l2spi_on_subscribe_all(xspeed_l2spi_t *l2spi,
+			xspeed_on_subscribe_all func);
 extern void            xspeed_l2spi_on_unsubscribe_all(xspeed_l2spi_t *l2spi,
 			xspeed_on_unsubscribe_all func);
-extern void            xspeed_l2spi_on_best_and_deep(xspeed_l2spi_t *l2spi, xspeed_on_best_and_deep func);
+extern void            xspeed_l2spi_on_best_and_deep(xspeed_l2spi_t *l2spi,
+			xspeed_on_best_and_deep func);
 
 #ifdef __cplusplus
 }

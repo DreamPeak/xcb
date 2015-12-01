@@ -71,7 +71,7 @@ private:
 			/* FIXME */
 			iData.requestID = 1;
 			strcpy(iData.accountID, variable_retrieve(cfg, "general", "account"));
-			//iData.contractObjectType = DFITCSEC_COT_ETF;
+			/* iData.contractObjectType = DFITCSEC_COT_ETF; */
 			m_pApi->ReqSOPQryContactInfo(&iData);
 		}
 	}

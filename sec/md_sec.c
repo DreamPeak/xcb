@@ -19,7 +19,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <float.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -30,7 +29,6 @@
 #include "logger.h"
 #include "config.h"
 #include "module.h"
-#include "utilities.h"
 #include "basics.h"
 #include "sec.h"
 
@@ -99,8 +97,8 @@ static void on_front_connected(void) {
 	struct DFITCSECReqUserLoginField stk_req, sop_req;
 	int stk_res, sop_res;
 
-	memset(&stk_req, 0, sizeof stk_req);
-	memset(&sop_req, 0, sizeof sop_req);
+	memset(&stk_req, '\0', sizeof stk_req);
+	memset(&sop_req, '\0', sizeof sop_req);
 	if (stk_userid && stk_passwd) {
 		/* FIXME */
 		strcpy(stk_req.accountID, stk_userid);

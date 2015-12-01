@@ -2,6 +2,7 @@
  * Copyright (c) 2013-2015, Dalian Futures Information Technology Co., Ltd.
  *
  * Bo Wang
+ * Xiaoye Meng <mengxiaoye at dce dot com dot cn>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,9 +40,9 @@ struct femas_mdspi_t : public CUstpFtdcMduserSpi {
 	femas_on_user_logout			on_user_logout_;
 	femas_on_subscribe_topic		on_subscribe_topic_;
 	femas_on_query_topic			on_query_topic_;
+	femas_on_deep_market_data		on_deep_market_data_;
 	femas_on_subscribe_market_data		on_subscribe_market_data_;
 	femas_on_unsubscribe_market_data	on_unsubscribe_market_data_;
-	femas_on_deep_market_data		on_deep_market_data_;
 	/* make gcc happy */
 	virtual ~femas_mdspi_t() {};
 	void OnFrontConnected() {
@@ -91,6 +92,10 @@ struct femas_mdspi_t : public CUstpFtdcMduserSpi {
 		if (on_query_topic_)
 			(*on_query_topic_)(pDissemination, pRspInfo, nRequestID, bIsLast ? 1 : 0);
 	}
+	void OnRtnDepthMarketData(CUstpFtdcDepthMarketDataField *pDepthMarketData) {
+		if (on_deep_market_data_)
+			(*on_deep_market_data_)(pDepthMarketData);
+	}
 	void OnRspSubMarketData(CUstpFtdcSpecificInstrumentField *pSpecificInstrument,
 		CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
 		if (on_subscribe_market_data_)
@@ -102,10 +107,6 @@ struct femas_mdspi_t : public CUstpFtdcMduserSpi {
 		if (on_unsubscribe_market_data_)
 			(*on_unsubscribe_market_data_)(pSpecificInstrument,
 				pRspInfo, nRequestID, bIsLast ? 1 : 0);
-	}
-	void OnRtnDepthMarketData(CUstpFtdcDepthMarketDataField *pDepthMarketData) {
-		if (on_deep_market_data_)
-			(*on_deep_market_data_)(pDepthMarketData);
 	}
 };
 
@@ -123,24 +124,9 @@ void femas_mdapi_destroy(femas_mdapi_t *mdapi) {
 	}
 }
 
-const char *femas_mdapi_get_version(femas_mdapi_t *mdapi, int *major, int *minor) {
+void femas_mdapi_heartbeat_timeout(femas_mdapi_t *mdapi, unsigned int timeout) {
 	if (mdapi)
-		mdapi->rep->GetVersion(*major, *minor);
-}
-
-void femas_mdapi_init(femas_mdapi_t *mdapi) {
-	if (mdapi)
-		mdapi->rep->Init();
-}
-
-void femas_mdapi_join(femas_mdapi_t *mdapi) {
-	if (mdapi)
-		mdapi->rep->Join();
-}
-
-const char *femas_mdapi_get_tradingday(femas_mdapi_t *mdapi) {
-	if (mdapi)
-		mdapi->rep->GetTradingDay();
+		mdapi->rep->SetHeartbeatTimeout(timeout);
 }
 
 void femas_mdapi_register_front(femas_mdapi_t *mdapi, char *frontaddr) {
@@ -158,10 +144,12 @@ void femas_mdapi_register_spi(femas_mdapi_t *mdapi, femas_mdspi_t *mdspi) {
 		mdapi->rep->RegisterSpi(mdspi);
 }
 
+/* FIXME */
 int femas_mdapi_register_certfile(femas_mdapi_t *mdapi, const char *certfile,
 	const char *keyfile, const char *cafile, const char *keyfilepasswd) {
 	if (mdapi)
-		mdapi->rep->RegisterCertificateFile(certfile, keyfile, cafile, keyfilepasswd);
+		return mdapi->rep->RegisterCertificateFile(certfile, keyfile, cafile, keyfilepasswd);
+	return -1;
 }
 
 void femas_mdapi_subscribe_market_data_topic(femas_mdapi_t *mdapi,
@@ -170,53 +158,90 @@ void femas_mdapi_subscribe_market_data_topic(femas_mdapi_t *mdapi,
 		mdapi->rep->SubscribeMarketDataTopic(topicid, resumetype);
 }
 
-int femas_mdapi_subscribe_market_data(femas_mdapi_t *mdapi, char **instruments, int count) {
+void femas_mdapi_init(femas_mdapi_t *mdapi) {
 	if (mdapi)
-		mdapi->rep->SubMarketData(instruments, count);
+		mdapi->rep->Init();
 }
 
-int femas_mdapi_unsubscribe_market_data(femas_mdapi_t *mdapi, char **instruments, int count) {
+/* FIXME */
+int femas_mdapi_join(femas_mdapi_t *mdapi) {
 	if (mdapi)
-		mdapi->rep->UnSubMarketData(instruments, count);
+		return mdapi->rep->Join();
+	return -1;
 }
 
-void femas_mdapi_heartbeat_timeout(femas_mdapi_t *mdapi, unsigned int timeout) {
-	if (mdapi)
-		mdapi->rep->SetHeartbeatTimeout(timeout);
-}
-
+/* FIXME */
 int femas_mdapi_user_login(femas_mdapi_t *mdapi, struct CUstpFtdcReqUserLoginField *userlogin, int rid) {
 	if (mdapi)
-		mdapi->rep->ReqUserLogin(userlogin, rid);
+		return mdapi->rep->ReqUserLogin(userlogin, rid);
+	return -1;
 }
 
+/* FIXME */
 int femas_mdapi_user_logout(femas_mdapi_t *mdapi, struct CUstpFtdcReqUserLogoutField *userlogout, int rid) {
 	if (mdapi)
-		mdapi->rep->ReqUserLogout(userlogout, rid);
+		return mdapi->rep->ReqUserLogout(userlogout, rid);
+	return -1;
 }
 
+/* FIXME */
+const char *femas_mdapi_get_version(femas_mdapi_t *mdapi, int *major, int *minor) {
+	if (mdapi)
+		return mdapi->rep->GetVersion(*major, *minor);
+	return NULL;
+}
+
+/* FIXME */
+const char *femas_mdapi_get_tradingday(femas_mdapi_t *mdapi) {
+	if (mdapi)
+		return mdapi->rep->GetTradingDay();
+	return NULL;
+}
+
+/* FIXME */
 int femas_mdapi_subscribe_topic(femas_mdapi_t *mdapi,
 	struct CUstpFtdcDisseminationField *dissemination, int rid) {
 	if (mdapi)
-		mdapi->rep->ReqSubscribeTopic(dissemination, rid);
+		return mdapi->rep->ReqSubscribeTopic(dissemination, rid);
+	return -1;
 }
 
+/* FIXME */
 int femas_mdapi_query_topic(femas_mdapi_t *mdapi,
 	struct CUstpFtdcDisseminationField *dissemination, int rid) {
 	if (mdapi)
-		mdapi->rep->ReqQryTopic(dissemination, rid);
+		return mdapi->rep->ReqQryTopic(dissemination, rid);
+	return -1;
 }
 
+/* FIXME */
+int femas_mdapi_subscribe_market_data(femas_mdapi_t *mdapi, char **instruments, int count) {
+	if (mdapi)
+		return mdapi->rep->SubMarketData(instruments, count);
+	return -1;
+}
+
+/* FIXME */
+int femas_mdapi_unsubscribe_market_data(femas_mdapi_t *mdapi, char **instruments, int count) {
+	if (mdapi)
+		return mdapi->rep->UnSubMarketData(instruments, count);
+	return -1;
+}
+
+/* FIXME */
 int femas_mdapi_request_subscribe_market_data(femas_mdapi_t *mdapi,
 	struct CUstpFtdcSpecificInstrumentField *instrument, int rid) {
 	if (mdapi)
-		mdapi->rep->ReqSubMarketData(instrument, rid);
+		return mdapi->rep->ReqSubMarketData(instrument, rid);
+	return -1;
 }
 
+/* FIXME */
 int femas_mdapi_request_unsubscribe_market_data(femas_mdapi_t *mdapi,
 	struct CUstpFtdcSpecificInstrumentField *instrument, int rid) {
 	if (mdapi)
-		mdapi->rep->ReqUnSubMarketData(instrument, rid);
+		return mdapi->rep->ReqUnSubMarketData(instrument, rid);
+	return -1;
 }
 
 femas_mdspi_t *femas_mdspi_create() {
@@ -278,6 +303,11 @@ void femas_mdspi_on_query_topic(femas_mdspi_t *mdspi, femas_on_query_topic func)
 		mdspi->on_query_topic_ = func;
 }
 
+void femas_mdspi_on_deep_market_data(femas_mdspi_t *mdspi, femas_on_deep_market_data func) {
+	if (mdspi && func)
+		mdspi->on_deep_market_data_ = func;
+}
+
 void femas_mdspi_on_subscribe_market_data(femas_mdspi_t *mdspi, femas_on_subscribe_market_data func) {
 	if (mdspi && func)
 		mdspi->on_subscribe_market_data_ = func;
@@ -286,11 +316,6 @@ void femas_mdspi_on_subscribe_market_data(femas_mdspi_t *mdspi, femas_on_subscri
 void femas_mdspi_on_unsubscribe_market_data(femas_mdspi_t *mdspi, femas_on_unsubscribe_market_data func) {
 	if (mdspi && func)
 		mdspi->on_unsubscribe_market_data_ = func;
-}
-
-void femas_mdspi_on_deep_market_data(femas_mdspi_t *mdspi, femas_on_deep_market_data func) {
-	if (mdspi && func)
-		mdspi->on_deep_market_data_ = func;
 }
 
 }

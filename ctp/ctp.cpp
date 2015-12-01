@@ -32,9 +32,9 @@ struct ctp_mdspi_t : public CThostFtdcMdSpi {
 	ctp_on_front_connected			on_front_connected_;
 	ctp_on_front_disconnected		on_front_disconnected_;
 	ctp_on_heartbeat_warning		on_heartbeat_warning_;
+	ctp_on_error				on_error_;
 	ctp_on_user_login			on_user_login_;
 	ctp_on_user_logout			on_user_logout_;
-	ctp_on_error				on_error_;
 	ctp_on_subscribe_market_data		on_subscribe_market_data_;
 	ctp_on_unsubscribe_market_data		on_unsubscribe_market_data_;
 	ctp_on_subscribe_quote_response		on_subscribe_quote_response_;
@@ -55,6 +55,10 @@ struct ctp_mdspi_t : public CThostFtdcMdSpi {
 		if (on_heartbeat_warning_)
 			(*on_heartbeat_warning_)(nTimeLapse);
 	}
+	void OnRspError(CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
+		if (on_error_)
+			(*on_error_)(pRspInfo, nRequestID, bIsLast ? 1 : 0);
+	}
 	void OnRspUserLogin(CThostFtdcRspUserLoginField *pRspUserLogin,
 		CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
 		if (on_user_login_)
@@ -64,10 +68,6 @@ struct ctp_mdspi_t : public CThostFtdcMdSpi {
 		CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
 		if (on_user_logout_)
 			(*on_user_logout_)(pUserLogout, pRspInfo, nRequestID, bIsLast ? 1 : 0);
-	}
-	void OnRspError(CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-		if (on_error_)
-			(*on_error_)(pRspInfo, nRequestID, bIsLast ? 1 : 0);
 	}
 	void OnRspSubMarketData(CThostFtdcSpecificInstrumentField *pSpecificInstrument,
 		CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
@@ -117,25 +117,6 @@ void ctp_mdapi_destroy(ctp_mdapi_t *mdapi) {
 	}
 }
 
-void ctp_mdapi_init(ctp_mdapi_t *mdapi) {
-	if (mdapi)
-		mdapi->rep->Init();
-}
-
-/* FIXME */
-int ctp_mdapi_join(ctp_mdapi_t *mdapi) {
-	if (mdapi)
-		return mdapi->rep->Join();
-	return -1;
-}
-
-/* FIXME */
-const char *ctp_mdapi_get_today(ctp_mdapi_t *mdapi) {
-	if (mdapi)
-		return mdapi->rep->GetTradingDay();
-	return NULL;
-}
-
 void ctp_mdapi_register_front(ctp_mdapi_t *mdapi, char *frontaddr) {
 	if (mdapi)
 		mdapi->rep->RegisterFront(frontaddr);
@@ -155,6 +136,39 @@ void ctp_mdapi_register_fens_user(ctp_mdapi_t *mdapi, struct CThostFtdcFensUserI
 void ctp_mdapi_register_spi(ctp_mdapi_t *mdapi, ctp_mdspi_t *mdspi) {
 	if (mdapi && mdspi)
 		mdapi->rep->RegisterSpi(mdspi);
+}
+
+void ctp_mdapi_init(ctp_mdapi_t *mdapi) {
+	if (mdapi)
+		mdapi->rep->Init();
+}
+
+/* FIXME */
+int ctp_mdapi_join(ctp_mdapi_t *mdapi) {
+	if (mdapi)
+		return mdapi->rep->Join();
+	return -1;
+}
+
+/* FIXME */
+int ctp_mdapi_login_user(ctp_mdapi_t *mdapi, struct CThostFtdcReqUserLoginField *userlogin, int rid) {
+	if (mdapi)
+		return mdapi->rep->ReqUserLogin(userlogin, rid);
+	return -1;
+}
+
+/* FIXME */
+int ctp_mdapi_logout_user(ctp_mdapi_t *mdapi, struct CThostFtdcUserLogoutField *userlogout, int rid) {
+	if (mdapi)
+		return mdapi->rep->ReqUserLogout(userlogout, rid);
+	return -1;
+}
+
+/* FIXME */
+const char *ctp_mdapi_get_today(ctp_mdapi_t *mdapi) {
+	if (mdapi)
+		return mdapi->rep->GetTradingDay();
+	return NULL;
 }
 
 /* FIXME */
@@ -185,20 +199,6 @@ int ctp_mdapi_unsubscribe_quote_response(ctp_mdapi_t *mdapi, char **instruments,
 	return -1;
 }
 
-/* FIXME */
-int ctp_mdapi_login_user(ctp_mdapi_t *mdapi, struct CThostFtdcReqUserLoginField *userlogin, int rid) {
-	if (mdapi)
-		return mdapi->rep->ReqUserLogin(userlogin, rid);
-	return -1;
-}
-
-/* FIXME */
-int ctp_mdapi_logout_user(ctp_mdapi_t *mdapi, struct CThostFtdcUserLogoutField *userlogout, int rid) {
-	if (mdapi)
-		return mdapi->rep->ReqUserLogout(userlogout, rid);
-	return -1;
-}
-
 ctp_mdspi_t *ctp_mdspi_create() {
 	return new ctp_mdspi_t;
 }
@@ -223,6 +223,11 @@ void ctp_mdspi_on_heartbeat_warning(ctp_mdspi_t *mdspi, ctp_on_heartbeat_warning
 		mdspi->on_heartbeat_warning_ = func;
 }
 
+void ctp_mdspi_on_error(ctp_mdspi_t *mdspi, ctp_on_error func) {
+	if (mdspi && func)
+		mdspi->on_error_ = func;
+}
+
 void ctp_mdspi_on_user_login(ctp_mdspi_t *mdspi, ctp_on_user_login func) {
 	if (mdspi && func)
 		mdspi->on_user_login_ = func;
@@ -231,11 +236,6 @@ void ctp_mdspi_on_user_login(ctp_mdspi_t *mdspi, ctp_on_user_login func) {
 void ctp_mdspi_on_user_logout(ctp_mdspi_t *mdspi, ctp_on_user_logout func) {
 	if (mdspi && func)
 		mdspi->on_user_logout_ = func;
-}
-
-void ctp_mdspi_on_error(ctp_mdspi_t *mdspi, ctp_on_error func) {
-	if (mdspi && func)
-		mdspi->on_error_ = func;
 }
 
 void ctp_mdspi_on_subscribe_market_data(ctp_mdspi_t *mdspi, ctp_on_subscribe_market_data func) {

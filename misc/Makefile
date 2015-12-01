@@ -22,7 +22,7 @@
 C++      = g++
 CC       = gcc
 CPPFLAGS = -I../include/
-CFLAGS   = -fPIC -Wall -march=corei7 -g -O2
+CFLAGS   = -fPIC -Wall -march=corei7 -g -O3
 LDFLAGS  = -ltcmalloc
 TARGET   = app_ema.so
 OBJ1     = stl.o

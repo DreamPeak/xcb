@@ -2,6 +2,7 @@
  * Copyright (c) 2013-2015, Dalian Futures Information Technology Co., Ltd.
  *
  * Bo Wang
+ * Xiaoye Meng <mengxiaoye at dce dot com dot cn>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,8 +19,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <stddef.h>
-#include "logger.h"
 #include "DFITCL2Api.h"
 #include "xspeed2.h"
 
@@ -93,6 +92,13 @@ void xspeed_l2api_destory(xspeed_l2api_t *l2api) {
 	}
 }
 
+int xspeed_l2api_connect(xspeed_l2api_t *l2api, char *svraddr,
+	xspeed_l2spi_t *l2spi, unsigned int quote_type) {
+	if (l2api && l2spi)
+		return l2api->rep->Connect(svraddr, l2spi, quote_type);
+	return 1;
+}
+
 int xspeed_l2api_user_login(xspeed_l2api_t *l2api, struct DFITCUserLoginField *userlogin) {
 	if (l2api)
 		return l2api->rep->ReqUserLogin(userlogin);
@@ -102,13 +108,6 @@ int xspeed_l2api_user_login(xspeed_l2api_t *l2api, struct DFITCUserLoginField *u
 int xspeed_l2api_user_logout(xspeed_l2api_t *l2api, struct DFITCUserLogoutField *userlogout) {
 	if (l2api)
 		return l2api->rep->ReqUserLogout(userlogout);
-	return 1;
-}
-
-int xspeed_l2api_connect(xspeed_l2api_t *l2api, char *svraddr,
-	xspeed_l2spi_t *l2spi, unsigned int quote_type) {
-	if (l2api && l2spi)
-		return l2api->rep->Connect(svraddr, l2spi, quote_type);
 	return 1;
 }
 
@@ -165,12 +164,14 @@ void xspeed_l2spi_on_user_logout(xspeed_l2spi_t *l2spi, xspeed_on_user_logout fu
 		l2spi->on_user_logout_ = func;
 }
 
-void xspeed_l2spi_on_subscribe_market_data(xspeed_l2spi_t *l2spi, xspeed_on_subscribe_market_data func) {
+void xspeed_l2spi_on_subscribe_market_data(xspeed_l2spi_t *l2spi,
+	xspeed_on_subscribe_market_data func) {
 	if (l2spi && func)
 		l2spi->on_subscribe_market_data_ = func;
 }
 
-void xspeed_l2spi_on_unsubscribe_market_data(xspeed_l2spi_t *l2spi, xspeed_on_unsubscribe_market_data func) {
+void xspeed_l2spi_on_unsubscribe_market_data(xspeed_l2spi_t *l2spi,
+	xspeed_on_unsubscribe_market_data func) {
 	if (l2spi && func)
 		l2spi->on_unsubscribe_market_data_ = func;
 }

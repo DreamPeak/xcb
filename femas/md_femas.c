@@ -2,6 +2,7 @@
  * Copyright (c) 2013-2015, Dalian Futures Information Technology Co., Ltd.
  *
  * Bo Wang
+ * Xiaoye Meng <mengxiaoye at dce dot com dot cn>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +19,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <float.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -26,10 +26,10 @@
 #include "macros.h"
 #include "mem.h"
 #include "dstr.h"
+#include "utilities.h"
 #include "logger.h"
 #include "config.h"
 #include "module.h"
-#include "utilities.h"
 #include "basics.h"
 #include "femas.h"
 
@@ -85,7 +85,7 @@ static void on_front_connected(void) {
 	struct CUstpFtdcReqUserLoginField req;
 	int res;
 
-	memset(&req, 0, sizeof req);
+	memset(&req, '\0', sizeof req);
 	/* FIXME */
 	strcpy(req.TradingDay, tradingday);
 	xcb_log(XCB_LOG_WARNING, "trading day is %s", tradingday);
@@ -100,6 +100,11 @@ static void on_front_connected(void) {
 
 static void on_front_disconnected(int reason) {
 	xcb_log(XCB_LOG_NOTICE, "Front disconnected: reason=%d", reason);
+}
+
+static void on_error(struct CUstpFtdcRspInfoField *rspinfo, int rid, int islast) {
+	if (rspinfo && rspinfo->ErrorID != 0)
+		xcb_log(XCB_LOG_ERROR, "Error occurred: errorid=%d", rspinfo->ErrorID);
 }
 
 static void on_user_login(struct CUstpFtdcRspUserLoginField *userlogin,
@@ -119,11 +124,6 @@ static void on_user_login(struct CUstpFtdcRspUserLoginField *userlogin,
 				xcb_log(XCB_LOG_INFO, "Subscribe contract '%s' failed", fields[i]);
 		dstr_free_tokens(fields, nfield);
 	}
-}
-
-static void on_error(struct CUstpFtdcRspInfoField *rspinfo, int rid, int islast) {
-	if (rspinfo && rspinfo->ErrorID != 0)
-		xcb_log(XCB_LOG_ERROR, "Error occurred: errorid=%d", rspinfo->ErrorID);
 }
 
 static void on_subscribe_market_data(struct CUstpFtdcSpecificInstrumentField *instrument,
@@ -199,14 +199,14 @@ static int load_module(void) {
 
 	load_config();
 	if (front_ip == NULL || front_port == NULL || userid == NULL) {
-		xcb_log(XCB_LOG_ERROR, "front_ip, front_port, userid can't be empty");
+		xcb_log(XCB_LOG_ERROR, "front_ip, front_port or userid can't be empty");
 		return MODULE_LOAD_FAILURE;
 	}
 	mdspi = femas_mdspi_create();
 	femas_mdspi_on_front_connected(mdspi, on_front_connected);
 	femas_mdspi_on_front_disconnected(mdspi, on_front_disconnected);
-	femas_mdspi_on_user_login(mdspi, on_user_login);
 	femas_mdspi_on_error(mdspi, on_error);
+	femas_mdspi_on_user_login(mdspi, on_user_login);
 	femas_mdspi_on_subscribe_market_data(mdspi, on_subscribe_market_data);
 	femas_mdspi_on_deep_market_data(mdspi, on_deep_market_data);
 	/* FIXME */

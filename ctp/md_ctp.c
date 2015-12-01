@@ -26,10 +26,10 @@
 #include "macros.h"
 #include "mem.h"
 #include "dstr.h"
+#include "utilities.h"
 #include "logger.h"
 #include "config.h"
 #include "module.h"
-#include "utilities.h"
 #include "basics.h"
 #include "ctp.h"
 
@@ -84,7 +84,7 @@ static void on_front_connected(void) {
 	struct CThostFtdcReqUserLoginField req;
 	int res;
 
-	memset(&req, 0, sizeof req);
+	memset(&req, '\0', sizeof req);
 	/* FIXME */
 	strcpy(req.BrokerID, brokerid);
 	strcpy(req.UserID, userid);
@@ -95,6 +95,11 @@ static void on_front_connected(void) {
 
 static void on_front_disconnected(int reason) {
 	xcb_log(XCB_LOG_NOTICE, "Front disconnected: reason=%d", reason);
+}
+
+static void on_error(struct CThostFtdcRspInfoField *rspinfo, int rid, int islast) {
+	if (rspinfo && rspinfo->ErrorID != 0)
+		xcb_log(XCB_LOG_ERROR, "Error occurred: errorid=%d", rspinfo->ErrorID);
 }
 
 static void on_user_login(struct CThostFtdcRspUserLoginField *userlogin,
@@ -116,11 +121,6 @@ static void on_user_login(struct CThostFtdcRspUserLoginField *userlogin,
 				xcb_log(XCB_LOG_INFO, "Subscribe contract '%s' failed", fields[i]);
 		dstr_free_tokens(fields, nfield);
 	}
-}
-
-static void on_error(struct CThostFtdcRspInfoField *rspinfo, int rid, int islast) {
-	if (rspinfo && rspinfo->ErrorID != 0)
-		xcb_log(XCB_LOG_ERROR, "Error occurred: errorid=%d", rspinfo->ErrorID);
 }
 
 static void on_subscribe_market_data(struct CThostFtdcSpecificInstrumentField *instrument,
@@ -202,8 +202,8 @@ static int load_module(void) {
 	mdspi = ctp_mdspi_create();
 	ctp_mdspi_on_front_connected(mdspi, on_front_connected);
 	ctp_mdspi_on_front_disconnected(mdspi, on_front_disconnected);
-	ctp_mdspi_on_user_login(mdspi, on_user_login);
 	ctp_mdspi_on_error(mdspi, on_error);
+	ctp_mdspi_on_user_login(mdspi, on_user_login);
 	ctp_mdspi_on_subscribe_market_data(mdspi, on_subscribe_market_data);
 	ctp_mdspi_on_deep_market_data(mdspi, on_deep_market_data);
 	/* FIXME */

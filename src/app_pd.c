@@ -28,10 +28,10 @@
 #include "mem.h"
 #include "dlist.h"
 #include "table.h"
+#include "utilities.h"
 #include "logger.h"
 #include "config.h"
 #include "module.h"
-#include "utilities.h"
 #include "basics.h"
 
 /* FIXME */

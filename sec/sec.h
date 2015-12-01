@@ -2,6 +2,7 @@
  * Copyright (c) 2013-2015, Dalian Futures Information Technology Co., Ltd.
  *
  * Bo Wang
+ * Xiaoye Meng <mengxiaoye at dce dot com dot cn>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,16 +56,18 @@ typedef void (*sec_on_sop_deep_market_data)(struct DFITCSOPDepthMarketDataField 
 
 /* FIXME: exported functions */
 extern sec_mdapi_t *sec_mdapi_create(void);
-extern int          sec_mdapi_init(sec_mdapi_t *mdapi, char *svraddr, sec_mdspi_t *mdspi);
 extern void         sec_mdapi_release(sec_mdapi_t *mdapi);
-extern int          sec_mdapi_stk_user_login(sec_mdapi_t *mdapi, struct DFITCSECReqUserLoginField *userlogin);
+extern int          sec_mdapi_init(sec_mdapi_t *mdapi, char *svraddr, sec_mdspi_t *mdspi);
+extern int          sec_mdapi_stk_user_login(sec_mdapi_t *mdapi,
+			struct DFITCSECReqUserLoginField *userlogin);
 extern int          sec_mdapi_stk_user_logout(sec_mdapi_t *mdapi,
 			struct DFITCSECReqUserLogoutField *userlogout);
 extern int          sec_mdapi_stk_subscribe_market_data(sec_mdapi_t *mdapi,
 			char **instruments, int count, int requsets);
 extern int          sec_mdapi_stk_unsubscribe_market_data(sec_mdapi_t *mdapi,
 			char **instruments, int count, int requsets);
-extern int          sec_mdapi_sop_user_login(sec_mdapi_t *mdapi, struct DFITCSECReqUserLoginField *userlogin);
+extern int          sec_mdapi_sop_user_login(sec_mdapi_t *mdapi,
+			struct DFITCSECReqUserLoginField *userlogin);
 extern int          sec_mdapi_sop_user_logout(sec_mdapi_t *mdapi,
 			struct DFITCSECReqUserLogoutField *userlogout);
 extern int          sec_mdapi_sop_subscribe_market_data(sec_mdapi_t *mdapi,
@@ -82,14 +85,16 @@ extern void         sec_mdspi_on_stk_subscribe_market_data(sec_mdspi_t *mdspi,
 			sec_on_stk_subscribe_market_data func);
 extern void         sec_mdspi_on_stk_unsubscribe_market_data(sec_mdspi_t *mdspi,
 			sec_on_stk_unsubscribe_market_data func);
-extern void         sec_mdspi_on_stk_deep_market_data(sec_mdspi_t *mdspi, sec_on_stk_deep_market_data func);
+extern void         sec_mdspi_on_stk_deep_market_data(sec_mdspi_t *mdspi,
+			sec_on_stk_deep_market_data func);
 extern void         sec_mdspi_on_sop_user_login(sec_mdspi_t *mdspi, sec_on_sop_user_login func);
 extern void         sec_mdspi_on_sop_user_logout(sec_mdspi_t *mdspi, sec_on_sop_user_logout func);
 extern void         sec_mdspi_on_sop_subscribe_market_data(sec_mdspi_t *mdspi,
 			sec_on_sop_subscribe_market_data func);
 extern void         sec_mdspi_on_sop_unsubscribe_market_data(sec_mdspi_t *mdspi,
 			sec_on_sop_unsubscribe_market_data func);
-extern void         sec_mdspi_on_sop_deep_market_data(sec_mdspi_t *mdspi, sec_on_sop_deep_market_data func);
+extern void         sec_mdspi_on_sop_deep_market_data(sec_mdspi_t *mdspi,
+			sec_on_sop_deep_market_data func);
 
 #ifdef __cplusplus
 }

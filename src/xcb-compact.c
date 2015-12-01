@@ -44,6 +44,7 @@
 #include "dlist.h"
 #include "table.h"
 #include "dstr.h"
+#include "utilities.h"
 #include "logger.h"
 #include "config.h"
 #include "module.h"
@@ -51,7 +52,6 @@
 #include "event.h"
 #include "thrpool.h"
 #include "db.h"
-#include "utilities.h"
 #include "basics.h"
 #include "commons.h"
 

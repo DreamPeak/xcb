@@ -2,6 +2,7 @@
  * Copyright (c) 2013-2015, Dalian Futures Information Technology Co., Ltd.
  *
  * Bo Wang
+ * Xiaoye Meng <mengxiaoye at dce dot com dot cn>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +19,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <float.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -30,7 +30,6 @@
 #include "logger.h"
 #include "config.h"
 #include "module.h"
-#include "utilities.h"
 #include "basics.h"
 #include "xspeed2.h"
 
@@ -86,10 +85,10 @@ static void on_front_connected(void) {
 	struct DFITCUserLoginField req;
 	int res;
 
-	memset(&req, 0, sizeof req);
+	memset(&req, '\0', sizeof req);
+	req.lRequestID = reqid;
 	strcpy(req.accountID, userid);
 	strcpy(req.passwd, passwd);
-	req.lRequestID = reqid;
 	res = xspeed_l2api_user_login(l2api, &req);
 	xcb_log(XCB_LOG_NOTICE, "Login %s for user '%s'", res == 0 ? "succeeded" : "failed", userid);
 }
@@ -129,7 +128,7 @@ static void on_user_logout(struct ErrorRtnField *rspinfo) {
 		xcb_log(XCB_LOG_ERROR, "Error occurred: errorid=%d", rspinfo->ErrorID);
 		return;
 	}
-	xcb_log(XCB_LOG_INFO, "logout succeeded");
+	xcb_log(XCB_LOG_INFO, "Logout succeeded");
 }
 
 static void on_subscribe_market_data(struct ErrorRtnField *rspinfo) {
@@ -218,8 +217,8 @@ static int load_module(void) {
 	xspeed_l2spi_on_front_disconnected(l2spi, on_front_disconnected);
 	xspeed_l2spi_on_user_login(l2spi, on_user_login);
 	xspeed_l2spi_on_user_logout(l2spi, on_user_logout);
-	xspeed_l2spi_on_subscribe_all(l2spi, on_subscribe_all);
 	xspeed_l2spi_on_subscribe_market_data(l2spi, on_subscribe_market_data);
+	xspeed_l2spi_on_subscribe_all(l2spi, on_subscribe_all);
 	xspeed_l2spi_on_best_and_deep(l2spi, on_best_and_deep);
 	l2api = xspeed_l2api_create();
 	/* FIXME */

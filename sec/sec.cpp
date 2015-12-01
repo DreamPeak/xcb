@@ -2,6 +2,7 @@
  * Copyright (c) 2013-2015, Dalian Futures Information Technology Co., Ltd.
  *
  * Bo Wang
+ * Xiaoye Meng <mengxiaoye at dce dot com dot cn>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -112,15 +113,15 @@ sec_mdapi_t *sec_mdapi_create(void) {
 	return mdapi;
 }
 
+void sec_mdapi_release(sec_mdapi_t *mdapi) {
+	if (mdapi)
+		mdapi->rep->Release();
+}
+
 int sec_mdapi_init(sec_mdapi_t *mdapi, char *svraddr, sec_mdspi_t *mdspi) {
 	if (mdapi && mdspi)
 		return mdapi->rep->Init(svraddr, mdspi);
 	return 1;
-}
-
-void sec_mdapi_release(sec_mdapi_t *mdapi) {
-	if (mdapi)
-		mdapi->rep->Release();
 }
 
 int sec_mdapi_stk_user_login(sec_mdapi_t *mdapi, struct DFITCSECReqUserLoginField *userlogin) {
@@ -135,13 +136,15 @@ int sec_mdapi_stk_user_logout(sec_mdapi_t *mdapi, struct DFITCSECReqUserLogoutFi
 	return -1;
 }
 
-int sec_mdapi_stk_subscribe_market_data(sec_mdapi_t *mdapi, char **instruments, int count, int requsets) {
+int sec_mdapi_stk_subscribe_market_data(sec_mdapi_t *mdapi,
+	char **instruments, int count, int requsets) {
 	if (mdapi)
 		return mdapi->rep->SubscribeStockMarketData(instruments, count, requsets);
 	return -1;
 }
 
-int sec_mdapi_stk_unsubscribe_market_data(sec_mdapi_t *mdapi, char **instruments, int count, int requsets) {
+int sec_mdapi_stk_unsubscribe_market_data(sec_mdapi_t *mdapi,
+	char **instruments, int count, int requsets) {
 	if (mdapi)
 		return mdapi->rep->UnSubscribeStockMarketData(instruments, count, requsets);
 	return -1;
@@ -159,13 +162,15 @@ int sec_mdapi_sop_user_logout(sec_mdapi_t *mdapi, struct DFITCSECReqUserLogoutFi
 	return -1;
 }
 
-int sec_mdapi_sop_subscribe_market_data(sec_mdapi_t *mdapi, char **instruments, int count, int requsets) {
+int sec_mdapi_sop_subscribe_market_data(sec_mdapi_t *mdapi,
+	char **instruments, int count, int requsets) {
 	if (mdapi)
 		return mdapi->rep->SubscribeSOPMarketData(instruments, count, requsets);
 	return -1;
 }
 
-int sec_mdapi_sop_unsubscribe_market_data(sec_mdapi_t *mdapi, char **instruments, int count, int requsets) {
+int sec_mdapi_sop_unsubscribe_market_data(sec_mdapi_t *mdapi,
+	char **instruments, int count, int requsets) {
 	if (mdapi)
 		return mdapi->rep->UnSubscribeSOPMarketData(instruments, count, requsets);
 	return -1;
@@ -231,12 +236,14 @@ void sec_mdspi_on_sop_user_logout(sec_mdspi_t *mdspi, sec_on_sop_user_logout fun
 		mdspi->on_sop_user_logout_ = func;
 }
 
-void sec_mdspi_on_sop_subscribe_market_data(sec_mdspi_t *mdspi, sec_on_sop_subscribe_market_data func) {
+void sec_mdspi_on_sop_subscribe_market_data(sec_mdspi_t *mdspi,
+	sec_on_sop_subscribe_market_data func) {
 	if (mdspi && func)
 		mdspi->on_sop_subscribe_market_data_ = func;
 }
 
-void sec_mdspi_on_sop_unsubscribe_market_data(sec_mdspi_t *mdspi, sec_on_sop_unsubscribe_market_data func) {
+void sec_mdspi_on_sop_unsubscribe_market_data(sec_mdspi_t *mdspi,
+	sec_on_sop_unsubscribe_market_data func) {
 	if (mdspi && func)
 		mdspi->on_sop_unsubscribe_market_data_ = func;
 }
