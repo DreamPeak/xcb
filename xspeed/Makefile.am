@@ -14,5 +14,5 @@ md_xspeed_la_CFLAGS = -fPIC -Wall
 md_xspeed_la_LDFLAGS = -module -avoid-version -L$(top_srcdir)/xspeed -lDFITCMdApi -ltcmalloc
 
 xspeeddir = $(libdir)
-xspeed_DATA = libDFITCMdApi.so
+xspeed_DATA = libDFITCTraderApi.so libDFITCMdApi.so
 
