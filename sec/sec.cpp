@@ -113,7 +113,7 @@ sec_mdapi_t *sec_mdapi_create(void) {
 	return mdapi;
 }
 
-void sec_mdapi_release(sec_mdapi_t *mdapi) {
+void sec_mdapi_destroy(sec_mdapi_t *mdapi) {
 	if (mdapi)
 		mdapi->rep->Release();
 }
@@ -121,7 +121,7 @@ void sec_mdapi_release(sec_mdapi_t *mdapi) {
 int sec_mdapi_init(sec_mdapi_t *mdapi, char *svraddr, sec_mdspi_t *mdspi) {
 	if (mdapi && mdspi)
 		return mdapi->rep->Init(svraddr, mdspi);
-	return 1;
+	return -1;
 }
 
 int sec_mdapi_stk_user_login(sec_mdapi_t *mdapi, struct DFITCSECReqUserLoginField *userlogin) {

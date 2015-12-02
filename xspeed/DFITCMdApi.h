@@ -2,9 +2,9 @@
  * 版权所有(C)2012-2016, 大连飞创信息技术有限公司
  * 文件名称：DFITCMdApi.h
  * 文件说明：定义XSpeed行情API接口
- * 当前版本：1.0.13
+ * 当前版本：1.0.14.45
  * 作者：XSpeed项目组
- * 发布日期：2013年8月15日
+ * 发布日期：2015年5月6日
  */
 
 #ifndef DLMDAPI_H_
@@ -56,9 +56,9 @@ namespace DFITCXSPEEDMDAPI
         virtual void OnRspUserLogout(struct DFITCUserLogoutInfoRtnField * pRspUsrLogout, struct DFITCErrorRtnField * pRspInfo) {}
 
         /**
-		 * 错误应答
-		 * @param pRspInfo:错误信息地址。
-		 */
+         * 错误应答
+         * @param pRspInfo:错误信息地址。
+         */
         virtual void OnRspError(struct DFITCErrorRtnField *pRspInfo) {}
 
         /**
@@ -76,20 +76,40 @@ namespace DFITCXSPEEDMDAPI
         virtual void OnRspUnSubMarketData(struct DFITCSpecificInstrumentField * pSpecificInstrument, struct DFITCErrorRtnField * pRspInfo) {}
 
         /**
+         * 订阅询价应答
+         * @param pSpecificInstrument:指向合约响应结构，该结构包含合约的相关信息。
+         * @param pRspInfo:错误信息，如果发生错误，该结构含有错误信息。
+         */
+        virtual void OnRspSubForQuoteRsp(struct DFITCSpecificInstrumentField * pSpecificInstrument, struct DFITCErrorRtnField * pRspInfo) {}
+
+        /**
+         * 取消订阅询价应答
+         * @param pSpecificInstrument:指向合约响应结构，该结构包含合约的相关信息。
+         * @param pRspInfo:错误信息，如果发生错误，该结构含有错误信息。
+         */
+        virtual void OnRspUnSubForQuoteRsp(struct DFITCSpecificInstrumentField * pSpecificInstrument, struct DFITCErrorRtnField * pRspInfo) {}
+
+        /**
          * 行情消息应答:如果订阅行情成功且有行情返回时，该方法会被调用。
          * @param pMarketDataField:指向行情信息结构的指针，结构体中包含具体的行情信息。
          */
         virtual void OnMarketData(struct DFITCDepthMarketDataField * pMarketDataField) {}
 
-		/**
+        /**
          * 自定义组合行情消息应答:如果订阅行情成功且有行情返回时，该方法会被调用。
          * @param pMarketDataField:指向行情信息结构的指针，结构体中包含具体的行情信息。
          */
         virtual void OnCustomMarketData(struct DFITCCustomMarketDataField * pMarketDataField) {}
 
         /**
+         * 询价通知
+         * @param pForQuoteField:指向询价信息结构的指针，结构体中包含具体的询价信息。
+         */
+        virtual void OnRtnForQuoteRsp(struct DFITCQuoteSubscribeRtnField * pForQuoteField) {}
+
+        /**
          * 交易日确认响应:用于接收交易日信息。
-         * @param DFITCTradingDayRtnField: 返回交易日请求确认响应结构的地址。
+         * @param pTradingDayRtnData: 返回交易日请求确认响应结构的地址。
          */
         virtual void OnRspTradingDay(struct DFITCTradingDayRtnField * pTradingDayRtnData){};
     };//end of DFITCMdSpi
@@ -107,7 +127,8 @@ namespace DFITCXSPEEDMDAPI
          * 进行一系列初始化工作:注册回调函数接口,连接行情前置。
          * @param pszSvrAddr:行情前置网络地址。
          *                  网络地址的格式为:"protocol://ipaddress:port",如"tcp://127.0.0.1:10915"
-         *                  其中protocol的值为tcp或者udp,表示接收行情的方式;如果是udp接收行情数据,udp的端口将由API自行确定。
+         *                  其中protocol的值为tcp,udp,udpb(广播行情),表示接收行情的方式;如果是udp接收行情数据,udp的端口将由API自行确定，
+		 *                  如果是udpb广播行情，需要与期货公司确认报盘广播行情端口。
          *                  ipaddress表示行情前置的IP,port表示行情前置的端口
          * @param pSpi:类DFITCMdSpi对象实例
          * @return 0 - 成功; -1 - 失败。
@@ -121,8 +142,7 @@ namespace DFITCXSPEEDMDAPI
 
         /**
          * 订阅行情:该方法发出订阅某个或者某些合约行情请求。
-
-         * @param ppInstrumentID[]:指针数组，每个指针指向一个合约。 （当输入“*”时，订阅所有合约）
+         * @param ppInstrumentID[]:指针数组，每个指针指向一个合约。（*代表订阅所有合约，也可订阅某交易所所有合约如DCE）
          * @param nCount:合约个数
          * @return 0 - 请求发送成功; -1 - 请求发送失败。
          */
@@ -130,11 +150,27 @@ namespace DFITCXSPEEDMDAPI
 
         /**
          * 退订行情:该方法发出退订某个/某些合约行情请求。
-         * @param ppInstrumentID[]:指针数组，每个指针指向一个合约。 （当输入“*”时，退订所有合约）
+         * @param ppInstrumentID[]:指针数组，每个指针指向一个合约。（*代表订阅退订所有合约，也可退订某交易所所有合约如DCE）
          * @param nCount:合约个数
          * @return 0 - 请求发送成功; -1 - 请求发送失败
          */
         virtual int UnSubscribeMarketData(char * ppInstrumentID[], int nCount, int nRequestID) = 0;
+
+        /**
+         * 订阅询价
+         * @param ppInstrumentID[]:指针数组，每个指针指向一个合约。（*代表订阅所有询价，也可订阅某交易所所有询价如DCE）
+         * @param nCount:合约个数
+         * @return 0 - 请求发送成功; -1 - 请求发送失败
+         */
+        virtual int SubscribeForQuoteRsp(char * ppInstrumentID[], int nCount, int nRequestID) = 0;
+
+       /**
+         * 退订询价
+         * @param ppInstrumentID[]:指针数组，每个指针指向一个合约。（*代表订阅退订所有询价，也可退订某交易所所有询价如DCE）
+         * @param nCount:合约个数
+         * @return 0 - 请求发送成功; -1 - 请求发送失败
+         */
+        virtual int UnSubscribeForQuoteRsp(char * ppInstrumentID[], int nCount, int nRequestID) = 0;
 
         /**
          * 用户发出登陆请求

@@ -100,19 +100,19 @@ static void on_front_connected(void) {
 	memset(&stk_req, '\0', sizeof stk_req);
 	memset(&sop_req, '\0', sizeof sop_req);
 	if (stk_userid && stk_passwd) {
+		stk_req.requestID = stk_reqid;
 		/* FIXME */
 		strcpy(stk_req.accountID, stk_userid);
 		strcpy(stk_req.password, stk_passwd);
-		stk_req.requestID = stk_reqid;
 		stk_res = sec_mdapi_stk_user_login(mdapi, &stk_req);
 		xcb_log(XCB_LOG_NOTICE, "Stock login %s for user '%s'",
 			stk_res == 0 ? "succeeded" : "failed", stk_userid);
 	}
 	if (sop_userid && sop_passwd) {
+		sop_req.requestID = sop_reqid;
 		/* FIXME */
 		strcpy(sop_req.accountID, sop_userid);
 		strcpy(sop_req.password, sop_passwd);
-		sop_req.requestID = sop_reqid;
 		sop_res = sec_mdapi_sop_user_login(mdapi, &sop_req);
 		xcb_log(XCB_LOG_NOTICE, "Sop login %s for user '%s'",
 			sop_res == 0 ? "succeeded" : "failed", sop_userid);
@@ -120,7 +120,7 @@ static void on_front_connected(void) {
 }
 
 static void on_front_disconnected(int reason) {
-	xcb_log(XCB_LOG_NOTICE, "Front disconnected: reason = '%d'", reason);
+	xcb_log(XCB_LOG_NOTICE, "Front disconnected: reason=%d", reason);
 }
 
 static void on_error(struct DFITCSECRspInfoField *rspinfo) {
@@ -325,7 +325,7 @@ static int load_module(void) {
 
 static int unload_module(void) {
 	/* FIXME */
-	sec_mdapi_release(mdapi);
+	sec_mdapi_destroy(mdapi);
 	sec_mdspi_destroy(mdspi);
 	config_destroy(cfg);
 	return unregister_application(app);

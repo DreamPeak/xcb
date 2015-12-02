@@ -42,12 +42,13 @@ static int count = 0;
 class CMySpi : public DFITCXSPEEDAPI::DFITCTraderSpi {
 public:
 	virtual ~CMySpi() {}
-	CMySpi(DFITCXSPEEDAPI::DFITCTraderApi * pApi) : m_pApi(pApi) {}
+	CMySpi(DFITCXSPEEDAPI::DFITCTraderApi *pApi) : m_pApi(pApi) {}
 
 private:
 	virtual void OnFrontConnected() {
 		struct DFITCUserLoginField lData;
 
+		memset(&lData, '\0', sizeof lData);
 		/* FIXME */
 		lData.lRequestID = 0;
 		strcpy(lData.accountID, variable_retrieve(cfg, "general", "account"));
@@ -71,6 +72,7 @@ private:
 		} else {
 			struct DFITCExchangeInstrumentField iData;
 
+			memset(&iData, '\0', sizeof iData);
 			/* FIXME */
 			iData.lRequestID = 1;
 			strcpy(iData.accountID, variable_retrieve(cfg, "general", "account"));

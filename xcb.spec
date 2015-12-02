@@ -2,7 +2,7 @@
 
 Name:		xcb
 Version:	1.0.2
-Release:	4%{?dist}
+Release:	5%{?dist}
 Summary:	Reliable Multicast Computing
 Group:		Applications/Internet
 License:	GPLv2
@@ -58,7 +58,6 @@ install -D -m 0755 %{name}.init             %{buildroot}%{_initrddir}/%{name}-pb
 sed -i 's|__XCB__|%{name}-pb2|g'            %{buildroot}%{_initrddir}/%{name}-pb2
 install -D -m 0755 %{name}.init             %{buildroot}%{_initrddir}/%{name}-compact
 sed -i 's|__XCB__|%{name}-compact|g'        %{buildroot}%{_initrddir}/%{name}-compact
-install -D -m 0755 xspeed/DFITCTraderApi.so %{buildroot}%{_libdir}/DFITCTraderApi.so
 chmod +x                                    %{buildroot}%{_libdir}/*.so
 rm -rf %{buildroot}%{_libdir}/*.la
 mkdir -p %{buildroot}%{_sharedstatedir}/%{name}/

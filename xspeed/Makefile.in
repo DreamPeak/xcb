@@ -15,6 +15,8 @@
 
 @SET_MAKE@
 
+
+
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
@@ -47,13 +49,43 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(install_sh) -d
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
-am__installdirs = "$(DESTDIR)$(sbindir)"
+am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
+am__vpath_adj = case $$p in \
+    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
+    *) f=$$p;; \
+  esac;
+am__strip_dir = f=`echo $$p | sed -e 's|^.*/||'`;
+am__install_max = 40
+am__nobase_strip_setup = \
+  srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*|]/\\\\&/g'`
+am__nobase_strip = \
+  for p in $$list; do echo "$$p"; done | sed -e "s|$$srcdirstrip/||"
+am__nobase_list = $(am__nobase_strip_setup); \
+  for p in $$list; do echo "$$p $$p"; done | \
+  sed "s| $$srcdirstrip/| |;"' / .*\//!s/ .*/ ./; s,\( .*\)/[^/]*$$,\1,' | \
+  $(AWK) 'BEGIN { files["."] = "" } { files[$$2] = files[$$2] " " $$1; \
+    if (++n[$$2] == $(am__install_max)) \
+      { print $$2, files[$$2]; n[$$2] = 0; files[$$2] = "" } } \
+    END { for (dir in files) print dir, files[dir] }'
+am__base_list = \
+  sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
+  sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
+am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(sbindir)" \
+	"$(DESTDIR)$(xspeeddir)"
+LTLIBRARIES = $(lib_LTLIBRARIES)
+md_xspeed_la_LIBADD =
+am_md_xspeed_la_OBJECTS = md_xspeed_la-xspeed.lo \
+	md_xspeed_la-md_xspeed.lo
+md_xspeed_la_OBJECTS = $(am_md_xspeed_la_OBJECTS)
+md_xspeed_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
+	$(CXXFLAGS) $(md_xspeed_la_LDFLAGS) $(LDFLAGS) -o $@
 PROGRAMS = $(sbin_PROGRAMS)
 am_xcb_exp_OBJECTS = xcb_exp-mem.$(OBJEXT) xcb_exp-dstr.$(OBJEXT) \
 	xcb_exp-utilities.$(OBJEXT) xcb_exp-logger.$(OBJEXT) \
 	xcb_exp-config.$(OBJEXT) xcb_exp-xcb-exp.$(OBJEXT)
 xcb_exp_OBJECTS = $(am_xcb_exp_OBJECTS)
-xcb_exp_DEPENDENCIES = DFITCTraderApi.so
+xcb_exp_DEPENDENCIES = libDFITCTraderApi.so
 xcb_exp_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 	$(xcb_exp_LDFLAGS) $(LDFLAGS) -o $@
@@ -79,8 +111,9 @@ CXXLD = $(CXX)
 CXXLINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(xcb_exp_SOURCES)
-DIST_SOURCES = $(xcb_exp_SOURCES)
+SOURCES = $(md_xspeed_la_SOURCES) $(xcb_exp_SOURCES)
+DIST_SOURCES = $(md_xspeed_la_SOURCES) $(xcb_exp_SOURCES)
+DATA = $(xspeed_DATA)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -206,8 +239,15 @@ $(top_srcdir)/src/config.c xcb-exp.cpp
 
 xcb_exp_CPPFLAGS = -I$(top_srcdir)/include
 xcb_exp_CFLAGS = -Wall -Winline
-xcb_exp_LDADD = DFITCTraderApi.so
+xcb_exp_LDADD = libDFITCTraderApi.so
 xcb_exp_LDFLAGS = -ltcmalloc
+lib_LTLIBRARIES = md_xspeed.la
+md_xspeed_la_SOURCES = xspeed.cpp md_xspeed.c
+md_xspeed_la_CPPFLAGS = -I$(top_srcdir)/include
+md_xspeed_la_CFLAGS = -fPIC -Wall
+md_xspeed_la_LDFLAGS = -module -avoid-version -L$(top_srcdir)/xspeed -lDFITCMdApi -ltcmalloc
+xspeeddir = $(libdir)
+xspeed_DATA = libDFITCMdApi.so
 all: all-am
 
 .SUFFIXES:
@@ -242,6 +282,39 @@ $(top_srcdir)/configure:  $(am__configure_deps)
 $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
+install-libLTLIBRARIES: $(lib_LTLIBRARIES)
+	@$(NORMAL_INSTALL)
+	test -z "$(libdir)" || $(MKDIR_P) "$(DESTDIR)$(libdir)"
+	@list='$(lib_LTLIBRARIES)'; test -n "$(libdir)" || list=; \
+	list2=; for p in $$list; do \
+	  if test -f $$p; then \
+	    list2="$$list2 $$p"; \
+	  else :; fi; \
+	done; \
+	test -z "$$list2" || { \
+	  echo " $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $$list2 '$(DESTDIR)$(libdir)'"; \
+	  $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $$list2 "$(DESTDIR)$(libdir)"; \
+	}
+
+uninstall-libLTLIBRARIES:
+	@$(NORMAL_UNINSTALL)
+	@list='$(lib_LTLIBRARIES)'; test -n "$(libdir)" || list=; \
+	for p in $$list; do \
+	  $(am__strip_dir) \
+	  echo " $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=uninstall rm -f '$(DESTDIR)$(libdir)/$$f'"; \
+	  $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=uninstall rm -f "$(DESTDIR)$(libdir)/$$f"; \
+	done
+
+clean-libLTLIBRARIES:
+	-test -z "$(lib_LTLIBRARIES)" || rm -f $(lib_LTLIBRARIES)
+	@list='$(lib_LTLIBRARIES)'; for p in $$list; do \
+	  dir="`echo $$p | sed -e 's|/[^/]*$$||'`"; \
+	  test "$$dir" != "$$p" || dir=.; \
+	  echo "rm -f \"$${dir}/so_locations\""; \
+	  rm -f "$${dir}/so_locations"; \
+	done
+md_xspeed.la: $(md_xspeed_la_OBJECTS) $(md_xspeed_la_DEPENDENCIES) 
+	$(md_xspeed_la_LINK) -rpath $(libdir) $(md_xspeed_la_OBJECTS) $(md_xspeed_la_LIBADD) $(LIBS)
 install-sbinPROGRAMS: $(sbin_PROGRAMS)
 	@$(NORMAL_INSTALL)
 	test -z "$(sbindir)" || $(MKDIR_P) "$(DESTDIR)$(sbindir)"
@@ -295,6 +368,8 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/md_xspeed_la-md_xspeed.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/md_xspeed_la-xspeed.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_exp-config.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_exp-dstr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_exp-logger.Po@am__quote@
@@ -322,6 +397,13 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
+
+md_xspeed_la-md_xspeed.lo: md_xspeed.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(md_xspeed_la_CPPFLAGS) $(CPPFLAGS) $(md_xspeed_la_CFLAGS) $(CFLAGS) -MT md_xspeed_la-md_xspeed.lo -MD -MP -MF $(DEPDIR)/md_xspeed_la-md_xspeed.Tpo -c -o md_xspeed_la-md_xspeed.lo `test -f 'md_xspeed.c' || echo '$(srcdir)/'`md_xspeed.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/md_xspeed_la-md_xspeed.Tpo $(DEPDIR)/md_xspeed_la-md_xspeed.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='md_xspeed.c' object='md_xspeed_la-md_xspeed.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(md_xspeed_la_CPPFLAGS) $(CPPFLAGS) $(md_xspeed_la_CFLAGS) $(CFLAGS) -c -o md_xspeed_la-md_xspeed.lo `test -f 'md_xspeed.c' || echo '$(srcdir)/'`md_xspeed.c
 
 xcb_exp-mem.o: $(top_srcdir)/src/mem.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_exp_CPPFLAGS) $(CPPFLAGS) $(xcb_exp_CFLAGS) $(CFLAGS) -MT xcb_exp-mem.o -MD -MP -MF $(DEPDIR)/xcb_exp-mem.Tpo -c -o xcb_exp-mem.o `test -f '$(top_srcdir)/src/mem.c' || echo '$(srcdir)/'`$(top_srcdir)/src/mem.c
@@ -414,6 +496,13 @@ xcb_exp-config.obj: $(top_srcdir)/src/config.c
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
 
+md_xspeed_la-xspeed.lo: xspeed.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(md_xspeed_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT md_xspeed_la-xspeed.lo -MD -MP -MF $(DEPDIR)/md_xspeed_la-xspeed.Tpo -c -o md_xspeed_la-xspeed.lo `test -f 'xspeed.cpp' || echo '$(srcdir)/'`xspeed.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/md_xspeed_la-xspeed.Tpo $(DEPDIR)/md_xspeed_la-xspeed.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='xspeed.cpp' object='md_xspeed_la-xspeed.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(md_xspeed_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o md_xspeed_la-xspeed.lo `test -f 'xspeed.cpp' || echo '$(srcdir)/'`xspeed.cpp
+
 xcb_exp-xcb-exp.o: xcb-exp.cpp
 @am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_exp_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT xcb_exp-xcb-exp.o -MD -MP -MF $(DEPDIR)/xcb_exp-xcb-exp.Tpo -c -o xcb_exp-xcb-exp.o `test -f 'xcb-exp.cpp' || echo '$(srcdir)/'`xcb-exp.cpp
 @am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/xcb_exp-xcb-exp.Tpo $(DEPDIR)/xcb_exp-xcb-exp.Po
@@ -433,6 +522,26 @@ mostlyclean-libtool:
 
 clean-libtool:
 	-rm -rf .libs _libs
+install-xspeedDATA: $(xspeed_DATA)
+	@$(NORMAL_INSTALL)
+	test -z "$(xspeeddir)" || $(MKDIR_P) "$(DESTDIR)$(xspeeddir)"
+	@list='$(xspeed_DATA)'; test -n "$(xspeeddir)" || list=; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(xspeeddir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(xspeeddir)" || exit $$?; \
+	done
+
+uninstall-xspeedDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(xspeed_DATA)'; test -n "$(xspeeddir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	test -n "$$files" || exit 0; \
+	echo " ( cd '$(DESTDIR)$(xspeeddir)' && rm -f" $$files ")"; \
+	cd "$(DESTDIR)$(xspeeddir)" && rm -f $$files
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
@@ -518,9 +627,9 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(PROGRAMS)
+all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) $(DATA)
 installdirs:
-	for dir in "$(DESTDIR)$(sbindir)"; do \
+	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(sbindir)" "$(DESTDIR)$(xspeeddir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -550,8 +659,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-generic clean-libtool clean-sbinPROGRAMS \
-	mostlyclean-am
+clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
+	clean-sbinPROGRAMS mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -571,13 +680,13 @@ info: info-am
 
 info-am:
 
-install-data-am:
+install-data-am: install-xspeedDATA
 
 install-dvi: install-dvi-am
 
 install-dvi-am:
 
-install-exec-am: install-sbinPROGRAMS
+install-exec-am: install-libLTLIBRARIES install-sbinPROGRAMS
 
 install-html: install-html-am
 
@@ -617,23 +726,26 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-sbinPROGRAMS
+uninstall-am: uninstall-libLTLIBRARIES uninstall-sbinPROGRAMS \
+	uninstall-xspeedDATA
 
 .MAKE: install-am install-strip
 
 .PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
-	clean-libtool clean-sbinPROGRAMS ctags distclean \
-	distclean-compile distclean-generic distclean-libtool \
-	distclean-tags distdir dvi dvi-am html html-am info info-am \
-	install install-am install-data install-data-am install-dvi \
-	install-dvi-am install-exec install-exec-am install-html \
-	install-html-am install-info install-info-am install-man \
-	install-pdf install-pdf-am install-ps install-ps-am \
-	install-sbinPROGRAMS install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags uninstall uninstall-am uninstall-sbinPROGRAMS
+	clean-libLTLIBRARIES clean-libtool clean-sbinPROGRAMS ctags \
+	distclean distclean-compile distclean-generic \
+	distclean-libtool distclean-tags distdir dvi dvi-am html \
+	html-am info info-am install install-am install-data \
+	install-data-am install-dvi install-dvi-am install-exec \
+	install-exec-am install-html install-html-am install-info \
+	install-info-am install-libLTLIBRARIES install-man install-pdf \
+	install-pdf-am install-ps install-ps-am install-sbinPROGRAMS \
+	install-strip install-xspeedDATA installcheck installcheck-am \
+	installdirs maintainer-clean maintainer-clean-generic \
+	mostlyclean mostlyclean-compile mostlyclean-generic \
+	mostlyclean-libtool pdf pdf-am ps ps-am tags uninstall \
+	uninstall-am uninstall-libLTLIBRARIES uninstall-sbinPROGRAMS \
+	uninstall-xspeedDATA
 
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

@@ -94,7 +94,7 @@ static void on_front_connected(void) {
 	if (passwd != NULL)
 		strcpy(req.Password, passwd);
 	strcpy(req.UserProductInfo, "demo v1.0");
-	res = femas_mdapi_user_login(mdapi, &req, 0);
+	res = femas_mdapi_user_login(mdapi, &req, 1);
 	xcb_log(XCB_LOG_NOTICE, "Login %s for user '%s'", res == 0 ? "succeeded" : "failed", userid);
 }
 
@@ -135,10 +135,8 @@ static void on_subscribe_market_data(struct CUstpFtdcSpecificInstrumentField *in
 static void on_deep_market_data(struct CUstpFtdcDepthMarketDataField *deepmd) {
 	Quote *quote;
 
-	if (deepmd == NULL) {
-		xcb_log(XCB_LOG_WARNING, "deepmd is NULL!");
+	if (deepmd == NULL)
 		return;
-	}
 	if (NEW0(quote)) {
 		/* FIXME */
 		quote->thyquote.m_nLen	 = sizeof(tHYQuote);

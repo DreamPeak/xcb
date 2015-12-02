@@ -56,7 +56,7 @@ typedef void (*sec_on_sop_deep_market_data)(struct DFITCSOPDepthMarketDataField 
 
 /* FIXME: exported functions */
 extern sec_mdapi_t *sec_mdapi_create(void);
-extern void         sec_mdapi_release(sec_mdapi_t *mdapi);
+extern void         sec_mdapi_destroy(sec_mdapi_t *mdapi);
 extern int          sec_mdapi_init(sec_mdapi_t *mdapi, char *svraddr, sec_mdspi_t *mdspi);
 extern int          sec_mdapi_stk_user_login(sec_mdapi_t *mdapi,
 			struct DFITCSECReqUserLoginField *userlogin);

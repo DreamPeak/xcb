@@ -87,6 +87,7 @@ static void on_front_connected(void) {
 
 	memset(&req, '\0', sizeof req);
 	req.lRequestID = reqid;
+	/* FIXME */
 	strcpy(req.accountID, userid);
 	strcpy(req.passwd, passwd);
 	res = xspeed_l2api_user_login(l2api, &req);
@@ -144,10 +145,8 @@ static void on_subscribe_all(struct ErrorRtnField *rspinfo) {
 static void on_best_and_deep(struct MDBestAndDeep *deepmd) {
 	Quote *quote;
 
-	if (deepmd == NULL) {
-		xcb_log(XCB_LOG_WARNING, "deepmd is NULL!");
+	if (deepmd == NULL)
 		return;
-	}
 	if (NEW0(quote)) {
 		/* FIXME */
 		quote->thyquote.m_nLen   = sizeof(tHYQuote);
