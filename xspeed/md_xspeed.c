@@ -134,8 +134,7 @@ static void on_deep_market_data(struct DFITCDepthMarketDataField *deepmd) {
 		/* FIXME */
 		quote->thyquote.m_nLen   = sizeof (tHYQuote);
 		RMCHR(deepmd->UpdateTime, ':');
-		RMCHR(deepmd->UpdateTime, '.');
-		quote->thyquote.m_nTime  = atoi(deepmd->UpdateTime);
+		quote->thyquote.m_nTime  = atoi(deepmd->UpdateTime) * 1000 + deepmd->UpdateMillisec;
 		strcpy(quote->thyquote.m_cHYDM, deepmd->instrumentID);
 		quote->thyquote.m_dZJSJ  = deepmd->preSettlementPrice;
 		quote->thyquote.m_dJJSJ  = deepmd->settlementPrice;

@@ -271,7 +271,7 @@ static void vfree(void *value) {
 static void *el_thread(void *data) {
 	NOT_USED(data);
 
-	start_event_loop(el, TIME_EVENTS);
+	start_event_loop(el, TIME_EVENTS | DONT_WAIT);
 	return NULL;
 }
 
