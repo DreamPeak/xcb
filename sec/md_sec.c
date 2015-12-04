@@ -154,7 +154,6 @@ static void on_stk_subscribe_market_data(struct DFITCSECSpecificInstrumentField 
 
 static void on_stk_deep_market_data(struct DFITCStockDepthMarketDataField *deepmd) {
 	Quote *quote;
-	char contract[256];
 
 	if (deepmd == NULL)
 		return;
@@ -164,9 +163,7 @@ static void on_stk_deep_market_data(struct DFITCStockDepthMarketDataField *deepm
 		RMCHR(deepmd->sharedDataField.updateTime, ':');
 		quote->thyquote.m_nTime  = atoi(deepmd->sharedDataField.updateTime) * 1000;
 		strcpy(quote->thyquote.m_cJYS, deepmd->staticDataField.exchangeID);
-		strcpy(contract, deepmd->staticDataField.exchangeID);
-		strcat(contract, deepmd->staticDataField.securityID);
-		strncpy(quote->thyquote.m_cHYDM, contract, sizeof quote->thyquote.m_cHYDM - 1);
+		strcpy(quote->thyquote.m_cHYDM, deepmd->staticDataField.securityID);
 		quote->thyquote.m_bTPBZ  = 0;
 		quote->thyquote.m_dZJSJ  = 0;
 		quote->thyquote.m_dJJSJ  = 0;

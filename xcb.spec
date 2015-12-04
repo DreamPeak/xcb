@@ -49,16 +49,16 @@ popd
 %install
 rm -rf %{buildroot}
 make install DESTDIR=%{buildroot}
-install -D -m 0644 %{name}.logrotate        %{buildroot}%{_sysconfdir}/logrotate.d/%{name}
-install -D -m 0755 %{name}.init             %{buildroot}%{_initrddir}/%{name}-dp2
-sed -i 's|__XCB__|%{name}-dp2|g'            %{buildroot}%{_initrddir}/%{name}-dp2
-install -D -m 0755 %{name}.init             %{buildroot}%{_initrddir}/%{name}-wk2
-sed -i 's|__XCB__|%{name}-wk2|g'            %{buildroot}%{_initrddir}/%{name}-wk2
-install -D -m 0755 %{name}.init             %{buildroot}%{_initrddir}/%{name}-pb2
-sed -i 's|__XCB__|%{name}-pb2|g'            %{buildroot}%{_initrddir}/%{name}-pb2
-install -D -m 0755 %{name}.init             %{buildroot}%{_initrddir}/%{name}-compact
-sed -i 's|__XCB__|%{name}-compact|g'        %{buildroot}%{_initrddir}/%{name}-compact
-chmod +x                                    %{buildroot}%{_libdir}/*.so
+install -D -m 0644 %{name}.logrotate  %{buildroot}%{_sysconfdir}/logrotate.d/%{name}
+install -D -m 0755 %{name}.init       %{buildroot}%{_initrddir}/%{name}-dp2
+sed -i 's|__XCB__|%{name}-dp2|g'      %{buildroot}%{_initrddir}/%{name}-dp2
+install -D -m 0755 %{name}.init       %{buildroot}%{_initrddir}/%{name}-wk2
+sed -i 's|__XCB__|%{name}-wk2|g'      %{buildroot}%{_initrddir}/%{name}-wk2
+install -D -m 0755 %{name}.init       %{buildroot}%{_initrddir}/%{name}-pb2
+sed -i 's|__XCB__|%{name}-pb2|g'      %{buildroot}%{_initrddir}/%{name}-pb2
+install -D -m 0755 %{name}.init       %{buildroot}%{_initrddir}/%{name}-compact
+sed -i 's|__XCB__|%{name}-compact|g'  %{buildroot}%{_initrddir}/%{name}-compact
+chmod +x                              %{buildroot}%{_libdir}/*.so
 rm -rf %{buildroot}%{_libdir}/*.la
 mkdir -p %{buildroot}%{_sharedstatedir}/%{name}/
 mv -f %{buildroot}%{_libdir}/md_*.so  %{buildroot}%{_sharedstatedir}/%{name}/
