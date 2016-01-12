@@ -154,6 +154,7 @@ static void on_stk_subscribe_market_data(struct DFITCSECSpecificInstrumentField 
 
 static void on_stk_deep_market_data(struct DFITCStockDepthMarketDataField *deepmd) {
 	Quote *quote;
+	char contract[256];
 
 	if (deepmd == NULL)
 		return;
@@ -163,7 +164,9 @@ static void on_stk_deep_market_data(struct DFITCStockDepthMarketDataField *deepm
 		RMCHR(deepmd->sharedDataField.updateTime, ':');
 		quote->thyquote.m_nTime  = atoi(deepmd->sharedDataField.updateTime) * 1000;
 		strcpy(quote->thyquote.m_cJYS, deepmd->staticDataField.exchangeID);
-		strcpy(quote->thyquote.m_cHYDM, deepmd->staticDataField.securityID);
+		strcpy(contract, deepmd->staticDataField.exchangeID);
+		strcat(contract, deepmd->staticDataField.securityID);
+		strncpy(quote->thyquote.m_cHYDM, contract, sizeof quote->thyquote.m_cHYDM - 1);
 		quote->thyquote.m_bTPBZ  = 0;
 		quote->thyquote.m_dZJSJ  = 0;
 		quote->thyquote.m_dJJSJ  = 0;
@@ -233,6 +236,7 @@ static void on_sop_subscribe_market_data(struct DFITCSECSpecificInstrumentField 
 
 static void on_sop_deep_market_data(struct DFITCSOPDepthMarketDataField *deepmd) {
 	Quote *quote;
+	char contract[256];
 
 	if (deepmd == NULL)
 		return;
@@ -243,7 +247,9 @@ static void on_sop_deep_market_data(struct DFITCSOPDepthMarketDataField *deepmd)
 		RMCHR(deepmd->sharedDataField.updateTime, '.');
 		quote->thyquote.m_nTime  = atoi(deepmd->sharedDataField.updateTime);
 		strcpy(quote->thyquote.m_cJYS, deepmd->staticDataField.exchangeID);
-		strcpy(quote->thyquote.m_cHYDM, deepmd->specificDataField.contractID);
+		strcpy(contract, deepmd->staticDataField.exchangeID);
+		strcat(contract, deepmd->specificDataField.contractID);
+		strncpy(quote->thyquote.m_cHYDM, contract, sizeof quote->thyquote.m_cHYDM - 1);
 		quote->thyquote.m_bTPBZ  = 0;
 		quote->thyquote.m_dZJSJ  = deepmd->specificDataField.preSettlePrice;
 		quote->thyquote.m_dJJSJ  = deepmd->specificDataField.settlePrice;

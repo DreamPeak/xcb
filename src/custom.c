@@ -106,6 +106,7 @@ void s_command(client c) {
 	if ((dlist = table_get_value(cache, pkey))) {
 		dlist_iter_t iter = dlist_iter_new(dlist, DLIST_START_HEAD);
 		dlist_node_t node;
+		int flag = 0;
 
 		/* FIXME: still has room to improve */
 		while ((node = dlist_next(iter))) {
@@ -116,6 +117,7 @@ void s_command(client c) {
 				int nfield = 0;
 				dstr res, contracts = NULL;
 
+				flag = 1;
 				fields = dstr_split_len(kvd->key, dstr_length(kvd->key), ",", 1, &nfield);
 				res = dstr_new(fields[0]);
 				if (nfield > 1) {
@@ -164,7 +166,8 @@ void s_command(client c) {
 				dstr_free(contracts);
 				dstr_free(res);
 				dstr_free_tokens(fields, nfield);
-			}
+			} else if (flag)
+				break;
 		}
 		dlist_iter_free(&iter);
 	}

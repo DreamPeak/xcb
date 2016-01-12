@@ -153,6 +153,8 @@ static int ctmsock = -1;
 static int log_reload = 0;
 static int shut_down = 0;
 static int cronloops = 0;
+static struct timeval tv;
+static int prev_hour = 0;
 
 static void sig_hup_handler(int sig) {
 	NOT_USED(sig);
@@ -708,10 +710,15 @@ void process_quote(void *data) {
 			return;
 		/* idiosyncrasy of different timestamps */
 		} else if ((tlen = intlen(quote->thyquote.m_nTime)) < 10) {
-			struct timeval tv;
+			int hour;
 			struct tm lt;
 
-			gettimeofday(&tv, NULL);
+			hour = quote->thyquote.m_nTime / 10000000;
+			if (tv.tv_sec == 0 || hour == 9 || hour == 21)
+				gettimeofday(&tv, NULL);
+			if (prev_hour == 23 && hour == 0)
+				tv.tv_sec += 24 * 60 * 60;
+			prev_hour = hour;
 			localtime_r(&tv.tv_sec, &lt);
 			if (quote->thyquote.m_cHYDM[0] == 'S' && quote->thyquote.m_cHYDM[1] == 'P')
 				quote->thyquote.m_nTime *= 1000;
@@ -719,7 +726,7 @@ void process_quote(void *data) {
 				quote->thyquote.m_nTime *= 100;
 			lt.tm_sec  = quote->thyquote.m_nTime % 100000   / 1000;
 			lt.tm_min  = quote->thyquote.m_nTime % 10000000 / 100000;
-			lt.tm_hour = quote->thyquote.m_nTime / 10000000;
+			lt.tm_hour = hour;
 			quote->m_nMSec = quote->thyquote.m_nTime % 1000;
 			quote->thyquote.m_nTime = mktime(&lt);
 		}
