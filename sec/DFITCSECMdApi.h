@@ -2,9 +2,9 @@
  * 版权所有(C)2012-2016, 大连飞创信息技术有限公司
  * 文件名称：DFITCSECMdApi.h
  * 文件说明：定义XSpeed行情API接口
- * 当前版本：1.5.46.0
+ * 当前版本：1.5.50.0
  * 作者：XSpeed证券项目组
- * 发布日期：2015年11月
+ * 发布日期：2015年12月
  */
 #ifndef DFITCSECMDAPI_H_
 #define DFITCSECMDAPI_H_
@@ -160,7 +160,7 @@
          *                  其中protocol的值为tcp或者udp,表示接收行情的方式;如果是udp接收行情数据,udp的端口将由API自行确定。
          *                  ipaddress表示行情前置的IP,port表示行情前置的端口
          * @param *pSpi:类DFITCMdSpi对象实例
-         * @return 0 - 成功;1 - 失败。
+         * @return 0 - 成功;-1 - 失败。
          */
         virtual int Init(const char * pszSvrAddr, DFITCSECMdSpi * pSpi) = 0;
 

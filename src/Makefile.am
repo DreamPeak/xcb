@@ -11,9 +11,9 @@ basics.c xcb-wk2.c
 xcb_wk2_CPPFLAGS = -I$(top_srcdir)/include -I/usr/include/pgm-5.1
 xcb_wk2_CFLAGS = -Wall -Winline -pthread -rdynamic
 xcb_wk2_LDFLAGS = -lrt -ldl -lm -lpgm -lleveldb -ltcmalloc
-xcb_pb2_SOURCES = mem.c dlist.c table.c ring.c heap.c dstr.c utilities.c       \
-logger.c config.c event.c net.c thrpool.c db.c pgmsock.c networking.c basics.c \
-custom.c xcb-pb2.c
+xcb_pb2_SOURCES = mem.c dlist.c table.c ring.c heap.c ptrie.c dstr.c           \
+utilities.c logger.c config.c event.c net.c thrpool.c db.c pgmsock.c           \
+networking.c basics.c custom.c xcb-pb2.c
 xcb_pb2_CPPFLAGS = -I$(top_srcdir)/include -I/usr/include/pgm-5.1
 xcb_pb2_CFLAGS = -Wall -Winline -pthread
 xcb_pb2_LDFLAGS = -lrt -lpgm -lleveldb -ltcmalloc

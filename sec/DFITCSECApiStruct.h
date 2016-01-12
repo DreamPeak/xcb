@@ -2,9 +2,9 @@
  * 版权所有(C)2012-2016, 大连飞创信息技术有限公司
  * 文件名称：DFITCSECApiStruct.h
  * 文件说明：定义接口所需的数据接口
- * 当前版本：1.5.46.0
+ * 当前版本：1.5.136
  * 作者：XSpeed证券项目组
- * 发布日期：2015年11月
+ * 发布日期：2015年12月
  */
 #ifndef DFITCSECAPISTRUCT_H_
 #define DFITCSECAPISTRUCT_H_
@@ -486,7 +486,7 @@ struct APISTRUCT DFITCStockRspWithdrawBatchOrderField
 {
     DFITCSECRequestIDType                requestID;                //请求ID
     DFITCSECAccountIDType                accountID;                //客户号
-    DFITCSECErrorIDType                  result;                   //撤单结果
+    DFITCSECBatchDeclareResultType       result;                   //撤单结果
 };
 
 //STOCK-计算可委托数量请求
@@ -660,7 +660,7 @@ struct APISTRUCT DFITCStockRspQryStockField
     DFITCSECPriceType                    latestPrice;              //最新价
     DFITCSECPriceType                    preClosePrice;            //昨收盘价
     DFITCSECPriceType                    openPrice;                //开盘价
-    DFITCSECQuantityType                 tradeQty;                 //成交数量
+    DFITCSECLargeQuantityType            tradeQty;                 //成交数量
     DFITCSECFundsType                    turnover;                 //成交金额
     DFITCSECPriceType                    priceHigher;              //最高价
     DFITCSECPriceType                    priceLower;               //最低价
@@ -893,7 +893,7 @@ struct APISTRUCT DFITCSOPWithdrawOrderRtnField
     DFITCSECSpdOrderIDType               spdOrderID;               //柜台委托号
     DFITCSECEntrustDirectionType         entrustDirection;         //委托类别
     DFITCSECOpenCloseFlagType            openCloseFlag;            //开平标志
-    DFITCSECQuantityType                 cancelQty;                //撤单数量
+    DFITCSECQuantityType                 withdrawQty;              //撤单数量
     DFITCSECQuantityType                 tradeQty;                 //成交数量
     DFITCSECDeclareResultType            declareResult;            //申报结果
     DFITCSECMessageType                  noteMsg;                  //结果说明(预留字段)
@@ -1222,8 +1222,8 @@ struct APISTRUCT DFITCSOPReqQryAbleLockStockField
 {
     DFITCSECRequestIDType                requestID;                //请求ID(Y)
     DFITCSECAccountIDType                accountID;                //客户号(Y)
-    DFITCSECExchangeIDType               exchangeID;               //交易所代码(N)
-    DFITCSECSecurityIDType               securityID;               //证券代码(N)
+    DFITCSECExchangeIDType               exchangeID;               //交易所代码(Y)
+    DFITCSECSecurityIDType               securityID;               //证券代码(Y)
 };
 
 //SOP-客户可锁定证券查询响应
@@ -1347,7 +1347,7 @@ struct APISTRUCT DFITCSOPRspQryContactField
     DFITCSECPriceType                   closePrice;                //今收盘价
     DFITCSECPriceType                   preSettlePrice;            //昨结算价
     DFITCSECPriceType                   openPrice;                 //开盘价
-    DFITCSECQuantityType                tradeQty;                  //成交数量
+    DFITCSECLargeQuantityType           tradeQty;                  //成交数量
     DFITCSECFundsType                   turnover;                  //成交金额
     DFITCSECPriceType                   settlePrice;               //结算价(预留字段)
     DFITCSECPriceType                   endCashSettlePrice;        //到期现金结算价
@@ -1378,6 +1378,7 @@ struct APISTRUCT DFITCSOPRspQryContactField
     DFITCSECFundsType                   askPrice5;                 //申卖价5
     DFITCSECQuantityType                askQty5;                   //申卖量5
     DFITCSESecurityOptionIndexType      optionIndex;               //股票期权索引值
+    DFITCSECMiniPriceChangeType         miniPriceChange;           //最小变动价位
 };
 
 //SOP-期权标的信息查询请求
@@ -1925,7 +1926,6 @@ struct APISTRUCT DFITCSOPSpecificDataField
     DFITCSECFundsType                    settlePrice;              //结算价
     DFITCSECLargeQuantityType			 positionQty;              //持仓数量
     DFITCSECFundsType					 AuctionPrice;			   //动态参考价格
-    DFITCSECTradingPhaseCodeType		 TradingPhaseCode;		   //产品实时阶段及标志
 };
 
 //stock 特有的
@@ -1977,6 +1977,7 @@ struct APISTRUCT DFITCSharedDataField
     DFITCSECLargeQuantityType            bidQty5;                  //申买量五
     DFITCSECFundsType                    askPrice5;                //申卖价五
     DFITCSECLargeQuantityType            askQty5;                  //申卖量五
+	DFITCSECTradingPhaseCodeType         TradingPhaseCode;         //产品实时阶段及标志
 };
 
 struct APISTRUCT DFITCSOPDepthMarketDataField
@@ -1988,7 +1989,7 @@ struct APISTRUCT DFITCSOPDepthMarketDataField
 
 struct APISTRUCT DFITCStockDepthMarketDataField
 {
-    struct DFITCSharedDataField                 sharedDataField ;        //公有的动态 
+    struct DFITCSharedDataField                 sharedDataField;         //公有的动态 
     struct DFITCStockSpecificDataField          specificDataField;       //特有的
     struct DFITCStaticDataField                 staticDataField;         //共有的静态
 };
