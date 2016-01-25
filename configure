@@ -18836,7 +18836,7 @@ fi
 done
 
 
-ac_config_files="$ac_config_files Makefile conf/Makefile ctp/Makefile devel/Makefile femas/Makefile include/Makefile sec/Makefile src/Makefile xspeed/Makefile xspeed2/Makefile"
+ac_config_files="$ac_config_files Makefile conf/Makefile ctp/Makefile devel/Makefile femas/Makefile include/Makefile sec/Makefile src/Makefile tap/Makefile xspeed/Makefile xspeed2/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -19855,6 +19855,7 @@ do
     "include/Makefile") CONFIG_FILES="$CONFIG_FILES include/Makefile" ;;
     "sec/Makefile") CONFIG_FILES="$CONFIG_FILES sec/Makefile" ;;
     "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
+    "tap/Makefile") CONFIG_FILES="$CONFIG_FILES tap/Makefile" ;;
     "xspeed/Makefile") CONFIG_FILES="$CONFIG_FILES xspeed/Makefile" ;;
     "xspeed2/Makefile") CONFIG_FILES="$CONFIG_FILES xspeed2/Makefile" ;;
 
