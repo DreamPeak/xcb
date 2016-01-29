@@ -44,6 +44,7 @@
 #include "mem.h"
 #include "dlist.h"
 #include "table.h"
+#include "ptrie.h"
 #include "dstr.h"
 #include "utilities.h"
 #include "logger.h"
@@ -58,7 +59,7 @@
 
 /* FIXME */
 table_t cache;
-table_t subscribers;
+ptrie_t subscribers;
 dlist_t clients_to_close;
 table_t idxfmts;
 event_loop el;
@@ -475,7 +476,10 @@ static int send_quote(void *data, void *data2) {
 	dstr *fields = NULL;
 	int nfield = 0;
 	dstr key, value, index, res;
+	ptrie_node_t pnode;
 	dlist_t dlist;
+	dlist_iter_t diter;
+	dlist_node_t dnode;
 
 	/* FIXME */
 	fields = dstr_split_len(msg->data, strlen(msg->data), "|", 1, &nfield);
@@ -490,41 +494,52 @@ static int send_quote(void *data, void *data2) {
 	res = dstr_cat(res, value);
 	res = dstr_cat(res, "\r\n");
 	/* in case of multiple subscribers */
-	table_rwlock_rdlock(subscribers);
-	if ((dlist = table_get_value(subscribers, index))) {
-		dlist_iter_t iter = dlist_iter_new(dlist, DLIST_START_HEAD);
-		dlist_node_t node;
+	ptrie_rwlock_rdlock(subscribers);
+	if ((pnode = ptrie_get_index(subscribers, index)) == NULL) {
+		dlist = ptrie_node_value(ptrie_get_root(subscribers));
+		diter = dlist_iter_new(dlist, DLIST_START_HEAD);
+		while ((dnode = dlist_next(diter))) {
+			client c = (client)dlist_node_value(dnode);
 
-		/* FIXME: still has room to improve */
-		while ((node = dlist_next(iter))) {
-			struct kvd *kvd = (struct kvd *)dlist_node_value(node);
-
-			if (dstr_length(kvd->key) <= dstr_length(skey) &&
-				!memcmp(kvd->key, skey, dstr_length(kvd->key))) {
-				dlist_iter_t iter2 = dlist_iter_new(kvd->u.dlist, DLIST_START_HEAD);
-
-				while ((node = dlist_next(iter2))) {
-					client c = (client)dlist_node_value(node);
-
-					pthread_spin_lock(&c->lock);
-					if (!(c->flags & CLIENT_CLOSE_ASAP)) {
-						if (net_try_write(c->fd, res, dstr_length(res),
-							10, NET_NONBLOCK) == -1) {
-							xcb_log(XCB_LOG_WARNING, "Writing to client '%p': %s",
-								c, strerror(errno));
-							if (++c->eagcount >= 3)
-								client_free_async(c);
-						} else if (c->eagcount)
-							c->eagcount = 0;
-					}
-					pthread_spin_unlock(&c->lock);
-				}
-				dlist_iter_free(&iter2);
+			pthread_spin_lock(&c->lock);
+			if (!(c->flags & CLIENT_CLOSE_ASAP)) {
+				if (net_try_write(c->fd, res, dstr_length(res), 10, NET_NONBLOCK) == -1) {
+					xcb_log(XCB_LOG_WARNING, "Writing to client '%p': %s",
+						c, strerror(errno));
+					if (++c->eagcount >= 3)
+						client_free_async(c);
+				} else if (c->eagcount)
+					c->eagcount = 0;
 			}
+			pthread_spin_unlock(&c->lock);
 		}
-		dlist_iter_free(&iter);
+		dlist_iter_free(&diter);
+	} else {
+		pnode = ptrie_find(pnode, skey);
+		while (pnode) {
+			dlist = ptrie_node_value(pnode);
+			diter = dlist_iter_new(dlist, DLIST_START_HEAD);
+			while ((dnode = dlist_next(diter))) {
+				client c = (client)dlist_node_value(dnode);
+
+				pthread_spin_lock(&c->lock);
+				if (!(c->flags & CLIENT_CLOSE_ASAP)) {
+					if (net_try_write(c->fd, res, dstr_length(res),
+						10, NET_NONBLOCK) == -1) {
+						xcb_log(XCB_LOG_WARNING, "Writing to client '%p': %s",
+							c, strerror(errno));
+						if (++c->eagcount >= 3)
+							client_free_async(c);
+					} else if (c->eagcount)
+						c->eagcount = 0;
+				}
+				pthread_spin_unlock(&c->lock);
+			}
+			dlist_iter_free(&diter);
+			pnode = ptrie_node_parent(pnode);
+		}
 	}
-	table_rwlock_unlock(subscribers);
+	ptrie_rwlock_unlock(subscribers);
 	dstr_free(res);
 	dstr_free(index);
 	dstr_free(value);
@@ -906,7 +921,7 @@ int main(int argc, char **argv) {
 			set_logger_level(__LOG_WARNING);
 	}
 	cache = table_new(cmpstr, hashmurmur2, kfree, lfree);
-	subscribers = table_new(cmpstr, hashmurmur2, kfree, lfree);
+	subscribers = ptrie_new();
 	clients_to_close = dlist_new(NULL, NULL);
 	clients = dlist_new(NULL, NULL);
 	monitors = dlist_new(NULL, NULL);
@@ -1032,34 +1047,28 @@ err:
 
 /* FIXME */
 static void remove_from_subscribers(client c) {
-	table_iter_t titer;
-	table_node_t tnode;
+	dlist_t dlist;
+	dlist_iter_t diter;
+	dlist_node_t dnode;
 
-	table_rwlock_wrlock(subscribers);
-	titer = table_iter_safe_new(subscribers);
-	while ((tnode = table_next(titer))) {
-		dlist_t dlist = (dlist_t)table_node_value(tnode);
-		dlist_iter_t diter = dlist_iter_new(dlist, DLIST_START_HEAD);
-		dlist_node_t node, node2;
+	ptrie_rwlock_wrlock(subscribers);
+	dlist = ptrie_node_value(ptrie_get_root(subscribers));
+	dlist_remove(dlist, dlist_find(dlist, c));
+	diter = dlist_iter_new(c->subscribers, DLIST_START_HEAD);
+	while ((dnode = dlist_next(diter))) {
+		dstr skey = (dstr)dlist_node_value(dnode);
+		dstr *fields = NULL;
+		int nfield = 0;
+		ptrie_node_t pnode;
 
-		while ((node = dlist_next(diter))) {
-			struct kvd *kvd = (struct kvd *)dlist_node_value(node);
-
-			if ((node2 = dlist_find(kvd->u.dlist, c)))
-				dlist_remove(kvd->u.dlist, node2);
-			if (dlist_length(kvd->u.dlist) == 0) {
-				dlist_remove(dlist, node);
-				kdfree(kvd);
-			}
-		}
-		dlist_iter_free(&diter);
-		if (dlist_length(dlist) == 0) {
-			table_remove(subscribers, table_node_key(tnode));
-			dlist_free(&dlist);
-		}
+		fields = dstr_split_len(skey, dstr_length(skey), ",", 1, &nfield);
+		pnode = ptrie_get_index(subscribers, fields[0]);
+		ptrie_remove(pnode, skey, c);
+		dstr_free_tokens(fields, nfield);
 	}
-	table_iter_free(&titer);
-	table_rwlock_unlock(subscribers);
+	dlist_iter_free(&diter);
+	dlist_free(&c->subscribers);
+	ptrie_rwlock_unlock(subscribers);
 }
 
 /* FIXME */
@@ -1195,8 +1204,9 @@ static client client_new(int fd, int sock) {
 	c->outpos        = 0;
 	c->reply         = ring_new();
 	c->sentlen       = 0;
-	c->refcount      = 0;
+	c->subscribers   = dlist_new(cmpstr, vfree);
 	c->eagcount      = 0;
+	c->refcount      = 0;
 	c->authenticated = 0;
 	dlist_lock(clients);
 	dlist_insert_tail(clients, c);

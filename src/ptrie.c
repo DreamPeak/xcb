@@ -36,11 +36,28 @@ struct ptrie_t {
 	pthread_rwlock_t	rwlock;
 };
 struct ptrie_node_t {
-	unsigned char		real:1;
 	char			*key;
 	dlist_t			value;
 	ptrie_node_t		parent, prev, next, children;
 };
+
+#define STEP_DOWN(nmatches, newkey, x) \
+	while (nmatches < strlen(newkey) && nmatches == strlen(x->key) && x->children) { \
+		ptrie_node_t y = x->children; \
+		char *subkey = newkey + nmatches; \
+		int flag = 0; \
+		while (y) { \
+			if (subkey[0] == y->key[0]) { \
+				flag = 1; \
+				newkey = subkey; \
+				x = y; \
+				nmatches = get_nmatches(newkey, x->key); \
+				break; \
+			} \
+			y = y->next; \
+		} \
+		if (!flag) break; \
+	}
 
 /* FIXME */
 static ptrie_node_t node_new(const char *key) {
@@ -83,7 +100,6 @@ static void merge(ptrie_node_t x, ptrie_node_t y) {
 	if (RESIZE(x->key, strlen(x->key) + strlen(y->key) + 1) == NULL)
 		return;
 	strcat(x->key, y->key);
-	x->real     = y->real;
 	x->value    = y->value;
 	y->value    = NULL;
 	x->children = y->children;
@@ -98,9 +114,8 @@ ptrie_t ptrie_new(void) {
 
 	if ((node = node_new("")) == NULL)
 		return NULL;
-	node->real  = 0;
 	node->value = dlist_new(NULL, NULL);
-	if (NEW(ptrie) == NULL) {
+	if (NEW0(ptrie) == NULL) {
 		node_free(node);
 		return NULL;
 	}
@@ -143,10 +158,10 @@ void ptrie_free(ptrie_t *pp) {
 	FREE(*pp);
 }
 
-ptrie_node_t ptrie_node_parent(ptrie_node_t node) {
+char *ptrie_node_key(ptrie_node_t node) {
 	if (node == NULL)
 		return NULL;
-	return node->parent;
+	return node->key;
 }
 
 dlist_t ptrie_node_value(ptrie_node_t node) {
@@ -155,11 +170,35 @@ dlist_t ptrie_node_value(ptrie_node_t node) {
 	return node->value;
 }
 
+ptrie_node_t ptrie_node_parent(ptrie_node_t node) {
+	if (node == NULL)
+		return NULL;
+	return node->parent;
+}
+
 /* FIXME */
 ptrie_node_t ptrie_get_root(ptrie_t ptrie) {
 	if (ptrie == NULL)
 		return NULL;
 	return ptrie->root;
+}
+
+/* FIXME */
+ptrie_node_t ptrie_set_index(ptrie_t ptrie, const char *index) {
+	ptrie_node_t node;
+
+	if (ptrie == NULL || index == NULL)
+		return NULL;
+	if ((node = node_new(index)) == NULL)
+		return NULL;
+	node->value  = dlist_new(NULL, NULL);
+	node->parent = ptrie->root;
+	if (ptrie->indices) {
+		node->next = ptrie->indices;
+		ptrie->indices->prev = node;
+	}
+	ptrie->root->children = ptrie->indices = node;
+	return node;
 }
 
 /* FIXME */
@@ -171,88 +210,42 @@ ptrie_node_t ptrie_get_index(ptrie_t ptrie, const char *index) {
 	for (node = ptrie->indices; node; node = node->next)
 		if (!strcmp(node->key, index))
 			return node;
-	if ((node = node_new(index)) == NULL)
-		return NULL;
-	node->real   = 0;
-	node->value  = dlist_new(NULL, NULL);
-	node->parent = ptrie->root;
-	if (ptrie->indices) {
-		node->next = ptrie->indices;
-		ptrie->indices->prev = node;
-	}
-	ptrie->root->children = ptrie->indices = node;
-	return node;
+	return NULL;
 }
 
-int ptrie_insert(ptrie_node_t node, const char *key, void *value, dstr *err) {
+int ptrie_insert(ptrie_node_t node, const char *key, void *value) {
 	char *newkey = (char *)key;
 	ptrie_node_t x = node, y, z;
 	unsigned nmatches;
-	dstr fullpath = dstr_new("");
 
 	if (node == NULL || key == NULL)
 		return -1;
 	nmatches = get_nmatches(newkey, x->key);
-	/* step down */
-	while (nmatches < strlen(newkey) && nmatches == strlen(x->key)) {
-		fullpath = dstr_cat(fullpath, x->key);
-		if (dlist_find(x->value, value)) {
-			*err = fullpath;
-			return -1;
-		}
-		if (x->children) {
-			ptrie_node_t y = x->children;
-			char *subkey = newkey + nmatches;
-			int flag = 0;
-
-			while (y) {
-				if (subkey[0] == y->key[0]) {
-					flag = 1;
-					newkey = subkey;
-					x = y;
-					nmatches = get_nmatches(newkey, x->key);
-					break;
-				}
-				y = y->next;
-			}
-			if (!flag) break;
-		}
-	}
+	STEP_DOWN(nmatches, newkey, x);
 	/* exact match */
 	if (nmatches == strlen(newkey) && nmatches == strlen(x->key)) {
-		x->real = 1;
-		if (dlist_find(x->value, value)) {
-			fullpath = dstr_cat(fullpath, x->key);
-			*err = fullpath;
+		if (dlist_find(x->value, value))
 			return -1;
-		}
 		dlist_insert_tail(x->value, value);
 	/* split the current node */
 	} else if (nmatches > 0 && nmatches < strlen(x->key)) {
-		if ((y = node_new(x->key)) == NULL) {
-			dstr_free(fullpath);
+		if ((y = node_new(x->key)) == NULL)
 			return -1;
-		}
-		y->real     = x->real;
 		y->value    = x->value;
 		y->parent   = x;
 		y->children = x->children;
 		if (nmatches < strlen(newkey)) {
 			if ((z = node_new(newkey)) == NULL) {
 				node_free(y);
-				dstr_free(fullpath);
 				return -1;
 			}
-			z->real   = 1;
 			z->value  = dlist_new(NULL, NULL);
 			dlist_insert_tail(z->value, value);
 			z->parent = x;
 			z->prev   = y;
 			y->next   = z;
-			x->real   = 0;
 			x->value  = dlist_new(NULL, NULL);
 		} else {
-			x->real   = 1;
 			x->value  = dlist_new(NULL, NULL);
 			dlist_insert_tail(x->value, value);
 		}
@@ -261,12 +254,9 @@ int ptrie_insert(ptrie_node_t node, const char *key, void *value, dstr *err) {
 		x->children = y;
 	/* add node as the child of the current node */
 	} else {
-		if ((y = node_new(newkey)) == NULL) {
-			dstr_free(fullpath);
+		if ((y = node_new(newkey)) == NULL)
 			return -1;
-		}
-		y->real   = 1;
-		y->value  = dlist_new(NULL, NULL);
+		y->value = dlist_new(NULL, NULL);
 		dlist_insert_tail(y->value, value);
 		y->parent = x;
 		if (x->children) {
@@ -275,55 +265,72 @@ int ptrie_insert(ptrie_node_t node, const char *key, void *value, dstr *err) {
 		}
 		x->children = y;
 	}
-	dstr_free(fullpath);
 	return 0;
 }
 
-ptrie_node_t ptrie_find(ptrie_t ptrie, const char *key) {
-	char *newkey = (char *)key;
-	ptrie_node_t x = ptrie->root;
-	unsigned nmatches;
-
-	if (ptrie == NULL || key == NULL)
-		return NULL;
-	nmatches = get_nmatches(newkey, x->key);
-	/* step down */
-	while (nmatches < strlen(newkey) && nmatches == strlen(x->key) && x->children) {
-		ptrie_node_t y = x->children;
-		char *subkey = newkey + nmatches;
-		int flag = 0;
-
-		while (y) {
-			if (subkey[0] == y->key[0]) {
-				flag = 1;
-				newkey = subkey;
-				x = y;
-				nmatches = get_nmatches(newkey, x->key);
-				break;
-			}
-			y = y->next;
-		}
-		if (!flag) break;
-	}
-	return nmatches == strlen(x->key) ? x : NULL;
-}
-
-int ptrie_remove(ptrie_node_t node, const char *key, void *value, dstr *err) {
+ptrie_node_t ptrie_find(ptrie_node_t node, const char *key) {
 	char *newkey = (char *)key;
 	ptrie_node_t x = node;
 	unsigned nmatches;
-	dstr fullpath = dstr_new("");
+
+	if (node == NULL || key == NULL)
+		return NULL;
+	nmatches = get_nmatches(newkey, x->key);
+	STEP_DOWN(nmatches, newkey, x);
+	return nmatches == strlen(x->key) ? x : NULL;
+}
+
+int ptrie_remove(ptrie_node_t node, const char *key, void *value) {
+	char *newkey = (char *)key;
+	ptrie_node_t x = node;
+	unsigned nmatches;
 
 	if (node == NULL || key == NULL)
 		return -1;
 	nmatches = get_nmatches(newkey, x->key);
+	STEP_DOWN(nmatches, newkey, x);
+	/* only the exact match case is worth considering */
+	if (nmatches == strlen(newkey) && nmatches == strlen(x->key)) {
+		dlist_node_t node;
+
+		if ((node = dlist_find(x->value, value))) {
+			dlist_remove(x->value, node);
+			if (dlist_length(x->value) == 0) {
+				if (x->children == NULL) {
+					ptrie_node_t w = x->parent;
+
+					if (x->prev)
+						x->prev->next = x->next;
+					if (x->next)
+						x->next->prev = x->prev;
+					if (w->children == x)
+						w->children = x->next;
+					node_free(x);
+					if (w->children && w->children->prev == NULL &&
+						w->children->next == NULL && dlist_length(w->value) == 0)
+						merge(w, w->children);
+				} else if (x->children && x->children->prev == NULL &&
+					x->children->next == NULL)
+					merge(x, x->children);
+			}
+			return 0;
+		}
+	}
+	return -1;
+}
+
+ptrie_node_t ptrie_search_prefix(ptrie_node_t node, const char *key, void *value) {
+	char *newkey = (char *)key;
+	ptrie_node_t x = node;
+	unsigned nmatches;
+
+	if (node == NULL || key == NULL)
+		return NULL;
+	nmatches = get_nmatches(newkey, x->key);
 	/* step down */
 	while (nmatches < strlen(newkey) && nmatches == strlen(x->key)) {
-		fullpath = dstr_cat(fullpath, x->key);
-		if (dlist_find(x->value, value)) {
-			*err = fullpath;
-			return -1;
-		}
+		if (dlist_find(x->value, value))
+			return x;
 		if (x->children) {
 			ptrie_node_t y = x->children;
 			char *subkey = newkey + nmatches;
@@ -339,39 +346,33 @@ int ptrie_remove(ptrie_node_t node, const char *key, void *value, dstr *err) {
 				}
 				y = y->next;
 			}
-			if (!flag) break;
+			if (!flag)
+				break;
 		}
 	}
-	/* only the exact match case is worth considering */
-	if (nmatches == strlen(newkey) && nmatches == strlen(x->key) && x->real) {
-		dlist_node_t node;
+	if (nmatches == strlen(newkey) && nmatches < strlen(x->key)) {
+		dlist_t queue = dlist_new(NULL, NULL);
 
-		if ((node = dlist_find(x->value, value)))
-			dlist_remove(x->value, node);
-		if (dlist_length(x->value) == 0) {
-			if (x->children == NULL) {
-				ptrie_node_t w = x->parent;
-
-				if (x->prev)
-					x->prev->next = x->next;
-				if (x->next)
-					x->next->prev = x->prev;
-				if (w->children == x)
-					w->children = x->next;
-				node_free(x);
-				if (w->children && w->children->prev == NULL &&
-					w->children->next == NULL && !w->real)
-					merge(w, w->children);
-			} else if (x->children && x->children->prev == NULL &&
-				x->children->next == NULL) {
-				merge(x, x->children);
-			} else
-				x->real = 0;
+		dlist_insert_tail(queue, x);
+		while (dlist_length(queue)) {
+			x = dlist_remove_head(queue);
+			if (dlist_find(x->value, value)) {
+				dlist_free(&queue);
+				return x;
+			}
+			if (x->children) {
+				x = x->children;
+				dlist_insert_tail(queue, x);
+				while (x->next) {
+					dlist_insert_tail(queue, x);
+					x = x->next;
+				}
+			}
 		}
 	}
-	dstr_free(fullpath);
-	return 0;
+	return NULL;
 }
+
 
 void ptrie_lock(ptrie_t ptrie) {
 	if (ptrie == NULL)

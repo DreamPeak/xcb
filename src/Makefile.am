@@ -17,9 +17,9 @@ networking.c basics.c custom.c xcb-pb2.c
 xcb_pb2_CPPFLAGS = -I$(top_srcdir)/include -I/usr/include/pgm-5.1
 xcb_pb2_CFLAGS = -Wall -Winline -pthread
 xcb_pb2_LDFLAGS = -lrt -lpgm -lleveldb -ltcmalloc
-xcb_compact_SOURCES = mem.c dlist.c table.c ring.c heap.c dstr.c utilities.c   \
-logger.c config.c event.c net.c loader.c thrpool.c db.c networking.c basics.c  \
-custom.c xcb-compact.c
+xcb_compact_SOURCES = mem.c dlist.c table.c ring.c heap.c ptrie.c dstr.c       \
+utilities.c logger.c config.c event.c net.c loader.c thrpool.c db.c            \
+networking.c basics.c custom.c xcb-compact.c
 xcb_compact_CPPFLAGS = -I$(top_srcdir)/include
 xcb_compact_CFLAGS = -Wall -Winline -pthread -rdynamic
 xcb_compact_LDFLAGS = -lrt -ldl -lm -lleveldb -ltcmalloc

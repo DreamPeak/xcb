@@ -23,6 +23,7 @@
 
 #include <pthread.h>
 #include <time.h>
+#include "dlist.h"
 #include "ring.h"
 #include "dstr.h"
 #include "event.h"
@@ -52,6 +53,7 @@ typedef struct client {
 	char			outbuf[16 * 1024];
 	ring_t			reply;
 	int			sentlen;
+	dlist_t			subscribers;
 	int			eagcount;
 	int			refcount;
 	int			authenticated;

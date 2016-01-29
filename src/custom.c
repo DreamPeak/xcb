@@ -30,6 +30,7 @@
 #include "mem.h"
 #include "dlist.h"
 #include "table.h"
+#include "ptrie.h"
 #include "dstr.h"
 #include "utilities.h"
 #include "logger.h"
@@ -46,7 +47,7 @@ struct crss {
 
 /* FIXME */
 extern table_t cache;
-extern table_t subscribers;
+extern ptrie_t subscribers;
 extern int persistence;
 extern db_t *db;
 extern db_readoptions_t *db_ro;
@@ -172,96 +173,54 @@ void s_command(client c) {
 		dlist_iter_free(&iter);
 	}
 	table_unlock(cache);
-	table_rwlock_wrlock(subscribers);
-	if ((dlist = table_get_value(subscribers, pkey)) == NULL) {
-		if (NEW(kvd)) {
-			kvd->key     = skey;
-			kvd->u.dlist = dlist_new(NULL, NULL);
-			dlist_insert_tail(kvd->u.dlist, c);
-			dlist = dlist_new(cmpkvd, kdfree);
-			dlist_insert_sort(dlist, kvd);
-			table_insert(subscribers, pkey, dlist);
-		} else {
-			add_reply_error(c, "error allocating memory for kvd\r\n");
-			dstr_free(skey);
-			dstr_free(pkey);
-		}
+	ptrie_rwlock_wrlock(subscribers);
+	dlist = ptrie_node_value(ptrie_get_root(subscribers));
+	if (dlist_find(dlist, c)) {
+		add_reply_error(c, "already subscribed 'ALL'\r\n");
+		dstr_free(skey);
 	} else {
-		if (NEW(kvd)) {
-			dlist_node_t node;
+		ptrie_node_t pnode, pnode2;
 
-			kvd->key     = skey;
-			kvd->u.dlist = dlist_new(NULL, NULL);
-			if ((node = dlist_find(dlist, kvd)) == NULL) {
-				dlist_insert_tail(kvd->u.dlist, c);
-				dlist_insert_sort(dlist, kvd);
-			} else {
-				kdfree(kvd);
-				kvd = (struct kvd *)dlist_node_value(node);
-				if (dlist_find(kvd->u.dlist, c) == NULL)
-					dlist_insert_tail(kvd->u.dlist, c);
+		if ((pnode = ptrie_get_index(subscribers, pkey)) == NULL)
+			pnode = ptrie_set_index(subscribers, pkey);
+		if ((pnode2 = ptrie_search_prefix(pnode, skey, c))) {
+			dlist_iter_t diter;
+			dlist_node_t dnode;
+			dstr path = dstr_new("");
+
+			dlist = dlist_new(NULL, NULL);
+			while (ptrie_node_parent(pnode2)) {
+				dlist_insert_head(dlist, ptrie_node_key(pnode2));
+				pnode2 = ptrie_node_parent(pnode2);
 			}
-		} else {
-			add_reply_error(c, "error allocating memory for kvd\r\n");
+			diter = dlist_iter_new(dlist, DLIST_START_HEAD);
+			while ((dnode = dlist_next(diter)))
+				path = dstr_cat(path, dlist_node_value(dnode));
+			add_reply_error_format(c, "already subscribed '%s'\r\n", path);
+			dlist_iter_free(&diter);
+			dlist_free(&dlist);
+			dstr_free(path);
 			dstr_free(skey);
-		}
-		dstr_free(pkey);
+		} else if (ptrie_insert(pnode, skey, c) == 0)
+			dlist_insert_sort(c->subscribers, skey);
 	}
-	table_rwlock_unlock(subscribers);
+	ptrie_rwlock_unlock(subscribers);
+	dstr_free(pkey);
 }
 
 /* FIXME */
 void sall_command(client c) {
-	dstr res = get_indices();
-	dstr *fields = NULL;
-	int nfield = 0, i;
+	ptrie_rwlock_wrlock(subscribers);
+	if (dlist_length(c->subscribers) > 0)
+		add_reply_error_format(c, "already subscribed '%s'\r\n",
+			dlist_node_value(dlist_head(c->subscribers)));
+	else {
+		dlist_t dlist = ptrie_node_value(ptrie_get_root(subscribers));
 
-	RTRIM(res);
-	fields = dstr_split_len(res, dstr_length(res), ",", 1, &nfield);
-	for (i = 1; i < nfield; ++i) {
-		dstr pkey = dstr_new(fields[i]);
-		dstr skey = dstr_new(pkey);
-		dlist_t dlist;
-		struct kvd *kvd;
-
-		table_rwlock_wrlock(subscribers);
-		if ((dlist = table_get_value(subscribers, pkey)) == NULL) {
-			if (NEW(kvd)) {
-				kvd->key = skey;
-				kvd->u.dlist = dlist_new(NULL, NULL);
-				dlist_insert_tail(kvd->u.dlist, c);
-				dlist = dlist_new(cmpkvd, kdfree);
-				dlist_insert_sort(dlist, kvd);
-				table_insert(subscribers, pkey, dlist);
-			} else {
-				add_reply_error(c, "error allocating memory for kvd\r\n");
-				dstr_free(skey);
-				dstr_free(pkey);
-			}
-		} else {
-			if (NEW(kvd)) {
-				dlist_node_t node;
-
-				kvd->key     = skey;
-				kvd->u.dlist = dlist_new(NULL, NULL);
-				if ((node = dlist_find(dlist, kvd)) == NULL) {
-					dlist_insert_tail(kvd->u.dlist, c);
-					dlist_insert_sort(dlist, kvd);
-				} else {
-					kdfree(kvd);
-					kvd = (struct kvd *)dlist_node_value(node);
-					if (dlist_find(kvd->u.dlist, c) == NULL)
-						dlist_insert_tail(kvd->u.dlist, c);
-				}
-			} else {
-				add_reply_error(c, "error allocating memory for kvd\r\n");
-				dstr_free(skey);
-			}
-			dstr_free(pkey);
-		}
-		table_rwlock_unlock(subscribers);
+		if (dlist_find(dlist, c) == NULL)
+			dlist_insert_tail(dlist, c);
 	}
-	dstr_free(res);
+	ptrie_rwlock_unlock(subscribers);
 }
 
 /* FIXME */
@@ -283,33 +242,37 @@ void u_command(client c) {
 			skey = dstr_cat(skey, c->argv[i]);
 		}
 	}
-	table_rwlock_wrlock(subscribers);
-	if ((dlist = table_get_value(subscribers, pkey))) {
-		struct kvd *kvd;
+	ptrie_rwlock_wrlock(subscribers);
+	dlist = ptrie_node_value(ptrie_get_root(subscribers));
+	if (dlist_find(dlist, c))
+		add_reply_error(c, "subscribe/unsubscribe is symmetrical. unsubscribe 'ALL' first");
+	else {
+		ptrie_node_t pnode, pnode2;
 
-		if (NEW(kvd)) {
-			dlist_node_t node, node2;
+		if ((pnode = ptrie_get_index(subscribers, pkey)) == NULL)
+			pnode = ptrie_set_index(subscribers, pkey);
+		if ((pnode2 = ptrie_search_prefix(pnode, skey, c))) {
+			dlist_iter_t diter;
+			dlist_node_t dnode;
+			dstr path = dstr_new("");
 
-			kvd->key = skey;
-			if ((node = dlist_find(dlist, kvd))) {
-				FREE(kvd);
-				kvd = (struct kvd *)dlist_node_value(node);
-				if ((node2 = dlist_find(kvd->u.dlist, c)))
-					dlist_remove(kvd->u.dlist, node2);
-				if (dlist_length(kvd->u.dlist) == 0) {
-					dlist_remove(dlist, node);
-					kdfree(kvd);
-				}
-				if (dlist_length(dlist) == 0) {
-					table_remove(subscribers, pkey);
-					dlist_free(&dlist);
-				}
-			} else
-				FREE(kvd);
-		} else
-			add_reply_error(c, "error allocating memory for kvd");
+			dlist = dlist_new(NULL, NULL);
+			while (ptrie_node_parent(pnode2)) {
+				dlist_insert_head(dlist, ptrie_node_key(pnode2));
+				pnode2 = ptrie_node_parent(pnode2);
+			}
+			diter = dlist_iter_new(dlist, DLIST_START_HEAD);
+			while ((dnode = dlist_next(diter)))
+				path = dstr_cat(path, dlist_node_value(dnode));
+			add_reply_error_format(c, "subscribe/unsubscribe is symmetrical. "
+				"unsubscribe '%s' first", path);
+			dlist_iter_free(&diter);
+			dlist_free(&dlist);
+			dstr_free(path);
+		} else if (ptrie_remove(pnode, skey, c) == 0)
+			dlist_remove(c->subscribers, dlist_find(c->subscribers, skey));
 	}
-	table_rwlock_unlock(subscribers);
+	ptrie_rwlock_unlock(subscribers);
 	dstr_free(skey);
 	dstr_free(pkey);
 	add_reply_string(c, "\r\n", 2);
@@ -317,49 +280,16 @@ void u_command(client c) {
 
 /* FIXME */
 void uall_command(client c) {
-	dstr res = get_indices();
-	dstr *fields = NULL;
-	int nfield = 0, i;
+	ptrie_rwlock_wrlock(subscribers);
+	if (dlist_length(c->subscribers) > 0)
+		add_reply_error_format(c, "subscribe/unsubscribe is symmetrical, unsubscribe '%s' first\r\n",
+			dlist_node_value(dlist_head(c->subscribers)));
+	else {
+		dlist_t dlist = ptrie_node_value(ptrie_get_root(subscribers));
 
-	RTRIM(res);
-	fields = dstr_split_len(res, dstr_length(res), ",", 1, &nfield);
-	for (i = 1; i < nfield; ++i) {
-		dstr pkey = dstr_new(fields[i]);
-		dstr skey = dstr_new(pkey);
-		dlist_t dlist;
-
-		table_rwlock_wrlock(subscribers);
-		if ((dlist = table_get_value(subscribers, pkey))) {
-			struct kvd *kvd;
-
-			if (NEW(kvd)) {
-				dlist_node_t node, node2;
-
-				kvd->key = skey;
-				if ((node = dlist_find(dlist, kvd))) {
-					FREE(kvd);
-					kvd = (struct kvd *)dlist_node_value(node);
-					if ((node2 = dlist_find(kvd->u.dlist, c)))
-						dlist_remove(kvd->u.dlist, node2);
-					if (dlist_length(kvd->u.dlist) == 0) {
-						dlist_remove(dlist, node);
-						kdfree(kvd);
-					}
-					if (dlist_length(dlist) == 0) {
-						table_remove(subscribers, pkey);
-						dlist_free(&dlist);
-					}
-				} else
-					FREE(kvd);
-			} else
-				add_reply_error(c, "error allocating memory for kvd");
-		}
-		table_rwlock_unlock(subscribers);
-		dstr_free(skey);
-		dstr_free(pkey);
+		dlist_remove(dlist, dlist_find(dlist, c));
 	}
-	add_reply_string(c, "\r\n", 2);
-	dstr_free(res);
+	ptrie_rwlock_unlock(subscribers);
 }
 
 /* FIXME */

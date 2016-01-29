@@ -41,7 +41,7 @@ C4E3B28684E46D5842053F1BD2FAE78FCCE442EEB0786AD751D37E7AC15727B30815648A850F4110
 
 /* FIXME */
 static char *app = "tap";
-static char *desc = "TAP API";
+static char *desc = "Trading Analysis Platform API";
 static tap_mdspi_t *mdspi;
 static tap_mdapi_t *mdapi;
 static struct config *cfg;
@@ -225,7 +225,7 @@ static int load_module(void) {
 	tap_mdspi_on_quote(mdspi, on_quote);
 	/* FIXME */
 	strcpy(appinfo.AuthCode, DEFAULT_AUTHCODE);
-	strcpy(appinfo.KeyOperationLogPath, "");
+	strcpy(appinfo.KeyOperationLogPath, "/var/log/xcb/");
 	mdapi = tap_mdapi_create(&appinfo, &iresult);
 	tap_mdapi_set_spi(mdapi, mdspi);
 	tap_mdapi_set_host_addr(mdapi, front_ip, atoi(front_port));
@@ -251,5 +251,5 @@ static int reload_module(void) {
 	return MODULE_LOAD_SUCCESS;
 }
 
-MODULE_INFO(load_module, unload_module, reload_module, "TAP API Application");
+MODULE_INFO(load_module, unload_module, reload_module, "Trading Analysis Platform API Application");
 

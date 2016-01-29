@@ -28,7 +28,6 @@
 #define PTRIE_INCLUDED
 
 #include "dlist.h"
-#include "dstr.h"
 
 /* exported types */
 typedef struct ptrie_t      *ptrie_t;
@@ -37,13 +36,16 @@ typedef struct ptrie_node_t *ptrie_node_t;
 /* FIXME: exported functions */
 extern ptrie_t      ptrie_new(void);
 extern void         ptrie_free(ptrie_t *pp);
-extern ptrie_node_t ptrie_node_parent(ptrie_node_t node);
+extern char        *ptrie_node_key(ptrie_node_t node);
 extern dlist_t      ptrie_node_value(ptrie_node_t node);
+extern ptrie_node_t ptrie_node_parent(ptrie_node_t node);
 extern ptrie_node_t ptrie_get_root(ptrie_t ptrie);
+extern ptrie_node_t ptrie_set_index(ptrie_t ptrie, const char *index);
 extern ptrie_node_t ptrie_get_index(ptrie_t ptrie, const char *index);
-extern int          ptrie_insert(ptrie_node_t node, const char *key, void *value, dstr *err);
-extern ptrie_node_t ptrie_find(ptrie_t ptrie, const char *key);
-extern int          ptrie_remove(ptrie_node_t node, const char *key, void *value, dstr *err);
+extern int          ptrie_insert(ptrie_node_t node, const char *key, void *value);
+extern ptrie_node_t ptrie_find(ptrie_node_t node, const char *key);
+extern int          ptrie_remove(ptrie_node_t node, const char *key, void *value);
+extern ptrie_node_t ptrie_search_prefix(ptrie_node_t node, const char *key, void *value);
 extern void         ptrie_lock(ptrie_t ptrie);
 extern void         ptrie_unlock(ptrie_t ptrie);
 extern void         ptrie_rwlock_rdlock(ptrie_t ptrie);

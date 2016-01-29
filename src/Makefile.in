@@ -109,13 +109,13 @@ xcb_cli_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 am_xcb_compact_OBJECTS = xcb_compact-mem.$(OBJEXT) \
 	xcb_compact-dlist.$(OBJEXT) xcb_compact-table.$(OBJEXT) \
 	xcb_compact-ring.$(OBJEXT) xcb_compact-heap.$(OBJEXT) \
-	xcb_compact-dstr.$(OBJEXT) xcb_compact-utilities.$(OBJEXT) \
-	xcb_compact-logger.$(OBJEXT) xcb_compact-config.$(OBJEXT) \
-	xcb_compact-event.$(OBJEXT) xcb_compact-net.$(OBJEXT) \
-	xcb_compact-loader.$(OBJEXT) xcb_compact-thrpool.$(OBJEXT) \
-	xcb_compact-db.$(OBJEXT) xcb_compact-networking.$(OBJEXT) \
-	xcb_compact-basics.$(OBJEXT) xcb_compact-custom.$(OBJEXT) \
-	xcb_compact-xcb-compact.$(OBJEXT)
+	xcb_compact-ptrie.$(OBJEXT) xcb_compact-dstr.$(OBJEXT) \
+	xcb_compact-utilities.$(OBJEXT) xcb_compact-logger.$(OBJEXT) \
+	xcb_compact-config.$(OBJEXT) xcb_compact-event.$(OBJEXT) \
+	xcb_compact-net.$(OBJEXT) xcb_compact-loader.$(OBJEXT) \
+	xcb_compact-thrpool.$(OBJEXT) xcb_compact-db.$(OBJEXT) \
+	xcb_compact-networking.$(OBJEXT) xcb_compact-basics.$(OBJEXT) \
+	xcb_compact-custom.$(OBJEXT) xcb_compact-xcb-compact.$(OBJEXT)
 xcb_compact_OBJECTS = $(am_xcb_compact_OBJECTS)
 xcb_compact_LDADD = $(LDADD)
 xcb_compact_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
@@ -333,9 +333,9 @@ networking.c basics.c custom.c xcb-pb2.c
 xcb_pb2_CPPFLAGS = -I$(top_srcdir)/include -I/usr/include/pgm-5.1
 xcb_pb2_CFLAGS = -Wall -Winline -pthread
 xcb_pb2_LDFLAGS = -lrt -lpgm -lleveldb -ltcmalloc
-xcb_compact_SOURCES = mem.c dlist.c table.c ring.c heap.c dstr.c utilities.c   \
-logger.c config.c event.c net.c loader.c thrpool.c db.c networking.c basics.c  \
-custom.c xcb-compact.c
+xcb_compact_SOURCES = mem.c dlist.c table.c ring.c heap.c ptrie.c dstr.c       \
+utilities.c logger.c config.c event.c net.c loader.c thrpool.c db.c            \
+networking.c basics.c custom.c xcb-compact.c
 
 xcb_compact_CPPFLAGS = -I$(top_srcdir)/include
 xcb_compact_CFLAGS = -Wall -Winline -pthread -rdynamic
@@ -530,6 +530,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_compact-mem.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_compact-net.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_compact-networking.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_compact-ptrie.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_compact-ring.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_compact-table.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_compact-thrpool.Po@am__quote@
@@ -790,6 +791,20 @@ xcb_compact-heap.obj: heap.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='heap.c' object='xcb_compact-heap.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_compact_CPPFLAGS) $(CPPFLAGS) $(xcb_compact_CFLAGS) $(CFLAGS) -c -o xcb_compact-heap.obj `if test -f 'heap.c'; then $(CYGPATH_W) 'heap.c'; else $(CYGPATH_W) '$(srcdir)/heap.c'; fi`
+
+xcb_compact-ptrie.o: ptrie.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_compact_CPPFLAGS) $(CPPFLAGS) $(xcb_compact_CFLAGS) $(CFLAGS) -MT xcb_compact-ptrie.o -MD -MP -MF $(DEPDIR)/xcb_compact-ptrie.Tpo -c -o xcb_compact-ptrie.o `test -f 'ptrie.c' || echo '$(srcdir)/'`ptrie.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_compact-ptrie.Tpo $(DEPDIR)/xcb_compact-ptrie.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ptrie.c' object='xcb_compact-ptrie.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_compact_CPPFLAGS) $(CPPFLAGS) $(xcb_compact_CFLAGS) $(CFLAGS) -c -o xcb_compact-ptrie.o `test -f 'ptrie.c' || echo '$(srcdir)/'`ptrie.c
+
+xcb_compact-ptrie.obj: ptrie.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_compact_CPPFLAGS) $(CPPFLAGS) $(xcb_compact_CFLAGS) $(CFLAGS) -MT xcb_compact-ptrie.obj -MD -MP -MF $(DEPDIR)/xcb_compact-ptrie.Tpo -c -o xcb_compact-ptrie.obj `if test -f 'ptrie.c'; then $(CYGPATH_W) 'ptrie.c'; else $(CYGPATH_W) '$(srcdir)/ptrie.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_compact-ptrie.Tpo $(DEPDIR)/xcb_compact-ptrie.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ptrie.c' object='xcb_compact-ptrie.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_compact_CPPFLAGS) $(CPPFLAGS) $(xcb_compact_CFLAGS) $(CFLAGS) -c -o xcb_compact-ptrie.obj `if test -f 'ptrie.c'; then $(CYGPATH_W) 'ptrie.c'; else $(CYGPATH_W) '$(srcdir)/ptrie.c'; fi`
 
 xcb_compact-dstr.o: dstr.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_compact_CPPFLAGS) $(CPPFLAGS) $(xcb_compact_CFLAGS) $(CFLAGS) -MT xcb_compact-dstr.o -MD -MP -MF $(DEPDIR)/xcb_compact-dstr.Tpo -c -o xcb_compact-dstr.o `test -f 'dstr.c' || echo '$(srcdir)/'`dstr.c
