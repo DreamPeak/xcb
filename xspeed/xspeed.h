@@ -39,7 +39,7 @@ typedef void (*xspeed_on_user_login)(struct DFITCUserLoginInfoRtnField *userlogi
 		struct DFITCErrorRtnField *rspinfo);
 typedef void (*xspeed_on_user_logout)(struct DFITCUserLogoutInfoRtnField *userlogout,
 		struct DFITCErrorRtnField *rspinfo);
-typedef void (*xspeed_on_today)(struct DFITCTradingDayRtnField *today);
+typedef void (*xspeed_on_tradingday)(struct DFITCTradingDayRtnField *tradingday);
 typedef void (*xspeed_on_subscribe_market_data)(struct DFITCSpecificInstrumentField *instrument,
 		struct DFITCErrorRtnField *rspinfo);
 typedef void (*xspeed_on_unsubscribe_market_data)(struct DFITCSpecificInstrumentField *instrument,
@@ -59,8 +59,8 @@ extern int             xspeed_mdapi_login_user(xspeed_mdapi_t *mdapi,
 			struct DFITCUserLoginField *userlogin);
 extern int             xspeed_mdapi_logout_user(xspeed_mdapi_t *mdapi,
 			struct DFITCUserLogoutField *userlogout);
-extern int             xspeed_mdapi_get_today(xspeed_mdapi_t *mdapi,
-			struct DFITCTradingDayField *today);
+extern int             xspeed_mdapi_get_tradingday(xspeed_mdapi_t *mdapi,
+			struct DFITCTradingDayField *tradingday);
 extern int             xspeed_mdapi_subscribe_market_data(xspeed_mdapi_t *mdapi,
 			char **instruments, int count, int rid);
 extern int             xspeed_mdapi_unsubscribe_market_data(xspeed_mdapi_t *mdapi,
@@ -78,7 +78,7 @@ extern void            xspeed_mdspi_on_front_disconnected(xspeed_mdspi_t *mdspi,
 extern void            xspeed_mdspi_on_error(xspeed_mdspi_t *mdspi, xspeed_on_error func);
 extern void            xspeed_mdspi_on_user_login(xspeed_mdspi_t *mdspi, xspeed_on_user_login func);
 extern void            xspeed_mdspi_on_user_logout(xspeed_mdspi_t *mdspi, xspeed_on_user_logout func);
-extern void            xspeed_mdspi_on_today(xspeed_mdspi_t *mdspi, xspeed_on_today func);
+extern void            xspeed_mdspi_on_tradingday(xspeed_mdspi_t *mdspi, xspeed_on_tradingday func);
 extern void            xspeed_mdspi_on_subscribe_market_data(xspeed_mdspi_t *mdspi,
 			xspeed_on_subscribe_market_data func);
 extern void            xspeed_mdspi_on_unsubscribe_market_data(xspeed_mdspi_t *mdspi,

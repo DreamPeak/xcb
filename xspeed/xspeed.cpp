@@ -34,7 +34,7 @@ struct xspeed_mdspi_t : public DFITCXSPEEDMDAPI::DFITCMdSpi {
 	xspeed_on_error				on_error_;
 	xspeed_on_user_login			on_user_login_;
 	xspeed_on_user_logout			on_user_logout_;
-	xspeed_on_today				on_today_;
+	xspeed_on_tradingday			on_tradingday_;
 	xspeed_on_subscribe_market_data		on_subscribe_market_data_;
 	xspeed_on_unsubscribe_market_data	on_unsubscribe_market_data_;
 	xspeed_on_deep_market_data		on_deep_market_data_;
@@ -66,8 +66,8 @@ struct xspeed_mdspi_t : public DFITCXSPEEDMDAPI::DFITCMdSpi {
 			(*on_user_logout_)(pRspUsrLogout, pRspInfo);
 	}
 	void OnRspTradingDay(struct DFITCTradingDayRtnField *pTradingDayRtnData) {
-		if (on_today_)
-			(*on_today_)(pTradingDayRtnData);
+		if (on_tradingday_)
+			(*on_tradingday_)(pTradingDayRtnData);
 	}
 	void OnRspSubMarketData(struct DFITCSpecificInstrumentField *pSpecificInstrument,
 		struct DFITCErrorRtnField *pRspInfo) {
@@ -130,9 +130,9 @@ int xspeed_mdapi_logout_user(xspeed_mdapi_t *mdapi, struct DFITCUserLogoutField 
 	return -1;
 }
 
-int xspeed_mdapi_get_today(xspeed_mdapi_t *mdapi, struct DFITCTradingDayField *today) {
+int xspeed_mdapi_get_tradingday(xspeed_mdapi_t *mdapi, struct DFITCTradingDayField *tradingday) {
 	if (mdapi)
-		return mdapi->rep->ReqTradingDay(today);
+		return mdapi->rep->ReqTradingDay(tradingday);
 	return -1;
 }
 
@@ -198,9 +198,9 @@ void xspeed_mdspi_on_user_logout(xspeed_mdspi_t *mdspi, xspeed_on_user_logout fu
 		mdspi->on_user_logout_ = func;
 }
 
-void xspeed_mdspi_on_today(xspeed_mdspi_t *mdspi, xspeed_on_today func) {
+void xspeed_mdspi_on_tradingday(xspeed_mdspi_t *mdspi, xspeed_on_tradingday func) {
 	if (mdspi && func)
-		mdspi->on_today_ = func;
+		mdspi->on_tradingday_ = func;
 }
 
 void xspeed_mdspi_on_subscribe_market_data(xspeed_mdspi_t *mdspi,

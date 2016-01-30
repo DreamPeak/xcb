@@ -291,10 +291,10 @@ int ptrie_remove(ptrie_node_t node, const char *key, void *value) {
 	STEP_DOWN(nmatches, newkey, x);
 	/* only the exact match case is worth considering */
 	if (nmatches == strlen(newkey) && nmatches == strlen(x->key)) {
-		dlist_node_t node;
+		dlist_node_t dnode;
 
-		if ((node = dlist_find(x->value, value))) {
-			dlist_remove(x->value, node);
+		if ((dnode = dlist_find(x->value, value))) {
+			dlist_remove(x->value, dnode);
 			if (dlist_length(x->value) == 0) {
 				if (x->children == NULL) {
 					ptrie_node_t w = x->parent;
@@ -306,10 +306,10 @@ int ptrie_remove(ptrie_node_t node, const char *key, void *value) {
 					if (w->children == x)
 						w->children = x->next;
 					node_free(x);
-					if (w->children && w->children->prev == NULL &&
+					if (w != node && w->children && w->children->prev == NULL &&
 						w->children->next == NULL && dlist_length(w->value) == 0)
 						merge(w, w->children);
-				} else if (x->children && x->children->prev == NULL &&
+				} else if (x != node && x->children && x->children->prev == NULL &&
 					x->children->next == NULL)
 					merge(x, x->children);
 			}
@@ -348,7 +348,8 @@ ptrie_node_t ptrie_search_prefix(ptrie_node_t node, const char *key, void *value
 			}
 			if (!flag)
 				break;
-		}
+		} else
+			break;
 	}
 	if (nmatches == strlen(newkey) && nmatches < strlen(x->key)) {
 		dlist_t queue = dlist_new(NULL, NULL);

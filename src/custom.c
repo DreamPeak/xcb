@@ -26,7 +26,6 @@
 #include <string.h>
 #include <strings.h>
 #include <time.h>
-#include "macros.h"
 #include "mem.h"
 #include "dlist.h"
 #include "table.h"
@@ -179,19 +178,19 @@ void s_command(client c) {
 		add_reply_error(c, "already subscribed 'ALL'\r\n");
 		dstr_free(skey);
 	} else {
-		ptrie_node_t pnode, pnode2;
+		ptrie_node_t node, node2;
 
-		if ((pnode = ptrie_get_index(subscribers, pkey)) == NULL)
-			pnode = ptrie_set_index(subscribers, pkey);
-		if ((pnode2 = ptrie_search_prefix(pnode, skey, c))) {
+		if ((node = ptrie_get_index(subscribers, pkey)) == NULL)
+			node = ptrie_set_index(subscribers, pkey);
+		if ((node2 = ptrie_search_prefix(node, skey, c))) {
 			dlist_iter_t diter;
 			dlist_node_t dnode;
 			dstr path = dstr_new("");
 
 			dlist = dlist_new(NULL, NULL);
-			while (ptrie_node_parent(pnode2)) {
-				dlist_insert_head(dlist, ptrie_node_key(pnode2));
-				pnode2 = ptrie_node_parent(pnode2);
+			while (ptrie_node_parent(node2)) {
+				dlist_insert_head(dlist, ptrie_node_key(node2));
+				node2 = ptrie_node_parent(node2);
 			}
 			diter = dlist_iter_new(dlist, DLIST_START_HEAD);
 			while ((dnode = dlist_next(diter)))
@@ -201,7 +200,7 @@ void s_command(client c) {
 			dlist_free(&dlist);
 			dstr_free(path);
 			dstr_free(skey);
-		} else if (ptrie_insert(pnode, skey, c) == 0)
+		} else if (ptrie_insert(node, skey, c) == 0)
 			dlist_insert_sort(c->subscribers, skey);
 	}
 	ptrie_rwlock_unlock(subscribers);
@@ -247,19 +246,19 @@ void u_command(client c) {
 	if (dlist_find(dlist, c))
 		add_reply_error(c, "subscribe/unsubscribe is symmetrical. unsubscribe 'ALL' first");
 	else {
-		ptrie_node_t pnode, pnode2;
+		ptrie_node_t node, node2;
 
-		if ((pnode = ptrie_get_index(subscribers, pkey)) == NULL)
-			pnode = ptrie_set_index(subscribers, pkey);
-		if ((pnode2 = ptrie_search_prefix(pnode, skey, c))) {
+		if ((node = ptrie_get_index(subscribers, pkey)) == NULL)
+			node = ptrie_set_index(subscribers, pkey);
+		if ((node2 = ptrie_search_prefix(node, skey, c))) {
 			dlist_iter_t diter;
 			dlist_node_t dnode;
 			dstr path = dstr_new("");
 
 			dlist = dlist_new(NULL, NULL);
-			while (ptrie_node_parent(pnode2)) {
-				dlist_insert_head(dlist, ptrie_node_key(pnode2));
-				pnode2 = ptrie_node_parent(pnode2);
+			while (ptrie_node_parent(node2)) {
+				dlist_insert_head(dlist, ptrie_node_key(node2));
+				node2 = ptrie_node_parent(node2);
 			}
 			diter = dlist_iter_new(dlist, DLIST_START_HEAD);
 			while ((dnode = dlist_next(diter)))
@@ -269,7 +268,7 @@ void u_command(client c) {
 			dlist_iter_free(&diter);
 			dlist_free(&dlist);
 			dstr_free(path);
-		} else if (ptrie_remove(pnode, skey, c) == 0)
+		} else if (ptrie_remove(node, skey, c) == 0)
 			dlist_remove(c->subscribers, dlist_find(c->subscribers, skey));
 	}
 	ptrie_rwlock_unlock(subscribers);

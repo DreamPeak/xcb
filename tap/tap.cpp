@@ -18,6 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <stddef.h>
 #include "TapQuoteAPI.h"
 #include "tap.h"
 
@@ -42,8 +43,6 @@ struct tap_mdspi_t : public ITapQuoteAPINotify {
 	tap_on_unsubscribe_quote	on_unsubscribe_quote_;
 	tap_on_quote			on_quote_;
 	tap_on_query_hisquote		on_query_hisquote_;
-	/* make gcc happy */
-	/* virtual ~tap_mdspi_t() {}; */
 	void OnRspLogin(TAPIINT32 error, const TapAPIQuotLoginRspInfo *info) {
 		if (on_login_)
 			(*on_login_)(error, info);
@@ -111,7 +110,10 @@ struct tap_mdspi_t : public ITapQuoteAPINotify {
 
 tap_mdapi_t *tap_mdapi_create(const struct TapAPIApplicationInfo *appinfo, TAPIINT32 *iresult) {
 	tap_mdapi_t *mdapi = new tap_mdapi_t;
-	mdapi->rep = CreateTapQuoteAPI(appinfo, *iresult);
+	if ((mdapi->rep = CreateTapQuoteAPI(appinfo, *iresult)) == NULL) {
+		delete mdapi;
+		return NULL;
+	}
 	return mdapi;
 }
 

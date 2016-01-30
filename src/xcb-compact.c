@@ -459,7 +459,7 @@ static int send_quote(void *data, void *data2) {
 	dstr *fields = NULL;
 	int nfield = 0;
 	dstr key, value, index, res;
-	ptrie_node_t pnode;
+	ptrie_node_t node;
 	dlist_t dlist;
 	dlist_iter_t diter;
 	dlist_node_t dnode;
@@ -478,7 +478,7 @@ static int send_quote(void *data, void *data2) {
 	res = dstr_cat(res, "\r\n");
 	/* in case of multiple subscribers */
 	ptrie_rwlock_rdlock(subscribers);
-	if ((pnode = ptrie_get_index(subscribers, index)) == NULL) {
+	if ((node = ptrie_get_index(subscribers, index)) == NULL) {
 		dlist = ptrie_node_value(ptrie_get_root(subscribers));
 		diter = dlist_iter_new(dlist, DLIST_START_HEAD);
 		while ((dnode = dlist_next(diter))) {
@@ -498,9 +498,9 @@ static int send_quote(void *data, void *data2) {
 		}
 		dlist_iter_free(&diter);
 	} else {
-		pnode = ptrie_find(pnode, skey);
-		while (pnode) {
-			dlist = ptrie_node_value(pnode);
+		node = ptrie_find(node, skey);
+		while (node) {
+			dlist = ptrie_node_value(node);
 			diter = dlist_iter_new(dlist, DLIST_START_HEAD);
 			while ((dnode = dlist_next(diter))) {
 				client c = (client)dlist_node_value(dnode);
@@ -519,7 +519,7 @@ static int send_quote(void *data, void *data2) {
 				pthread_spin_unlock(&c->lock);
 			}
 			dlist_iter_free(&diter);
-			pnode = ptrie_node_parent(pnode);
+			node = ptrie_node_parent(node);
 		}
 	}
 	ptrie_rwlock_unlock(subscribers);
@@ -1387,11 +1387,11 @@ static void remove_from_subscribers(client c) {
 		dstr skey = (dstr)dlist_node_value(dnode);
 		dstr *fields = NULL;
 		int nfield = 0;
-		ptrie_node_t pnode;
+		ptrie_node_t node;
 
 		fields = dstr_split_len(skey, dstr_length(skey), ",", 1, &nfield);
-		pnode = ptrie_get_index(subscribers, fields[0]);
-		ptrie_remove(pnode, skey, c);
+		node = ptrie_get_index(subscribers, fields[0]);
+		ptrie_remove(node, skey, c);
 		dstr_free_tokens(fields, nfield);
 	}
 	dlist_iter_free(&diter);

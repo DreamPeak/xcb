@@ -165,7 +165,14 @@ int ctp_mdapi_logout_user(ctp_mdapi_t *mdapi, struct CThostFtdcUserLogoutField *
 }
 
 /* FIXME */
-const char *ctp_mdapi_get_today(ctp_mdapi_t *mdapi) {
+const char *ctp_mdapi_get_version(ctp_mdapi_t *mdapi) {
+	if (mdapi)
+		return mdapi->rep->GetApiVersion();
+	return NULL;
+}
+
+/* FIXME */
+const char *ctp_mdapi_get_tradingday(ctp_mdapi_t *mdapi) {
 	if (mdapi)
 		return mdapi->rep->GetTradingDay();
 	return NULL;

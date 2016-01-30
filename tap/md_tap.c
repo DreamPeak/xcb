@@ -226,7 +226,10 @@ static int load_module(void) {
 	/* FIXME */
 	strcpy(appinfo.AuthCode, DEFAULT_AUTHCODE);
 	strcpy(appinfo.KeyOperationLogPath, "/var/log/xcb/");
-	mdapi = tap_mdapi_create(&appinfo, &iresult);
+	if ((mdapi = tap_mdapi_create(&appinfo, &iresult)) == NULL) {
+		xcb_log(XCB_LOG_ERROR, "Error occurred: errorid=%d", iresult);
+		return MODULE_LOAD_FAILURE;
+	}
 	tap_mdapi_set_spi(mdapi, mdspi);
 	tap_mdapi_set_host_addr(mdapi, front_ip, atoi(front_port));
 	memset(&loginauth, '\0', sizeof loginauth);

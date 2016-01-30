@@ -65,7 +65,8 @@ extern int          ctp_mdapi_login_user(ctp_mdapi_t *mdapi,
 			struct CThostFtdcReqUserLoginField *userlogin, int rid);
 extern int          ctp_mdapi_logout_user(ctp_mdapi_t *mdapi,
 			struct CThostFtdcUserLogoutField *userlogout, int rid);
-extern const char  *ctp_mdapi_get_today(ctp_mdapi_t *mdapi);
+extern const char  *ctp_mdapi_get_version(ctp_mdapi_t *mdapi);
+extern const char  *ctp_mdapi_get_tradingday(ctp_mdapi_t *mdapi);
 extern int          ctp_mdapi_subscribe_market_data(ctp_mdapi_t *mdapi,
 			char **instruments, int count);
 extern int          ctp_mdapi_unsubscribe_market_data(ctp_mdapi_t *mdapi,
