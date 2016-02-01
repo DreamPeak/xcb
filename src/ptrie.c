@@ -229,13 +229,13 @@ int ptrie_insert(ptrie_node_t node, const char *key, void *value) {
 		dlist_insert_tail(x->value, value);
 	/* split the current node */
 	} else if (nmatches > 0 && nmatches < strlen(x->key)) {
-		if ((y = node_new(x->key)) == NULL)
+		if ((y = node_new(x->key + nmatches)) == NULL)
 			return -1;
 		y->value    = x->value;
 		y->parent   = x;
 		y->children = x->children;
 		if (nmatches < strlen(newkey)) {
-			if ((z = node_new(newkey)) == NULL) {
+			if ((z = node_new(newkey + nmatches)) == NULL) {
 				node_free(y);
 				return -1;
 			}
@@ -254,7 +254,7 @@ int ptrie_insert(ptrie_node_t node, const char *key, void *value) {
 		x->children = y;
 	/* add node as the child of the current node */
 	} else {
-		if ((y = node_new(newkey)) == NULL)
+		if ((y = node_new(newkey + nmatches)) == NULL)
 			return -1;
 		y->value = dlist_new(NULL, NULL);
 		dlist_insert_tail(y->value, value);
@@ -329,29 +329,26 @@ ptrie_node_t ptrie_search_prefix(ptrie_node_t node, const char *key, void *value
 	nmatches = get_nmatches(newkey, x->key);
 	/* step down */
 	while (nmatches < strlen(newkey) && nmatches == strlen(x->key)) {
+		ptrie_node_t y = x->children;
+		char *subkey = newkey + nmatches;
+		int flag = 0;
+
 		if (dlist_find(x->value, value))
 			return x;
-		if (x->children) {
-			ptrie_node_t y = x->children;
-			char *subkey = newkey + nmatches;
-			int flag = 0;
-
-			while (y) {
-				if (subkey[0] == y->key[0]) {
-					flag = 1;
-					newkey = subkey;
-					x = y;
-					nmatches = get_nmatches(newkey, x->key);
-					break;
-				}
-				y = y->next;
-			}
-			if (!flag)
+		while (y) {
+			if (subkey[0] == y->key[0]) {
+				flag = 1;
+				newkey = subkey;
+				x = y;
+				nmatches = get_nmatches(newkey, x->key);
 				break;
-		} else
+			}
+			y = y->next;
+		}
+		if (!flag)
 			break;
 	}
-	if (nmatches == strlen(newkey) && nmatches < strlen(x->key)) {
+	if (nmatches == strlen(newkey) && nmatches <= strlen(x->key)) {
 		dlist_t queue = dlist_new(NULL, NULL);
 
 		dlist_insert_tail(queue, x);

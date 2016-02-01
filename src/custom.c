@@ -263,13 +263,15 @@ void u_command(client c) {
 			diter = dlist_iter_new(dlist, DLIST_START_HEAD);
 			while ((dnode = dlist_next(diter)))
 				path = dstr_cat(path, dlist_node_value(dnode));
-			add_reply_error_format(c, "subscribe/unsubscribe is symmetrical. "
-				"unsubscribe '%s' first", path);
+			if (strcmp(skey, path))
+				add_reply_error_format(c, "subscribe/unsubscribe is symmetrical. "
+					"unsubscribe '%s' first", path);
+			else if (ptrie_remove(node, skey, c) == 0)
+				dlist_remove(c->subscribers, dlist_find(c->subscribers, skey));
 			dlist_iter_free(&diter);
 			dlist_free(&dlist);
 			dstr_free(path);
-		} else if (ptrie_remove(node, skey, c) == 0)
-			dlist_remove(c->subscribers, dlist_find(c->subscribers, skey));
+		}
 	}
 	ptrie_rwlock_unlock(subscribers);
 	dstr_free(skey);
