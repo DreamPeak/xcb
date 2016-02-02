@@ -124,6 +124,14 @@ void tap_mdapi_destroy(tap_mdapi_t *mdapi) {
 	}
 }
 
+TAPIINT32 tap_mdapi_set_log_path(const TAPICHAR *path) {
+	return SetTapQuoteAPIDataPath(path);
+}
+
+TAPIINT32 tap_mdapi_set_log_level(TAPILOGLEVEL level) {
+	return SetTapQuoteAPILogLevel(level);
+}
+
 /* FIXME */
 TAPIINT32 tap_mdapi_set_spi(tap_mdapi_t *mdapi, tap_mdspi_t *mdspi) {
 	if (mdapi)
@@ -149,6 +157,17 @@ TAPIINT32 tap_mdapi_login(tap_mdapi_t *mdapi, const struct TapAPIQuoteLoginAuth 
 TAPIINT32 tap_mdapi_disconnect(tap_mdapi_t *mdapi) {
 	if (mdapi)
 		return mdapi->rep->Disconnect();
+	return -1;
+}
+
+const TAPICHAR *tap_mdapi_get_version() {
+	return GetTapQuoteAPIVersion();
+}
+
+/* FIXME */
+TAPIINT32 tap_mdapi_get_servtime(tap_mdapi_t *mdapi, TAPIDATETIME *datetime) {
+	if (mdapi)
+		return mdapi->rep->GetServerTime(datetime);
 	return -1;
 }
 
@@ -212,6 +231,14 @@ TAPIINT32 tap_mdapi_query_hisquote(tap_mdapi_t *mdapi, TAPIUINT32 *sid,
 	if (mdapi)
 		return mdapi->rep->QryHisQuote(sid, req);
 	return -1;
+}
+
+/* FIXME */
+const struct TapAPIQuoteWhole *tap_mdapi_get_fullquote(tap_mdapi_t *mdapi,
+	const struct TapAPIContract *contract) {
+	if (mdapi)
+		return mdapi->rep->GetFullQuote(contract);
+	return NULL;
 }
 
 tap_mdspi_t *tap_mdspi_create() {

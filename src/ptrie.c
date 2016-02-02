@@ -295,7 +295,7 @@ int ptrie_remove(ptrie_node_t node, const char *key, void *value) {
 
 		if ((dnode = dlist_find(x->value, value))) {
 			dlist_remove(x->value, dnode);
-			if (dlist_length(x->value) == 0) {
+			if (x != node && dlist_length(x->value) == 0) {
 				if (x->children == NULL) {
 					ptrie_node_t w = x->parent;
 
@@ -309,7 +309,7 @@ int ptrie_remove(ptrie_node_t node, const char *key, void *value) {
 					if (w != node && w->children && w->children->prev == NULL &&
 						w->children->next == NULL && dlist_length(w->value) == 0)
 						merge(w, w->children);
-				} else if (x != node && x->children && x->children->prev == NULL &&
+				} else if (x->children && x->children->prev == NULL &&
 					x->children->next == NULL)
 					merge(x, x->children);
 			}

@@ -54,42 +54,59 @@ typedef void (*tap_on_query_hisquote)(TAPIUINT32 sid, TAPIINT32 error, TAPIYNFLA
 		const struct TapAPIHisQuoteQryRsp *info);
 
 /* FIXME: exported functions */
-extern tap_mdapi_t *tap_mdapi_create(const struct TapAPIApplicationInfo *appinfo, TAPIINT32 *iresult);
-extern void         tap_mdapi_destroy(tap_mdapi_t *mdapi);
-extern TAPIINT32    tap_mdapi_set_spi(tap_mdapi_t *mdapi, tap_mdspi_t *mdspi);
-extern TAPIINT32    tap_mdapi_set_host_addr(tap_mdapi_t *mdapi, const TAPICHAR *ip, TAPIUINT16 port);
-extern TAPIINT32    tap_mdapi_login(tap_mdapi_t *mdapi, const struct TapAPIQuoteLoginAuth *loginauth);
-extern TAPIINT32    tap_mdapi_disconnect(tap_mdapi_t *mdapi);
-extern TAPIINT32    tap_mdapi_change_passwd(tap_mdapi_t *mdapi, TAPIUINT32 *sid,
-			const struct TapAPIChangePasswordReq *req);
-extern TAPIINT32    tap_mdapi_query_exchange(tap_mdapi_t *mdapi, TAPIUINT32 *sid);
-extern TAPIINT32    tap_mdapi_query_commodity(tap_mdapi_t *mdapi, TAPIUINT32 *sid);
-extern TAPIINT32    tap_mdapi_query_time_bucket(tap_mdapi_t *mdapi, TAPIUINT32 *sid,
-			const struct TapAPICommodity *req);
-extern TAPIINT32    tap_mdapi_query_contract(tap_mdapi_t *mdapi, TAPIUINT32 *sid,
-			const struct TapAPICommodity *req);
-extern TAPIINT32    tap_mdapi_subscribe_quote(tap_mdapi_t *mdapi, TAPIUINT32 *sid,
-			const struct TapAPIContract *contract);
-extern TAPIINT32    tap_mdapi_unsubscribe_quote(tap_mdapi_t *mdapi, TAPIUINT32 *sid,
-			const struct TapAPIContract *contract);
-extern TAPIINT32    tap_mdapi_query_hisquote(tap_mdapi_t *mdapi, TAPIUINT32 *sid,
-			const struct TapAPIHisQuoteQryReq *req);
-extern tap_mdspi_t *tap_mdspi_create(void);
-extern void         tap_mdspi_destroy(tap_mdspi_t *mdspi);
-extern void         tap_mdspi_on_login(tap_mdspi_t *mdspi, tap_on_login func);
-extern void         tap_mdspi_on_api_ready(tap_mdspi_t *mdspi, tap_on_api_ready func);
-extern void         tap_mdspi_on_disconnect(tap_mdspi_t *mdspi, tap_on_disconnect func);
-extern void         tap_mdspi_on_change_passwd(tap_mdspi_t *mdspi, tap_on_change_passwd func);
-extern void         tap_mdspi_on_query_exchange(tap_mdspi_t *mdspi, tap_on_query_exchange func);
-extern void         tap_mdspi_on_query_commodity(tap_mdspi_t *mdspi, tap_on_query_commodity func);
-extern void         tap_mdspi_on_query_time_bucket(tap_mdspi_t *mdspi, tap_on_query_time_bucket func);
-extern void         tap_mdspi_on_time_bucket(tap_mdspi_t *mdspi, tap_on_time_bucket func);
-extern void         tap_mdspi_on_query_contract(tap_mdspi_t *mdspi, tap_on_query_contract func);
-extern void         tap_mdspi_on_contract(tap_mdspi_t *mdspi, tap_on_contract func);
-extern void         tap_mdspi_on_subscribe_quote(tap_mdspi_t *mdspi, tap_on_subscribe_quote func);
-extern void         tap_mdspi_on_unsubscribe_quote(tap_mdspi_t *mdspi, tap_on_unsubscribe_quote func);
-extern void         tap_mdspi_on_quote(tap_mdspi_t *mdspi, tap_on_quote func);
-extern void         tap_mdspi_on_query_hisquote(tap_mdspi_t *mdspi, tap_on_query_hisquote func);
+extern tap_mdapi_t                   *tap_mdapi_create(const struct TapAPIApplicationInfo *appinfo,
+					TAPIINT32 *iresult);
+extern void                           tap_mdapi_destroy(tap_mdapi_t *mdapi);
+extern TAPIINT32                      tap_mdapi_set_log_path(const TAPICHAR *path);
+extern TAPIINT32                      tap_mdapi_set_log_level(TAPILOGLEVEL level);
+extern TAPIINT32                      tap_mdapi_set_spi(tap_mdapi_t *mdapi, tap_mdspi_t *mdspi);
+extern TAPIINT32                      tap_mdapi_set_host_addr(tap_mdapi_t *mdapi,
+					const TAPICHAR *ip, TAPIUINT16 port);
+extern TAPIINT32                      tap_mdapi_login(tap_mdapi_t *mdapi,
+					const struct TapAPIQuoteLoginAuth *loginauth);
+extern TAPIINT32                      tap_mdapi_disconnect(tap_mdapi_t *mdapi);
+extern const TAPICHAR                *tap_mdapi_get_version(void);
+extern TAPIINT32                      tap_mdapi_get_servtime(tap_mdapi_t *mdapi, TAPIDATETIME *datetime);
+extern TAPIINT32                      tap_mdapi_change_passwd(tap_mdapi_t *mdapi, TAPIUINT32 *sid,
+					const struct TapAPIChangePasswordReq *req);
+extern TAPIINT32                      tap_mdapi_query_exchange(tap_mdapi_t *mdapi, TAPIUINT32 *sid);
+extern TAPIINT32                      tap_mdapi_query_commodity(tap_mdapi_t *mdapi, TAPIUINT32 *sid);
+extern TAPIINT32                      tap_mdapi_query_time_bucket(tap_mdapi_t *mdapi, TAPIUINT32 *sid,
+					const struct TapAPICommodity *req);
+extern TAPIINT32                      tap_mdapi_query_contract(tap_mdapi_t *mdapi, TAPIUINT32 *sid,
+					const struct TapAPICommodity *req);
+extern TAPIINT32                      tap_mdapi_subscribe_quote(tap_mdapi_t *mdapi, TAPIUINT32 *sid,
+					const struct TapAPIContract *contract);
+extern TAPIINT32                      tap_mdapi_unsubscribe_quote(tap_mdapi_t *mdapi, TAPIUINT32 *sid,
+					const struct TapAPIContract *contract);
+extern TAPIINT32                      tap_mdapi_query_hisquote(tap_mdapi_t *mdapi, TAPIUINT32 *sid,
+					const struct TapAPIHisQuoteQryReq *req);
+extern const struct TapAPIQuoteWhole *tap_mdapi_get_fullquote(tap_mdapi_t *mdapi,
+					const struct TapAPIContract *contract);
+extern tap_mdspi_t                   *tap_mdspi_create(void);
+extern void                           tap_mdspi_destroy(tap_mdspi_t *mdspi);
+extern void                           tap_mdspi_on_login(tap_mdspi_t *mdspi, tap_on_login func);
+extern void                           tap_mdspi_on_api_ready(tap_mdspi_t *mdspi, tap_on_api_ready func);
+extern void                           tap_mdspi_on_disconnect(tap_mdspi_t *mdspi, tap_on_disconnect func);
+extern void                           tap_mdspi_on_change_passwd(tap_mdspi_t *mdspi,
+					tap_on_change_passwd func);
+extern void                           tap_mdspi_on_query_exchange(tap_mdspi_t *mdspi,
+					tap_on_query_exchange func);
+extern void                           tap_mdspi_on_query_commodity(tap_mdspi_t *mdspi,
+					tap_on_query_commodity func);
+extern void                           tap_mdspi_on_query_time_bucket(tap_mdspi_t *mdspi,
+					tap_on_query_time_bucket func);
+extern void                           tap_mdspi_on_time_bucket(tap_mdspi_t *mdspi, tap_on_time_bucket func);
+extern void                           tap_mdspi_on_query_contract(tap_mdspi_t *mdspi,
+					tap_on_query_contract func);
+extern void                           tap_mdspi_on_contract(tap_mdspi_t *mdspi, tap_on_contract func);
+extern void                           tap_mdspi_on_subscribe_quote(tap_mdspi_t *mdspi,
+					tap_on_subscribe_quote func);
+extern void                           tap_mdspi_on_unsubscribe_quote(tap_mdspi_t *mdspi,
+					tap_on_unsubscribe_quote func);
+extern void                           tap_mdspi_on_quote(tap_mdspi_t *mdspi, tap_on_quote func);
+extern void                           tap_mdspi_on_query_hisquote(tap_mdspi_t *mdspi,
+					tap_on_query_hisquote func);
 
 #ifdef __cplusplus
 }
