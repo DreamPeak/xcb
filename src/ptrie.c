@@ -36,9 +36,9 @@ struct ptrie_t {
 	pthread_rwlock_t	rwlock;
 };
 struct ptrie_node_t {
+	ptrie_node_t		parent, prev, next, children;
 	char			*key;
 	dlist_t			value;
-	ptrie_node_t		parent, prev, next, children;
 };
 
 #define STEP_DOWN(nmatches, newkey, x) \
@@ -158,6 +158,12 @@ void ptrie_free(ptrie_t *pp) {
 	FREE(*pp);
 }
 
+ptrie_node_t ptrie_node_parent(ptrie_node_t node) {
+	if (node == NULL)
+		return NULL;
+	return node->parent;
+}
+
 char *ptrie_node_key(ptrie_node_t node) {
 	if (node == NULL)
 		return NULL;
@@ -168,12 +174,6 @@ dlist_t ptrie_node_value(ptrie_node_t node) {
 	if (node == NULL)
 		return NULL;
 	return node->value;
-}
-
-ptrie_node_t ptrie_node_parent(ptrie_node_t node) {
-	if (node == NULL)
-		return NULL;
-	return node->parent;
 }
 
 /* FIXME */
@@ -358,13 +358,10 @@ ptrie_node_t ptrie_search_prefix(ptrie_node_t node, const char *key, void *value
 				dlist_free(&queue);
 				return x;
 			}
-			if (x->children) {
-				x = x->children;
+			x = x->children;
+			while (x) {
 				dlist_insert_tail(queue, x);
-				while (x->next) {
-					dlist_insert_tail(queue, x);
-					x = x->next;
-				}
+				x = x->next;
 			}
 		}
 	}

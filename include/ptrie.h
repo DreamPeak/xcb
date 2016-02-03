@@ -36,9 +36,9 @@ typedef struct ptrie_node_t *ptrie_node_t;
 /* FIXME: exported functions */
 extern ptrie_t      ptrie_new(void);
 extern void         ptrie_free(ptrie_t *pp);
+extern ptrie_node_t ptrie_node_parent(ptrie_node_t node);
 extern char        *ptrie_node_key(ptrie_node_t node);
 extern dlist_t      ptrie_node_value(ptrie_node_t node);
-extern ptrie_node_t ptrie_node_parent(ptrie_node_t node);
 extern ptrie_node_t ptrie_get_root(ptrie_t ptrie);
 extern ptrie_node_t ptrie_set_index(ptrie_t ptrie, const char *index);
 extern ptrie_node_t ptrie_get_index(ptrie_t ptrie, const char *index);
