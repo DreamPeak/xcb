@@ -76,8 +76,7 @@ static ptrie_node_t node_new(const char *key) {
 static void node_free(ptrie_node_t node) {
 	if (node) {
 		FREE(node->key);
-		if (node->value)
-			dlist_free(&node->value);
+		dlist_free(&node->value);
 		FREE(node);
 	}
 }
@@ -95,14 +94,22 @@ static unsigned get_nmatches(const char *x, const char *y) {
 
 /* FIXME */
 static void merge(ptrie_node_t x, ptrie_node_t y) {
+	ptrie_node_t z;
+
 	if (x == NULL || y == NULL)
 		return;
 	if (RESIZE(x->key, strlen(x->key) + strlen(y->key) + 1) == NULL)
 		return;
 	strcat(x->key, y->key);
+	dlist_free(&x->value);
 	x->value    = y->value;
 	y->value    = NULL;
 	x->children = y->children;
+	z           = x->children;
+	while (z) {
+		z->parent = x;
+		z = z->next;
+	}
 	node_free(y);
 }
 
@@ -234,6 +241,11 @@ int ptrie_insert(ptrie_node_t node, const char *key, void *value) {
 		y->value    = x->value;
 		y->parent   = x;
 		y->children = x->children;
+		z           = y->children;
+		while (z) {
+			z->parent = y;
+			z = z->next;
+		}
 		if (nmatches < strlen(newkey)) {
 			if ((z = node_new(newkey + nmatches)) == NULL) {
 				node_free(y);

@@ -77,15 +77,6 @@ void kvfree(void *value) {
 }
 
 /* FIXME */
-void kdfree(void *value) {
-	struct kvd *kvd = (struct kvd *)value;
-
-	dstr_free(kvd->key);
-	dlist_free(&kvd->u.dlist);
-	FREE(kvd);
-}
-
-/* FIXME */
 void s_command(client c) {
 	dstr pkey, skey;
 	int i;
@@ -176,7 +167,7 @@ void s_command(client c) {
 	ptrie_rwlock_wrlock(subscribers);
 	dlist = ptrie_node_value(ptrie_get_root(subscribers));
 	if (dlist_find(dlist, c)) {
-		add_reply_error(c, "already subscribed 'ALL'\r\n");
+		add_reply_error(c, "subscribe/unsubscribe is symmetrical. already subscribed 'ALL'\r\n");
 		dstr_free(skey);
 	} else {
 		ptrie_node_t node, node2;
@@ -196,7 +187,8 @@ void s_command(client c) {
 			diter = dlist_iter_new(dlist, DLIST_START_HEAD);
 			while ((dnode = dlist_next(diter)))
 				path = dstr_cat(path, dlist_node_value(dnode));
-			add_reply_error_format(c, "already subscribed '%s'\r\n", path);
+			add_reply_error_format(c, "subscribe/unsubscribe is symmetrical. "
+				"already subscribed '%s'\r\n", path);
 			dlist_iter_free(&diter);
 			dlist_free(&dlist);
 			dstr_free(path);
@@ -212,7 +204,7 @@ void s_command(client c) {
 void sall_command(client c) {
 	ptrie_rwlock_wrlock(subscribers);
 	if (dlist_length(c->subscribers) > 0)
-		add_reply_error_format(c, "already subscribed '%s'\r\n",
+		add_reply_error_format(c, "subscribe/unsubscribe is symmetrical. already subscribed '%s'\r\n",
 			dlist_node_value(dlist_head(c->subscribers)));
 	else {
 		dlist_t dlist = ptrie_node_value(ptrie_get_root(subscribers));
