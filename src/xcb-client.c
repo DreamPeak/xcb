@@ -1,7 +1,9 @@
 /*
  * Copyright (c) 2013-2016, Dalian Futures Information Technology Co., Ltd.
  *
+ * Gaohang Wu
  * Bo Wang
+ * Xiaoye Meng <mengxiaoye at dce dot com dot cn>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -405,8 +407,8 @@ int xcb_query(xcb_context_t c, const char *sid, const char *index, const char *p
 	dstr s;
 	char buf[128];
 
-	if (sid == NULL || index == NULL) {
-		xcb_set_error(c, XCB_ERR_OTHER, "Session ID or index can't be empty");
+	if (sid == NULL || index == NULL || start == NULL || end == NULL) {
+		xcb_set_error(c, XCB_ERR_OTHER, "Session ID, index, start or end can't be empty");
 		return XCB_ERR;
 	}
 	s = dstr_new("Q");
@@ -414,11 +416,14 @@ int xcb_query(xcb_context_t c, const char *sid, const char *index, const char *p
 	s = dstr_cat(s, ",");
 	s = dstr_cat(s, sid);
 	s = dstr_cat(s, ",");
-	s = dstr_cat(s, pattern);
+	if (pattern)
+		s = dstr_cat(s, pattern);
 	s = dstr_cat(s, ",");
 	strftime(buf, sizeof buf, "%F %T", start);
+	s = dstr_cat(s, buf);
 	s = dstr_cat(s, ",");
 	strftime(buf, sizeof buf, "%F %T", end);
+	s = dstr_cat(s, buf);
 	s = dstr_cat(s, "\r\n");
 	if (net_try_write(c->fd, s, dstr_length(s), 10, NET_NONBLOCK) == -1) {
 		xcb_set_error(c, XCB_ERR_IO, NULL);

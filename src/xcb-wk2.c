@@ -278,14 +278,16 @@ static int server_cron(event_loop el, unsigned long id, void *data) {
 		xcb_log(XCB_LOG_WARNING, "SIGTERM received, but errors trying to shutdown the server");
 	}
 	/* close clients asynchronously */
-	iter = dlist_iter_new(clients_to_close, DLIST_START_HEAD);
-	while ((node = dlist_next(iter))) {
-		client c = (client)dlist_node_value(node);
+	if (dlist_length(clients_to_close) > 0) {
+		iter = dlist_iter_new(clients_to_close, DLIST_START_HEAD);
+		while ((node = dlist_next(iter))) {
+			client c = (client)dlist_node_value(node);
 
-		if (c->refcount == 0)
-			client_free(c);
+			if (c->refcount == 0)
+				client_free(c);
+		}
+		dlist_iter_free(&iter);
 	}
-	dlist_iter_free(&iter);
 	/* triggered approximately every one second */
 	if (cronloops % 10 == 0)
 		if (persistence && dirty) {
@@ -304,7 +306,6 @@ static int server_cron(event_loop el, unsigned long id, void *data) {
 	/* triggered approximately every 20 seconds */
 	if (cronloops % 200 == 0) {
 		dstr res, ip = getipv4();
-		dlist_iter_t iter2;
 
 		/* heartbeat */
 		dlist_lock(clients);
@@ -331,35 +332,41 @@ static int server_cron(event_loop el, unsigned long id, void *data) {
 		res = dstr_cat(res, ip);
 		res = dstr_cat(res, "|");
 		dlist_lock(queues);
-		iter = dlist_iter_new(queues, DLIST_START_HEAD);
-		while ((node = dlist_next(iter))) {
-			struct msgs *msgs = (struct msgs *)dlist_node_value(node);
+		if (dlist_length(queues) > 0) {
+			iter = dlist_iter_new(queues, DLIST_START_HEAD);
+			while ((node = dlist_next(iter))) {
+				struct msgs *msgs = (struct msgs *)dlist_node_value(node);
 
-			dlist_lock(msgs->appouts);
-			iter2 = dlist_iter_new(msgs->appouts, DLIST_START_HEAD);
-			while ((node = dlist_next(iter2))) {
-				struct appout *ao = (struct appout *)dlist_node_value(node);
-				const char *appname;
+				dlist_lock(msgs->appouts);
+				if (dlist_length(msgs->appouts) > 0) {
+					dlist_iter_t iter2 = dlist_iter_new(msgs->appouts, DLIST_START_HEAD);
 
-				if ((appname = get_application_name(ao->app))) {
-					dstr res2 = dstr_new("INDEX|");
-					dstr tmp = dstr_new(appname);
+					while ((node = dlist_next(iter2))) {
+						struct appout *ao = (struct appout *)dlist_node_value(node);
+						const char *appname;
 
-					STR2UPPER(tmp);
-					res = dstr_cat(res, tmp);
-					res = dstr_cat(res, ",");
-					res2 = dstr_cat(res2, tmp);
-					res2 = dstr_cat(res2, "|");
-					res2 = dstr_cat(res2, get_application_format(ao->app));
-					out2rmp(res2);
-					dstr_free(tmp);
-					dstr_free(res2);
+						if ((appname = get_application_name(ao->app))) {
+							dstr res2 = dstr_new("INDEX|");
+							dstr tmp = dstr_new(appname);
+
+							STR2UPPER(tmp);
+							res = dstr_cat(res, tmp);
+							res = dstr_cat(res, ",");
+							res2 = dstr_cat(res2, tmp);
+							res2 = dstr_cat(res2, "|");
+							res2 = dstr_cat(res2,
+								get_application_format(ao->app));
+							out2rmp(res2);
+							dstr_free(tmp);
+							dstr_free(res2);
+						}
+					}
+					dlist_iter_free(&iter2);
 				}
+				dlist_unlock(msgs->appouts);
 			}
-			dlist_iter_free(&iter2);
-			dlist_unlock(msgs->appouts);
+			dlist_iter_free(&iter);
 		}
-		dlist_iter_free(&iter);
 		dlist_unlock(queues);
 		if (res[dstr_length(res) - 1] == ',')
 			res = dstr_range(res, 0, -2);
@@ -464,7 +471,7 @@ static int on_msgv(struct pgm_msgv_t *msgv, size_t len) {
 		quote = (Quote *)pskb->data;
 		if (quote->thyquote.m_nLen == sizeof (tHYQuote)) {
 			dlist_iter_t iter;
-			dlist_node_t node;
+			dlist_node_t node = NULL;
 
 			/* in case of multiple monitors */
 			dlist_rwlock_rdlock(monitors);
@@ -513,15 +520,17 @@ static int on_msgv(struct pgm_msgv_t *msgv, size_t len) {
 			}
 			dlist_rwlock_unlock(monitors);
 			/* FIXME: filter */
-			iter = dlist_iter_new(filter, DLIST_START_HEAD);
-			while ((node = dlist_next(iter))) {
-				dstr item = (dstr)dlist_node_value(node);
+			if (dlist_length(filter) > 0) {
+				iter = dlist_iter_new(filter, DLIST_START_HEAD);
+				while ((node = dlist_next(iter))) {
+					dstr item = (dstr)dlist_node_value(node);
 
-				if (dstr_length(item) <= sizeof quote->thyquote.m_cHYDM &&
-					!memcmp(item, quote->thyquote.m_cHYDM, dstr_length(item)))
-					break;
+					if (dstr_length(item) <= sizeof quote->thyquote.m_cHYDM &&
+						!memcmp(item, quote->thyquote.m_cHYDM, dstr_length(item)))
+						break;
+				}
+				dlist_iter_free(&iter);
 			}
-			dlist_iter_free(&iter);
 			if (node == NULL)
 				continue;
 			if (NEW0(msg) == NULL)
@@ -749,66 +758,70 @@ int msgs_hook(struct msgs *msgs, int (*exec)(void *data, void *data2), struct ms
 /* FIXME */
 int msgs_hook_name(const char *msgs, int (*exec)(void *data, void *data2), struct msgs *out) {
 	dlist_iter_t iter;
-	dlist_node_t node;
+	dlist_node_t node = NULL;
 
 	if (msgs == NULL || exec == NULL)
 		return -1;
 	dlist_lock(queues);
-	iter = dlist_iter_new(queues, DLIST_START_HEAD);
-	while ((node = dlist_next(iter))) {
-		struct msgs *m = (struct msgs *)dlist_node_value(node);
+	if (dlist_length(queues) > 0) {
+		iter = dlist_iter_new(queues, DLIST_START_HEAD);
+		while ((node = dlist_next(iter))) {
+			struct msgs *m = (struct msgs *)dlist_node_value(node);
 
-		if (!strcasecmp(m->name, msgs)) {
-			if (msgs_hook(m, exec, out) == -1) {
-				dlist_unlock(queues);
-				return -1;
+			if (!strcasecmp(m->name, msgs)) {
+				if (msgs_hook(m, exec, out) == -1) {
+					dlist_unlock(queues);
+					return -1;
+				}
+				break;
 			}
-			break;
 		}
+		dlist_iter_free(&iter);
 	}
-	dlist_iter_free(&iter);
 	dlist_unlock(queues);
 	return node ? 0 : -2;
 }
 
 /* FIXME */
 void msgs_unhook(struct msgs *msgs, int (*exec)(void *data, void *data2)) {
-	dlist_iter_t iter;
-	dlist_node_t node;
-
 	if (msgs == NULL || exec == NULL)
 		return;
 	dlist_lock(msgs->appouts);
-	iter = dlist_iter_new(msgs->appouts, DLIST_START_HEAD);
-	while ((node = dlist_next(iter))) {
-		struct appout *ao = (struct appout *)dlist_node_value(node);
+	if (dlist_length(msgs->appouts) > 0) {
+		dlist_iter_t iter = dlist_iter_new(msgs->appouts, DLIST_START_HEAD);
+		dlist_node_t node;
 
-		if (ao->app == exec) {
-			dlist_remove(msgs->appouts, node);
-			FREE(ao);
+		while ((node = dlist_next(iter))) {
+			struct appout *ao = (struct appout *)dlist_node_value(node);
+
+			if (ao->app == exec) {
+				dlist_remove(msgs->appouts, node);
+				FREE(ao);
+			}
 		}
+		dlist_iter_free(&iter);
 	}
-	dlist_iter_free(&iter);
 	dlist_unlock(msgs->appouts);
 	thrpool_remove(tp, exec);
 }
 
 /* FIXME */
 void msgs_unhook_name(const char *msgs, int (*exec)(void *data, void *data2)) {
-	dlist_iter_t iter;
-	dlist_node_t node;
-
 	if (msgs == NULL || exec == NULL)
 		return;
 	dlist_lock(queues);
-	iter = dlist_iter_new(queues, DLIST_START_HEAD);
-	while ((node = dlist_next(iter))) {
-		struct msgs *m = (struct msgs *)dlist_node_value(node);
+	if (dlist_length(queues) > 0) {
+		dlist_iter_t iter = dlist_iter_new(queues, DLIST_START_HEAD);
+		dlist_node_t node;
 
-		if (!strcasecmp(m->name, msgs))
-			msgs_unhook(m, exec);
+		while ((node = dlist_next(iter))) {
+			struct msgs *m = (struct msgs *)dlist_node_value(node);
+
+			if (!strcasecmp(m->name, msgs))
+				msgs_unhook(m, exec);
+		}
+		dlist_iter_free(&iter);
 	}
-	dlist_iter_free(&iter);
 	dlist_unlock(queues);
 	thrpool_remove(tp, exec);
 }
@@ -833,23 +846,25 @@ void stop_msgs(struct msgs *msgs) {
 
 /* FIXME */
 int check_msgs(struct msgs *msgs) {
-	dlist_iter_t iter;
-	dlist_node_t node;
 	int flag = 0;
 
 	dlist_lock(msgs->appouts);
-	iter = dlist_iter_new(msgs->appouts, DLIST_START_HEAD);
-	while ((node = dlist_next(iter))) {
-		struct appout *ao = (struct appout *)dlist_node_value(node);;
-		struct module *mod;
+	if (dlist_length(msgs->appouts) > 0) {
+		dlist_iter_t iter = dlist_iter_new(msgs->appouts, DLIST_START_HEAD);
+		dlist_node_t node;
 
-		if ((mod = get_application_module(ao->app)) != msgs->mod) {
-			xcb_log(XCB_LOG_WARNING, "Queue '%s' is used by module '%s', unload '%s' first",
-				msgs->name, mod->name, mod->name);
-			flag = -1;
+		while ((node = dlist_next(iter))) {
+			struct appout *ao = (struct appout *)dlist_node_value(node);;
+			struct module *mod;
+
+			if ((mod = get_application_module(ao->app)) != msgs->mod) {
+				xcb_log(XCB_LOG_WARNING, "Queue '%s' is used by module '%s', "
+					"unload '%s' first", msgs->name, mod->name, mod->name);
+				flag = -1;
+			}
 		}
+		dlist_iter_free(&iter);
 	}
-	dlist_iter_free(&iter);
 	dlist_unlock(msgs->appouts);
 	return flag;
 }
@@ -1459,33 +1474,37 @@ static void show_command(client c) {
 			add_reply_string_format(c, "%30.30s  %s [Module: %s]\r\n",
 				app->name, app->desc, app->mod->name);
 	} else if (!strcasecmp(c->argv[1], "queues")) {
-		dlist_iter_t iter, iter2;
-		dlist_node_t node;
-
 		dlist_lock(queues);
-		iter = dlist_iter_new(queues, DLIST_START_HEAD);
-		while ((node = dlist_next(iter))) {
-			struct msgs *msgs = (struct msgs *)dlist_node_value(node);
-			dstr appnames = dstr_new_len("", 0);
+		if (dlist_length(queues) > 0) {
+			dlist_iter_t iter = dlist_iter_new(queues, DLIST_START_HEAD);
+			dlist_node_t node;
 
-			dlist_lock(msgs->appouts);
-			iter2 = dlist_iter_new(msgs->appouts, DLIST_START_HEAD);
-			while ((node = dlist_next(iter2))) {
-				struct appout *ao = (struct appout *)dlist_node_value(node);
-				const char *appname;
+			while ((node = dlist_next(iter))) {
+				struct msgs *msgs = (struct msgs *)dlist_node_value(node);
+				dstr appnames = dstr_new_len("", 0);
 
-				if ((appname = get_application_name(ao->app))) {
-					appnames = dstr_cat(appnames, appname);
-					appnames = dstr_cat(appnames, ", ");
+				dlist_lock(msgs->appouts);
+				if (dlist_length(msgs->appouts) > 0) {
+					dlist_iter_t iter2 = dlist_iter_new(msgs->appouts, DLIST_START_HEAD);
+
+					while ((node = dlist_next(iter2))) {
+						struct appout *ao = (struct appout *)dlist_node_value(node);
+						const char *appname;
+
+						if ((appname = get_application_name(ao->app))) {
+							appnames = dstr_cat(appnames, appname);
+							appnames = dstr_cat(appnames, ", ");
+						}
+					}
+					dlist_iter_free(&iter2);
 				}
+				dlist_unlock(msgs->appouts);
+				add_reply_string_format(c, "%30.30s  %s\r\n", msgs->name,
+					dstr_length(appnames) == 0 ? appnames : dstr_range(appnames, 0, -3));
+				dstr_free(appnames);
 			}
-			dlist_iter_free(&iter2);
-			dlist_unlock(msgs->appouts);
-			add_reply_string_format(c, "%30.30s  %s\r\n", msgs->name,
-				dstr_length(appnames) == 0 ? appnames : dstr_range(appnames, 0, -3));
-			dstr_free(appnames);
+			dlist_iter_free(&iter);
 		}
-		dlist_iter_free(&iter);
 		dlist_unlock(queues);
 	} else
 		add_reply_error_format(c, "unknown property '%s'", c->argv[1]);

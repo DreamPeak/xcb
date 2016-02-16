@@ -247,38 +247,42 @@ static int prepare_for_shutdown(void) {
 }
 
 dstr get_indices(void) {
-	table_iter_t titer;
-	table_node_t tnode;
 	dlist_t dlist = dlist_new(cmpstr, vfree);
-	dlist_iter_t diter;
-	dlist_node_t dnode;
 	dstr res = dstr_new("INDICES");
 
 	/* split and sort */
 	table_lock(indices);
-	titer = table_iter_new(indices);
-	while ((tnode = table_next(titer))) {
-		dstr apps = (dstr)table_node_value(tnode);
-		dstr *fields = NULL;
-		int nfield = 0, i;
+	if (table_length(indices) > 0) {
+		table_iter_t iter = table_iter_new(indices);
+		table_node_t node;
 
-		fields = dstr_split_len(apps, dstr_length(apps), ",", 1, &nfield);
-		for (i = 0; i < nfield; ++i)
-			if (dlist_find(dlist, fields[i]) == NULL)
-				dlist_insert_sort(dlist, dstr_new(fields[i]));
-		dstr_free_tokens(fields, nfield);
+		while ((node = table_next(iter))) {
+			dstr apps = (dstr)table_node_value(node);
+			dstr *fields = NULL;
+			int nfield = 0, i;
+
+			fields = dstr_split_len(apps, dstr_length(apps), ",", 1, &nfield);
+			for (i = 0; i < nfield; ++i)
+				if (dlist_find(dlist, fields[i]) == NULL)
+					dlist_insert_sort(dlist, dstr_new(fields[i]));
+			dstr_free_tokens(fields, nfield);
+		}
+		table_iter_free(&iter);
 	}
-	table_iter_free(&titer);
 	table_unlock(indices);
 	/* assemble */
-	diter = dlist_iter_new(dlist, DLIST_START_HEAD);
-	while ((dnode = dlist_next(diter))) {
-		dstr index = (dstr)dlist_node_value(dnode);
+	if (dlist_length(dlist) > 0) {
+		dlist_iter_t iter = dlist_iter_new(dlist, DLIST_START_HEAD);
+		dlist_node_t node;
 
-		res = dstr_cat(res, ",");
-		res = dstr_cat(res, index);
+		while ((node = dlist_next(iter))) {
+			dstr index = (dstr)dlist_node_value(node);
+
+			res = dstr_cat(res, ",");
+			res = dstr_cat(res, index);
+		}
+		dlist_iter_free(&iter);
 	}
-	dlist_iter_free(&diter);
 	dlist_free(&dlist);
 	res = dstr_cat(res, "\r\n");
 	return res;
@@ -321,14 +325,16 @@ static int server_cron(event_loop el, unsigned long id, void *data) {
 		xcb_log(XCB_LOG_WARNING, "SIGTERM received, but errors trying to shutdown the server");
 	}
 	/* close clients asynchronously */
-	iter = dlist_iter_new(clients_to_close, DLIST_START_HEAD);
-	while ((node = dlist_next(iter))) {
-		client c = (client)dlist_node_value(node);
+	if (dlist_length(clients_to_close) > 0) {
+		iter = dlist_iter_new(clients_to_close, DLIST_START_HEAD);
+		while ((node = dlist_next(iter))) {
+			client c = (client)dlist_node_value(node);
 
-		if (c->refcount == 0)
-			client_free(c);
+			if (c->refcount == 0)
+				client_free(c);
+		}
+		dlist_iter_free(&iter);
 	}
-	dlist_iter_free(&iter);
 	/* triggered approximately every one second */
 	if (cronloops % 10 == 0)
 		if (persistence && dirty) {
@@ -474,8 +480,8 @@ static void init_pgm_recv_cfg(char *cat, struct pgm_cfg *pgm_recv_cfg) {
 static int send_quote(void *data, void *data2) {
 	struct msg *msg = (struct msg *)data;
 	dstr skey = (dstr)data2;
-	dstr *fields = NULL;
-	int nfield = 0;
+	dstr *fields = NULL, *fields2 = NULL;
+	int nfield = 0, nfield2 = 0;
 	dstr key, value, index, res;
 	ptrie_node_t node;
 	dlist_t dlist;
@@ -486,10 +492,8 @@ static int send_quote(void *data, void *data2) {
 	fields = dstr_split_len(msg->data, strlen(msg->data), "|", 1, &nfield);
 	key   = dstr_new(fields[0]);
 	value = dstr_new(fields[1]);
-	dstr_free_tokens(fields, nfield);
-	fields = NULL, nfield = 0;
-	fields = dstr_split_len(key, dstr_length(key), ",", 1, &nfield);
-	index = dstr_new(fields[0]);
+	fields2 = dstr_split_len(key, dstr_length(key), ",", 1, &nfield2);
+	index = dstr_new(fields2[0]);
 	res = dstr_new(key);
 	res = dstr_cat(res, ",");
 	res = dstr_cat(res, value);
@@ -498,27 +502,7 @@ static int send_quote(void *data, void *data2) {
 	ptrie_rwlock_rdlock(subscribers);
 	if ((node = ptrie_get_index(subscribers, index)) == NULL) {
 		dlist = ptrie_node_value(ptrie_get_root(subscribers));
-		diter = dlist_iter_new(dlist, DLIST_START_HEAD);
-		while ((dnode = dlist_next(diter))) {
-			client c = (client)dlist_node_value(dnode);
-
-			pthread_spin_lock(&c->lock);
-			if (!(c->flags & CLIENT_CLOSE_ASAP)) {
-				if (net_try_write(c->fd, res, dstr_length(res), 10, NET_NONBLOCK) == -1) {
-					xcb_log(XCB_LOG_WARNING, "Writing to client '%p': %s",
-						c, strerror(errno));
-					if (++c->eagcount >= 3)
-						client_free_async(c);
-				} else if (c->eagcount)
-					c->eagcount = 0;
-			}
-			pthread_spin_unlock(&c->lock);
-		}
-		dlist_iter_free(&diter);
-	} else {
-		node = ptrie_find(node, skey);
-		while (node) {
-			dlist = ptrie_node_value(node);
+		if (dlist_length(dlist) > 0) {
 			diter = dlist_iter_new(dlist, DLIST_START_HEAD);
 			while ((dnode = dlist_next(diter))) {
 				client c = (client)dlist_node_value(dnode);
@@ -537,12 +521,38 @@ static int send_quote(void *data, void *data2) {
 				pthread_spin_unlock(&c->lock);
 			}
 			dlist_iter_free(&diter);
+		}
+	} else {
+		node = ptrie_find(node, skey);
+		while (node) {
+			dlist = ptrie_node_value(node);
+			if (dlist_length(dlist) > 0) {
+				diter = dlist_iter_new(dlist, DLIST_START_HEAD);
+				while ((dnode = dlist_next(diter))) {
+					client c = (client)dlist_node_value(dnode);
+
+					pthread_spin_lock(&c->lock);
+					if (!(c->flags & CLIENT_CLOSE_ASAP)) {
+						if (net_try_write(c->fd, res, dstr_length(res),
+							10, NET_NONBLOCK) == -1) {
+							xcb_log(XCB_LOG_WARNING, "Writing to client '%p': %s",
+								c, strerror(errno));
+							if (++c->eagcount >= 3)
+								client_free_async(c);
+						} else if (c->eagcount)
+							c->eagcount = 0;
+					}
+					pthread_spin_unlock(&c->lock);
+				}
+				dlist_iter_free(&diter);
+			}
 			node = ptrie_node_parent(node);
 		}
 	}
 	ptrie_rwlock_unlock(subscribers);
 	dstr_free(res);
 	dstr_free(index);
+	dstr_free_tokens(fields2, nfield2);
 	dstr_free(value);
 	dstr_free(key);
 	dstr_free_tokens(fields, nfield);
@@ -649,6 +659,8 @@ static int on_msgv(struct pgm_msgv_t *msgv, size_t len) {
 			}
 		} else {
 			dstr key = NULL, value = NULL, index = NULL, contracts = NULL;
+			dstr *fields2 = NULL;
+			int nfield2 = 0;
 			dstr ckey, cvalue, skey;
 			dlist_t dlist;
 			struct kvd *kvd;
@@ -658,19 +670,17 @@ static int on_msgv(struct pgm_msgv_t *msgv, size_t len) {
 				goto end;
 			key   = dstr_new(fields[0]);
 			value = dstr_new(fields[1]);
-			dstr_free_tokens(fields, nfield);
-			fields = NULL, nfield = 0;
-			fields = dstr_split_len(key, dstr_length(key), ",", 1, &nfield);
-			if (nfield < 2)
+			fields2 = dstr_split_len(key, dstr_length(key), ",", 1, &nfield2);
+			if (nfield2 < 2)
 				goto end;
-			index = dstr_new(fields[0]);
-			if (nfield > 2) {
+			index = dstr_new(fields2[0]);
+			if (nfield2 > 2) {
 				int i;
 
-				contracts = dstr_new(fields[2]);
-				for (i = 3; i < nfield; ++i) {
+				contracts = dstr_new(fields2[2]);
+				for (i = 3; i < nfield2; ++i) {
 					contracts = dstr_cat(contracts, ",");
-					contracts = dstr_cat(contracts, fields[i]);
+					contracts = dstr_cat(contracts, fields2[i]);
 				}
 			}
 			ckey   = dstr_new(index);
@@ -678,7 +688,7 @@ static int on_msgv(struct pgm_msgv_t *msgv, size_t len) {
 				ckey = dstr_cat(ckey, ",");
 				ckey = dstr_cat(ckey, contracts);
 			}
-			cvalue = dstr_new(fields[1]);
+			cvalue = dstr_new(fields2[1]);
 			cvalue = dstr_cat(cvalue, ",");
 			cvalue = dstr_cat(cvalue, value);
 			skey   = dstr_new(ckey);
@@ -772,6 +782,7 @@ end:
 			dlist_rwlock_unlock(monitors);
 			dstr_free(contracts);
 			dstr_free(index);
+			dstr_free_tokens(fields2, nfield2);
 			dstr_free(value);
 			dstr_free(key);
 		}
@@ -1054,20 +1065,23 @@ static void remove_from_subscribers(client c) {
 
 	ptrie_rwlock_wrlock(subscribers);
 	dlist = ptrie_node_value(ptrie_get_root(subscribers));
-	dlist_remove(dlist, dlist_find(dlist, c));
-	diter = dlist_iter_new(c->subscribers, DLIST_START_HEAD);
-	while ((dnode = dlist_next(diter))) {
-		dstr skey = (dstr)dlist_node_value(dnode);
-		dstr *fields = NULL;
-		int nfield = 0;
-		ptrie_node_t node;
+	if ((dnode = dlist_find(dlist, c)))
+		dlist_remove(dlist, dnode);
+	else {
+		diter = dlist_iter_new(c->subscribers, DLIST_START_HEAD);
+		while ((dnode = dlist_next(diter))) {
+			dstr skey = (dstr)dlist_node_value(dnode);
+			dstr *fields = NULL;
+			int nfield = 0;
+			ptrie_node_t node;
 
-		fields = dstr_split_len(skey, dstr_length(skey), ",", 1, &nfield);
-		node = ptrie_get_index(subscribers, fields[0]);
-		ptrie_remove(node, skey, c);
-		dstr_free_tokens(fields, nfield);
+			fields = dstr_split_len(skey, dstr_length(skey), ",", 1, &nfield);
+			node = ptrie_get_index(subscribers, fields[0]);
+			ptrie_remove(node, skey, c);
+			dstr_free_tokens(fields, nfield);
+		}
+		dlist_iter_free(&diter);
 	}
-	dlist_iter_free(&diter);
 	dlist_free(&c->subscribers);
 	ptrie_rwlock_unlock(subscribers);
 }

@@ -274,59 +274,66 @@ static int prepare_for_shutdown(void) {
 }
 
 dstr get_indices(void) {
-	dlist_iter_t iter, iter2;
+	dlist_iter_t iter;
 	dlist_node_t node;
 	dlist_t dlist = dlist_new(cmpstr, vfree2);
 	dstr res = dstr_new("INDICES");
 
 	dlist_lock(queues);
-	iter = dlist_iter_new(queues, DLIST_START_HEAD);
-	while ((node = dlist_next(iter))) {
-		struct msgs *msgs = (struct msgs *)dlist_node_value(node);
+	if (dlist_length(queues) > 0) {
+		iter = dlist_iter_new(queues, DLIST_START_HEAD);
+		while ((node = dlist_next(iter))) {
+			struct msgs *msgs = (struct msgs *)dlist_node_value(node);
 
-		dlist_lock(msgs->appouts);
-		iter2 = dlist_iter_new(msgs->appouts, DLIST_START_HEAD);
-		while ((node = dlist_next(iter2))) {
-			struct appout *ao = (struct appout *)dlist_node_value(node);
-			const char *appname;
+			dlist_lock(msgs->appouts);
+			if (dlist_length(msgs->appouts) > 0) {
+				dlist_iter_t iter2 = dlist_iter_new(msgs->appouts, DLIST_START_HEAD);
 
-			if ((appname = get_application_name(ao->app))) {
-				dstr index, format, prev;
+				while ((node = dlist_next(iter2))) {
+					struct appout *ao = (struct appout *)dlist_node_value(node);
+					const char *appname;
 
-				index  = dstr_new(appname);
-				format = dstr_new(get_application_format(ao->app));
-				STR2UPPER(index);
-				if (dlist_find(dlist, index) == NULL)
-					dlist_insert_sort(dlist, dstr_new(index));
-				table_lock(idxfmts);
-				if ((prev = table_get_value(idxfmts, index)) == NULL)
-					table_insert(idxfmts, index, format);
-				else if (dstr_length(prev) != dstr_length(format) ||
-					memcmp(prev, format, dstr_length(prev))) {
-					table_insert(idxfmts, index, format);
-					dstr_free(prev);
-					dstr_free(index);
-				} else {
-					dstr_free(format);
-					dstr_free(index);
+					if ((appname = get_application_name(ao->app))) {
+						dstr index, format, prev;
+
+						index  = dstr_new(appname);
+						format = dstr_new(get_application_format(ao->app));
+						STR2UPPER(index);
+						if (dlist_find(dlist, index) == NULL)
+							dlist_insert_sort(dlist, dstr_new(index));
+						table_lock(idxfmts);
+						if ((prev = table_get_value(idxfmts, index)) == NULL)
+							table_insert(idxfmts, index, format);
+						else if (dstr_length(prev) != dstr_length(format) ||
+							memcmp(prev, format, dstr_length(prev))) {
+							table_insert(idxfmts, index, format);
+							dstr_free(prev);
+							dstr_free(index);
+						} else {
+							dstr_free(format);
+							dstr_free(index);
+						}
+						table_unlock(idxfmts);
+					}
 				}
-				table_unlock(idxfmts);
+				dlist_iter_free(&iter2);
 			}
+			dlist_unlock(msgs->appouts);
 		}
-		dlist_iter_free(&iter2);
-		dlist_unlock(msgs->appouts);
+		dlist_iter_free(&iter);
 	}
-	dlist_iter_free(&iter);
 	dlist_unlock(queues);
 	/* assemble */
-	iter = dlist_iter_new(dlist, DLIST_START_HEAD);
-	while ((node = dlist_next(iter))) {
-		dstr index = (dstr)dlist_node_value(node);
+	if (dlist_length(dlist) > 0) {
+		iter = dlist_iter_new(dlist, DLIST_START_HEAD);
+		while ((node = dlist_next(iter))) {
+			dstr index = (dstr)dlist_node_value(node);
 
-		res = dstr_cat(res, ",");
-		res = dstr_cat(res, index);
+			res = dstr_cat(res, ",");
+			res = dstr_cat(res, index);
+		}
+		dlist_iter_free(&iter);
 	}
-	dlist_iter_free(&iter);
 	dlist_free(&dlist);
 	res = dstr_cat(res, "\r\n");
 	return res;
@@ -371,14 +378,16 @@ static int server_cron(event_loop el, unsigned long id, void *data) {
 		xcb_log(XCB_LOG_WARNING, "SIGTERM received, but errors trying to shutdown the server");
 	}
 	/* close clients asynchronously */
-	iter = dlist_iter_new(clients_to_close, DLIST_START_HEAD);
-	while ((node = dlist_next(iter))) {
-		client c = (client)dlist_node_value(node);
+	if (dlist_length(clients_to_close) > 0) {
+		iter = dlist_iter_new(clients_to_close, DLIST_START_HEAD);
+		while ((node = dlist_next(iter))) {
+			client c = (client)dlist_node_value(node);
 
-		if (c->refcount == 0)
-			client_free(c);
+			if (c->refcount == 0)
+				client_free(c);
+		}
+		dlist_iter_free(&iter);
 	}
-	dlist_iter_free(&iter);
 	/* triggered approximately every one second */
 	if (cronloops % 10 == 0)
 		if (persistence && dirty) {
@@ -456,8 +465,8 @@ static int server_cron(event_loop el, unsigned long id, void *data) {
 static int send_quote(void *data, void *data2) {
 	struct msg *msg = (struct msg *)data;
 	dstr skey = (dstr)data2;
-	dstr *fields = NULL;
-	int nfield = 0;
+	dstr *fields = NULL, *fields2 = NULL;
+	int nfield = 0, nfield2 = 0;
 	dstr key, value, index, res;
 	ptrie_node_t node;
 	dlist_t dlist;
@@ -468,10 +477,8 @@ static int send_quote(void *data, void *data2) {
 	fields = dstr_split_len(msg->data, strlen(msg->data), "|", 1, &nfield);
 	key   = dstr_new(fields[0]);
 	value = dstr_new(fields[1]);
-	dstr_free_tokens(fields, nfield);
-	fields = NULL, nfield = 0;
-	fields = dstr_split_len(key, dstr_length(key), ",", 1, &nfield);
-	index = dstr_new(fields[0]);
+	fields2 = dstr_split_len(key, dstr_length(key), ",", 1, &nfield2);
+	index = dstr_new(fields2[0]);
 	res = dstr_new(key);
 	res = dstr_cat(res, ",");
 	res = dstr_cat(res, value);
@@ -480,27 +487,7 @@ static int send_quote(void *data, void *data2) {
 	ptrie_rwlock_rdlock(subscribers);
 	if ((node = ptrie_get_index(subscribers, index)) == NULL) {
 		dlist = ptrie_node_value(ptrie_get_root(subscribers));
-		diter = dlist_iter_new(dlist, DLIST_START_HEAD);
-		while ((dnode = dlist_next(diter))) {
-			client c = (client)dlist_node_value(dnode);
-
-			pthread_spin_lock(&c->lock);
-			if (!(c->flags & CLIENT_CLOSE_ASAP)) {
-				if (net_try_write(c->fd, res, dstr_length(res), 10, NET_NONBLOCK) == -1) {
-					xcb_log(XCB_LOG_WARNING, "Writing to client '%p': %s",
-						c, strerror(errno));
-					if (++c->eagcount >= 3)
-						client_free_async(c);
-				} else if (c->eagcount)
-					c->eagcount = 0;
-			}
-			pthread_spin_unlock(&c->lock);
-		}
-		dlist_iter_free(&diter);
-	} else {
-		node = ptrie_find(node, skey);
-		while (node) {
-			dlist = ptrie_node_value(node);
+		if (dlist_length(dlist) > 0) {
 			diter = dlist_iter_new(dlist, DLIST_START_HEAD);
 			while ((dnode = dlist_next(diter))) {
 				client c = (client)dlist_node_value(dnode);
@@ -519,12 +506,38 @@ static int send_quote(void *data, void *data2) {
 				pthread_spin_unlock(&c->lock);
 			}
 			dlist_iter_free(&diter);
+		}
+	} else {
+		node = ptrie_find(node, skey);
+		while (node) {
+			dlist = ptrie_node_value(node);
+			if (dlist_length(dlist) > 0) {
+				diter = dlist_iter_new(dlist, DLIST_START_HEAD);
+				while ((dnode = dlist_next(diter))) {
+					client c = (client)dlist_node_value(dnode);
+
+					pthread_spin_lock(&c->lock);
+					if (!(c->flags & CLIENT_CLOSE_ASAP)) {
+						if (net_try_write(c->fd, res, dstr_length(res),
+							10, NET_NONBLOCK) == -1) {
+							xcb_log(XCB_LOG_WARNING, "Writing to client '%p': %s",
+								c, strerror(errno));
+							if (++c->eagcount >= 3)
+								client_free_async(c);
+						} else if (c->eagcount)
+							c->eagcount = 0;
+					}
+					pthread_spin_unlock(&c->lock);
+				}
+				dlist_iter_free(&diter);
+			}
 			node = ptrie_node_parent(node);
 		}
 	}
 	ptrie_rwlock_unlock(subscribers);
 	dstr_free(res);
 	dstr_free(index);
+	dstr_free_tokens(fields2, nfield2);
 	dstr_free(value);
 	dstr_free(key);
 	dstr_free_tokens(fields, nfield);
@@ -653,7 +666,7 @@ void process_quote(void *data) {
 	quote = (Quote *)data;
 	if (quote->thyquote.m_nLen == sizeof (tHYQuote)) {
 		dlist_iter_t iter;
-		dlist_node_t node;
+		dlist_node_t node = NULL;
 		int tlen;
 
 		quote->thyquote.m_cJYS[sizeof quote->thyquote.m_cJYS - 1] = '\0';
@@ -706,15 +719,17 @@ void process_quote(void *data) {
 		}
 		dlist_rwlock_unlock(monitors);
 		/* FIXME: filter */
-		iter = dlist_iter_new(filter, DLIST_START_HEAD);
-		while ((node = dlist_next(iter))) {
-			dstr item = (dstr)dlist_node_value(node);
+		if (dlist_length(filter) > 0) {
+			iter = dlist_iter_new(filter, DLIST_START_HEAD);
+			while ((node = dlist_next(iter))) {
+				dstr item = (dstr)dlist_node_value(node);
 
-			if (dstr_length(item) <= sizeof quote->thyquote.m_cHYDM &&
-				!memcmp(item, quote->thyquote.m_cHYDM, dstr_length(item)))
-				break;
+				if (dstr_length(item) <= sizeof quote->thyquote.m_cHYDM &&
+					!memcmp(item, quote->thyquote.m_cHYDM, dstr_length(item)))
+					break;
+			}
+			dlist_iter_free(&iter);
 		}
-		dlist_iter_free(&iter);
 		if (node == NULL) {
 			FREE(data);
 			return;
@@ -900,66 +915,70 @@ int msgs_hook(struct msgs *msgs, int (*exec)(void *data, void *data2), struct ms
 /* FIXME */
 int msgs_hook_name(const char *msgs, int (*exec)(void *data, void *data2), struct msgs *out) {
 	dlist_iter_t iter;
-	dlist_node_t node;
+	dlist_node_t node = NULL;
 
 	if (msgs == NULL || exec == NULL)
 		return -1;
 	dlist_lock(queues);
-	iter = dlist_iter_new(queues, DLIST_START_HEAD);
-	while ((node = dlist_next(iter))) {
-		struct msgs *m = (struct msgs *)dlist_node_value(node);
+	if (dlist_length(queues) > 0) {
+		iter = dlist_iter_new(queues, DLIST_START_HEAD);
+		while ((node = dlist_next(iter))) {
+			struct msgs *m = (struct msgs *)dlist_node_value(node);
 
-		if (!strcasecmp(m->name, msgs)) {
-			if (msgs_hook(m, exec, out) == -1) {
-				dlist_unlock(queues);
-				return -1;
+			if (!strcasecmp(m->name, msgs)) {
+				if (msgs_hook(m, exec, out) == -1) {
+					dlist_unlock(queues);
+					return -1;
+				}
+				break;
 			}
-			break;
 		}
+		dlist_iter_free(&iter);
 	}
-	dlist_iter_free(&iter);
 	dlist_unlock(queues);
 	return node ? 0 : -2;
 }
 
 /* FIXME */
 void msgs_unhook(struct msgs *msgs, int (*exec)(void *data, void *data2)) {
-	dlist_iter_t iter;
-	dlist_node_t node;
-
 	if (msgs == NULL || exec == NULL)
 		return;
 	dlist_lock(msgs->appouts);
-	iter = dlist_iter_new(msgs->appouts, DLIST_START_HEAD);
-	while ((node = dlist_next(iter))) {
-		struct appout *ao = (struct appout *)dlist_node_value(node);
+	if (dlist_length(msgs->appouts) > 0) {
+		dlist_iter_t iter = dlist_iter_new(msgs->appouts, DLIST_START_HEAD);
+		dlist_node_t node;
 
-		if (ao->app == exec) {
-			dlist_remove(msgs->appouts, node);
-			FREE(ao);
+		while ((node = dlist_next(iter))) {
+			struct appout *ao = (struct appout *)dlist_node_value(node);
+
+			if (ao->app == exec) {
+				dlist_remove(msgs->appouts, node);
+				FREE(ao);
+			}
 		}
+		dlist_iter_free(&iter);
 	}
-	dlist_iter_free(&iter);
 	dlist_unlock(msgs->appouts);
 	thrpool_remove(tp, exec);
 }
 
 /* FIXME */
 void msgs_unhook_name(const char *msgs, int (*exec)(void *data, void *data2)) {
-	dlist_iter_t iter;
-	dlist_node_t node;
-
 	if (msgs == NULL || exec == NULL)
 		return;
 	dlist_lock(queues);
-	iter = dlist_iter_new(queues, DLIST_START_HEAD);
-	while ((node = dlist_next(iter))) {
-		struct msgs *m = (struct msgs *)dlist_node_value(node);
+	if (dlist_length(queues) > 0) {
+		dlist_iter_t iter = dlist_iter_new(queues, DLIST_START_HEAD);
+		dlist_node_t node;
 
-		if (!strcasecmp(m->name, msgs))
-			msgs_unhook(m, exec);
+		while ((node = dlist_next(iter))) {
+			struct msgs *m = (struct msgs *)dlist_node_value(node);
+
+			if (!strcasecmp(m->name, msgs))
+				msgs_unhook(m, exec);
+		}
+		dlist_iter_free(&iter);
 	}
-	dlist_iter_free(&iter);
 	dlist_unlock(queues);
 	thrpool_remove(tp, exec);
 }
@@ -984,23 +1003,25 @@ void stop_msgs(struct msgs *msgs) {
 
 /* FIXME */
 int check_msgs(struct msgs *msgs) {
-	dlist_iter_t iter;
-	dlist_node_t node;
 	int flag = 0;
 
 	dlist_lock(msgs->appouts);
-	iter = dlist_iter_new(msgs->appouts, DLIST_START_HEAD);
-	while ((node = dlist_next(iter))) {
-		struct appout *ao = (struct appout *)dlist_node_value(node);;
-		struct module *mod;
+	if (dlist_length(msgs->appouts) > 0) {
+		dlist_iter_t iter = dlist_iter_new(msgs->appouts, DLIST_START_HEAD);
+		dlist_node_t node;
 
-		if ((mod = get_application_module(ao->app)) != msgs->mod) {
-			xcb_log(XCB_LOG_WARNING, "Queue '%s' is used by module '%s', unload '%s' first",
-				msgs->name, mod->name, mod->name);
-			flag = -1;
+		while ((node = dlist_next(iter))) {
+			struct appout *ao = (struct appout *)dlist_node_value(node);;
+			struct module *mod;
+
+			if ((mod = get_application_module(ao->app)) != msgs->mod) {
+				xcb_log(XCB_LOG_WARNING, "Queue '%s' is used by module '%s', "
+					"unload '%s' first", msgs->name, mod->name, mod->name);
+				flag = -1;
+			}
 		}
+		dlist_iter_free(&iter);
 	}
-	dlist_iter_free(&iter);
 	dlist_unlock(msgs->appouts);
 	return flag;
 }
@@ -1023,6 +1044,8 @@ void out2rmp(const char *res) {
 		fields = dstr_split_len(res, len, "|", 1, &nfield);
 		{
 			dstr key = NULL, value = NULL, index = NULL, contracts = NULL;
+			dstr *fields2 = NULL;
+			int nfield2 = 0;
 			dstr ckey, cvalue, skey;
 			dlist_t dlist;
 			struct kvd *kvd;
@@ -1032,19 +1055,17 @@ void out2rmp(const char *res) {
 				goto end;
 			key   = dstr_new(fields[0]);
 			value = dstr_new(fields[1]);
-			dstr_free_tokens(fields, nfield);
-			fields = NULL, nfield = 0;
-			fields = dstr_split_len(key, dstr_length(key), ",", 1, &nfield);
-			if (nfield < 2)
+			fields2 = dstr_split_len(key, dstr_length(key), ",", 1, &nfield2);
+			if (nfield2 < 2)
 				goto end;
-			index = dstr_new(fields[0]);
-			if (nfield > 2) {
+			index = dstr_new(fields2[0]);
+			if (nfield2 > 2) {
 				int i;
 
-				contracts = dstr_new(fields[2]);
-				for (i = 3; i < nfield; ++i) {
+				contracts = dstr_new(fields2[2]);
+				for (i = 3; i < nfield2; ++i) {
 					contracts = dstr_cat(contracts, ",");
-					contracts = dstr_cat(contracts, fields[i]);
+					contracts = dstr_cat(contracts, fields2[i]);
 				}
 			}
 			ckey   = dstr_new(index);
@@ -1052,7 +1073,7 @@ void out2rmp(const char *res) {
 				ckey = dstr_cat(ckey, ",");
 				ckey = dstr_cat(ckey, contracts);
 			}
-			cvalue = dstr_new(fields[1]);
+			cvalue = dstr_new(fields2[1]);
 			cvalue = dstr_cat(cvalue, ",");
 			cvalue = dstr_cat(cvalue, value);
 			skey   = dstr_new(ckey);
@@ -1146,6 +1167,7 @@ end:
 			dlist_rwlock_unlock(monitors);
 			dstr_free(contracts);
 			dstr_free(index);
+			dstr_free_tokens(fields2, nfield2);
 			dstr_free(value);
 			dstr_free(key);
 		}
@@ -1381,20 +1403,23 @@ static void remove_from_subscribers(client c) {
 
 	ptrie_rwlock_wrlock(subscribers);
 	dlist = ptrie_node_value(ptrie_get_root(subscribers));
-	dlist_remove(dlist, dlist_find(dlist, c));
-	diter = dlist_iter_new(c->subscribers, DLIST_START_HEAD);
-	while ((dnode = dlist_next(diter))) {
-		dstr skey = (dstr)dlist_node_value(dnode);
-		dstr *fields = NULL;
-		int nfield = 0;
-		ptrie_node_t node;
+	if ((dnode = dlist_find(dlist, c)))
+		dlist_remove(dlist, dnode);
+	else {
+		diter = dlist_iter_new(c->subscribers, DLIST_START_HEAD);
+		while ((dnode = dlist_next(diter))) {
+			dstr skey = (dstr)dlist_node_value(dnode);
+			dstr *fields = NULL;
+			int nfield = 0;
+			ptrie_node_t node;
 
-		fields = dstr_split_len(skey, dstr_length(skey), ",", 1, &nfield);
-		node = ptrie_get_index(subscribers, fields[0]);
-		ptrie_remove(node, skey, c);
-		dstr_free_tokens(fields, nfield);
+			fields = dstr_split_len(skey, dstr_length(skey), ",", 1, &nfield);
+			node = ptrie_get_index(subscribers, fields[0]);
+			ptrie_remove(node, skey, c);
+			dstr_free_tokens(fields, nfield);
+		}
+		dlist_iter_free(&diter);
 	}
-	dlist_iter_free(&diter);
 	dlist_free(&c->subscribers);
 	ptrie_rwlock_unlock(subscribers);
 }
@@ -1673,33 +1698,37 @@ static void show_command(client c) {
 			add_reply_string_format(c, "%30.30s  %s [Module: %s]\r\n",
 				app->name, app->desc, app->mod->name);
 	} else if (!strcasecmp(c->argv[1], "queues")) {
-		dlist_iter_t iter, iter2;
-		dlist_node_t node;
-
 		dlist_lock(queues);
-		iter = dlist_iter_new(queues, DLIST_START_HEAD);
-		while ((node = dlist_next(iter))) {
-			struct msgs *msgs = (struct msgs *)dlist_node_value(node);
-			dstr appnames = dstr_new_len("", 0);
+		if (dlist_length(queues) > 0) {
+			dlist_iter_t iter = dlist_iter_new(queues, DLIST_START_HEAD);
+			dlist_node_t node;
 
-			dlist_lock(msgs->appouts);
-			iter2 = dlist_iter_new(msgs->appouts, DLIST_START_HEAD);
-			while ((node = dlist_next(iter2))) {
-				struct appout *ao = (struct appout *)dlist_node_value(node);
-				const char *appname;
+			while ((node = dlist_next(iter))) {
+				struct msgs *msgs = (struct msgs *)dlist_node_value(node);
+				dstr appnames = dstr_new_len("", 0);
 
-				if ((appname = get_application_name(ao->app))) {
-					appnames = dstr_cat(appnames, appname);
-					appnames = dstr_cat(appnames, ", ");
+				dlist_lock(msgs->appouts);
+				if (dlist_length(msgs->appouts) > 0) {
+					dlist_iter_t iter2 = dlist_iter_new(msgs->appouts, DLIST_START_HEAD);
+
+					while ((node = dlist_next(iter2))) {
+						struct appout *ao = (struct appout *)dlist_node_value(node);
+						const char *appname;
+
+						if ((appname = get_application_name(ao->app))) {
+							appnames = dstr_cat(appnames, appname);
+							appnames = dstr_cat(appnames, ", ");
+						}
+					}
+					dlist_iter_free(&iter2);
 				}
+				dlist_unlock(msgs->appouts);
+				add_reply_string_format(c, "%30.30s  %s\r\n", msgs->name,
+					dstr_length(appnames) == 0 ? appnames : dstr_range(appnames, 0, -3));
+				dstr_free(appnames);
 			}
-			dlist_iter_free(&iter2);
-			dlist_unlock(msgs->appouts);
-			add_reply_string_format(c, "%30.30s  %s\r\n", msgs->name,
-				dstr_length(appnames) == 0 ? appnames : dstr_range(appnames, 0, -3));
-			dstr_free(appnames);
+			dlist_iter_free(&iter);
 		}
-		dlist_iter_free(&iter);
 		dlist_unlock(queues);
 	} else
 		add_reply_error_format(c, "unknown property '%s'", c->argv[1]);

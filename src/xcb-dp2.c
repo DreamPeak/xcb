@@ -266,14 +266,16 @@ static int server_cron(event_loop el, unsigned long id, void *data) {
 		xcb_log(XCB_LOG_WARNING, "SIGTERM received, but errors trying to shutdown the server");
 	}
 	/* close clients asynchronously */
-	iter = dlist_iter_new(clients_to_close, DLIST_START_HEAD);
-	while ((node = dlist_next(iter))) {
-		client c = (client)dlist_node_value(node);
+	if (dlist_length(clients_to_close) > 0) {
+		iter = dlist_iter_new(clients_to_close, DLIST_START_HEAD);
+		while ((node = dlist_next(iter))) {
+			client c = (client)dlist_node_value(node);
 
-		if (c->refcount == 0)
-			client_free(c);
+			if (c->refcount == 0)
+				client_free(c);
+		}
+		dlist_iter_free(&iter);
 	}
-	dlist_iter_free(&iter);
 	/* triggered approximately every 20 seconds */
 	if (cronloops % 200 == 0) {
 		char meme[] = "SU OT GNOLEB ERA ESAB RUOY LLA";
@@ -406,8 +408,6 @@ void process_quote(void *data) {
 
 	quote = (Quote *)data;
 	if (quote->thyquote.m_nLen == sizeof (tHYQuote)) {
-		dlist_iter_t iter;
-		dlist_node_t node;
 		int tlen;
 
 		quote->thyquote.m_cJYS[sizeof quote->thyquote.m_cJYS - 1] = '\0';
@@ -417,6 +417,8 @@ void process_quote(void *data) {
 		dlist_rwlock_rdlock(monitors);
 		if (dlist_length(monitors) > 0) {
 			char res[512];
+			dlist_iter_t iter = dlist_iter_new(monitors, DLIST_START_HEAD);
+			dlist_node_t node;
 
 			snprintf(res, sizeof res, "RX '%d,%s,%s,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,"
 				"%.2f,%.2f,%d,%.2f,%d,%d,%.2f,%d,%.2f,%d'\r\n",

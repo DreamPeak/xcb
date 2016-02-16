@@ -105,8 +105,8 @@ void s_command(client c) {
 			kvd = (struct kvd *)dlist_node_value(node);
 			if (dstr_length(kvd->key) >= dstr_length(skey) &&
 				!memcmp(kvd->key, skey, dstr_length(skey))) {
-				dstr *fields = NULL;
-				int nfield = 0;
+				dstr *fields = NULL, *fields2 = NULL;
+				int nfield = 0, nfield2 = 0;
 				dstr res, contracts = NULL;
 
 				flag = 1;
@@ -119,19 +119,17 @@ void s_command(client c) {
 						contracts = dstr_cat(contracts, fields[i]);
 					}
 				}
-				dstr_free_tokens(fields, nfield);
-				fields = NULL, nfield = 0;
-				fields = dstr_split_len(kvd->u.value, dstr_length(kvd->u.value),
-					",", 1, &nfield);
+				fields2 = dstr_split_len(kvd->u.value, dstr_length(kvd->u.value),
+					",", 1, &nfield2);
 				res = dstr_cat(res, ",");
-				res = dstr_cat(res, fields[0]);
+				res = dstr_cat(res, fields2[0]);
 				if (contracts) {
 					res = dstr_cat(res, ",");
 					res = dstr_cat(res, contracts);
 				}
-				for (i = 1; i < nfield; ++i) {
+				for (i = 1; i < nfield2; ++i) {
 					res = dstr_cat(res, ",");
-					res = dstr_cat(res, fields[i]);
+					res = dstr_cat(res, fields2[i]);
 				}
 				res = dstr_cat(res, "\r\n");
 				pthread_spin_lock(&c->lock);
@@ -143,6 +141,7 @@ void s_command(client c) {
 						if (++c->eagcount >= 3) {
 							client_free_async(c);
 							pthread_spin_unlock(&c->lock);
+							dstr_free_tokens(fields2, nfield2);
 							dstr_free(contracts);
 							dstr_free(res);
 							dstr_free_tokens(fields, nfield);
@@ -155,6 +154,7 @@ void s_command(client c) {
 						c->eagcount = 0;
 				}
 				pthread_spin_unlock(&c->lock);
+				dstr_free_tokens(fields2, nfield2);
 				dstr_free(contracts);
 				dstr_free(res);
 				dstr_free_tokens(fields, nfield);

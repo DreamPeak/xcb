@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013-2016, Dalian Futures Information Technology Co., Ltd.
  *
- * Guodong Zhang <zhangguodong at dce dot com dot cn>
+ * Guodong Zhang
  * Xiaoye Meng   <mengxiaoye at dce dot com dot cn>
  *
  * This program is free software; you can redistribute it and/or modify
