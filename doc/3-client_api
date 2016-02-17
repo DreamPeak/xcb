@@ -1,3 +1,56 @@
 
 Xiaoye Meng <mengxiaoye at dce dot com dot cn>
 
+All commands and replies are in CSV format.  So you can easily drop them into
+M$ EXCEL to do crazy things.
+
+S<index>[,pattern]
+
+    Subscribe an index according to a pattern.
+    For example: SIMPVBAW
+                 SIMPVBAW,m
+                 SIMPVBAW,m1603
+                 SIMPVBAW,m1603-C-2600
+
+SALL
+
+    Subscribe all indices.
+
+U<index>[,pattern]
+
+    Unsubscribe an index according to a pattern.
+    For example: UIMPVBAW
+                 UIMPVBAW,m
+                 UIMPVBAW,m1603
+                 UIMPVBAW,m1603-C-2600
+
+UALL
+
+    Unsubscribe all indices.
+
+Q<index>,<rid>,[pattern],<start time>,<end time>
+
+    Query an index according to a pattern, from 'start time' to 'end time'.
+    'start time' and 'end time' must be in 'yyyy-mm-dd hh:mm' or
+    'yyyy-mm-dd hh:mm:ss' format.
+    For example: QIMPVBAW,123,,2016-02-15 09:00,2016-02-15 10:00
+                 QIMPVBAW,123,m1603,2016-02-15 09:00:00,2016-02-15 10:00:30
+
+QC,<rid>
+
+    Cancel a query.
+    For example: QC,123
+
+INDICES,<rid>
+
+    Return all indices you can subscribe/unsubscribe.
+    For example: -->INDICES,999
+                 <--999,INDICES,GREEKSBAW,IMPVBAW,OTVBAW,VSML
+
+INDEX,<index>
+
+    Return the format of an index.
+    For example: -->INDEX,IMPVBAW
+                 <--IMPVBAW,timestamp,contract,lastprice,vol,bidprice1,vol2,
+                    askprice1,vol3,spotprice
+

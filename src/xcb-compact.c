@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2013-2016, Dalian Futures Information Technology Co., Ltd.
  *
+ * Gaohang Wu
  * Bo Wang
  * Xiaoye Meng <mengxiaoye at dce dot com dot cn>
  *
@@ -1557,7 +1558,7 @@ static client client_new(int fd, int sock) {
 	c->outpos        = 0;
 	c->reply         = ring_new();
 	c->sentlen       = 0;
-	c->subscribers   = dlist_new(cmpstr, vfree);
+	c->subscribers   = dlist_new(cmpstr, vfree2);
 	c->eagcount      = 0;
 	c->refcount      = 0;
 	c->authenticated = 0;

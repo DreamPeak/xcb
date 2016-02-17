@@ -1,3 +1,46 @@
 
 Xiaoye Meng <mengxiaoye at dce dot com dot cn>
 
+By typing '
+
+    service xcb-compact start
+
+', the compactor is loaded into main memory.
+
+You can start the command line interface to play with it.
+
+    xcb-cli
+    XCUBE CLI, Copyright (c) 2013-2016, Dalian Futures Information Technology Co., Ltd.
+    Type 'help' or '?' for help.
+    xcb*CLI> help
+                              help  Display this text
+                                 ?  Synonym for 'help'
+                            config  Get or set configurations
+                              show  Show modules, applications or queues
+                            module  Load, unload or reload module
+                           monitor  Monitor on or off
+                          database  Database operations
+                          shutdown  Shut down xcb-compact
+                              quit  Quit connecting to xcb-compact
+    xcb*CLI> show modules
+                    app_impvbaw.so  Implied Volatility (BAW) Applications [Status: Running]
+                       app_vsml.so  Volatility Smile Application [Status: Running]
+                  app_greeksbaw.so  Greeks (BAW) Application [Status: Running]
+                     app_otvbaw.so  Option Theoretical Value (BAW) Application [Status: Running]
+                       app_test.so  Communication Test Application [Status: Running]
+    xcb*CLI> show applications
+                           impvbaw  Implied Volatility (BAW) [Module: app_impvbaw.so]
+                        mm_impvbaw  Min & Max of Implied Volatility (BAW) [Module: app_impvbaw.so]
+                              vsml  Volatility Smile [Module: app_vsml.so]
+                         greeksbaw  Delta, Gamma, Theta, Vega, and Rho (BAW) [Module: app_greeksbaw.so]
+                            otvbaw  Option Theoretical Value (BAW) [Module: app_otvbaw.so]
+                              test  Communication Tester [Module: app_test.so]
+    xcb*CLI> show queues
+                      default_msgs  impvbaw
+                      impvbaw_msgs  mm_impvbaw, vsml, greeksbaw
+                         vsml_msgs  otvbaw
+    xcb*CLI> module load app_kline.so
+    module 'app_kline.so' loaded OK
+    xcb*CLI> module unload app_kline.so
+    module 'app_kline.so' unloaded OK
+

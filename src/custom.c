@@ -76,7 +76,6 @@ void kvfree(void *value) {
 	FREE(kvd);
 }
 
-/* FIXME */
 void s_command(client c) {
 	dstr pkey, skey;
 	int i;
@@ -193,6 +192,7 @@ void s_command(client c) {
 			dlist_free(&dlist);
 			dstr_free(path);
 			dstr_free(skey);
+		/* FIXME */
 		} else if (ptrie_insert(node, skey, c) == 0)
 			dlist_insert_sort(c->subscribers, skey);
 	}
@@ -215,7 +215,6 @@ void sall_command(client c) {
 	ptrie_rwlock_unlock(subscribers);
 }
 
-/* FIXME */
 void u_command(client c) {
 	dstr pkey, skey;
 	dlist_t dlist;
@@ -259,8 +258,12 @@ void u_command(client c) {
 			if (strcmp(skey, path))
 				add_reply_error_format(c, "subscribe/unsubscribe is symmetrical. "
 					"unsubscribe '%s' first", path);
-			else if (ptrie_remove(node, skey, c) == 0)
-				dlist_remove(c->subscribers, dlist_find(c->subscribers, skey));
+			/* FIXME */
+			else if (ptrie_remove(node, skey, c) == 0) {
+				dstr s = dlist_remove(c->subscribers, dlist_find(c->subscribers, skey));
+
+				dstr_free(s);
+			}
 			dlist_iter_free(&diter);
 			dlist_free(&dlist);
 			dstr_free(path);
