@@ -85,10 +85,9 @@ static void on_front_connected(void) {
 	int res;
 
 	memset(&req, '\0', sizeof req);
-	/* FIXME */
-	strcpy(req.BrokerID, brokerid);
-	strcpy(req.UserID, userid);
-	strcpy(req.Password, passwd);
+	strncat(req.BrokerID, brokerid, sizeof req.BrokerID - 1);
+	strncat(req.UserID, userid, sizeof req.UserID - 1);
+	strncat(req.Password, passwd, sizeof req.Password - 1);
 	res = ctp_mdapi_login_user(mdapi, &req, 1);
 	xcb_log(XCB_LOG_NOTICE, "Login %s for user '%s'", res == 0 ? "succeeded" : "failed", userid);
 }
@@ -139,6 +138,7 @@ static void on_deep_market_data(struct CThostFtdcDepthMarketDataField *deepmd) {
 		quote->thyquote.m_nLen   = sizeof (tHYQuote);
 		RMCHR(deepmd->UpdateTime, ':');
 		quote->thyquote.m_nTime  = atoi(deepmd->UpdateTime) * 1000 + deepmd->UpdateMillisec;
+		strcpy(quote->thyquote.m_cJYS, deepmd->ExchangeID);
 		strcpy(quote->thyquote.m_cHYDM, deepmd->InstrumentID);
 		if (deepmd->PreSettlementPrice != DBL_MAX)
 			quote->thyquote.m_dZJSJ  = deepmd->PreSettlementPrice;

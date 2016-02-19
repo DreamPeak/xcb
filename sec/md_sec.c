@@ -101,18 +101,16 @@ static void on_front_connected(void) {
 	memset(&sop_req, '\0', sizeof sop_req);
 	if (stk_userid && stk_passwd) {
 		stk_req.requestID = stk_reqid;
-		/* FIXME */
-		strcpy(stk_req.accountID, stk_userid);
-		strcpy(stk_req.password, stk_passwd);
+		strncat(stk_req.accountID, stk_userid, sizeof stk_req.accountID - 1);
+		strncat(stk_req.password, stk_passwd, sizeof stk_req.password - 1);
 		stk_res = sec_mdapi_stk_user_login(mdapi, &stk_req);
 		xcb_log(XCB_LOG_NOTICE, "Stock login %s for user '%s'",
 			stk_res == 0 ? "succeeded" : "failed", stk_userid);
 	}
 	if (sop_userid && sop_passwd) {
 		sop_req.requestID = sop_reqid;
-		/* FIXME */
-		strcpy(sop_req.accountID, sop_userid);
-		strcpy(sop_req.password, sop_passwd);
+		strncat(sop_req.accountID, sop_userid, sizeof sop_req.accountID - 1);
+		strncat(sop_req.password, sop_passwd, sizeof sop_req.password - 1);
 		sop_res = sec_mdapi_sop_user_login(mdapi, &sop_req);
 		xcb_log(XCB_LOG_NOTICE, "Sop login %s for user '%s'",
 			sop_res == 0 ? "succeeded" : "failed", sop_userid);
@@ -154,7 +152,6 @@ static void on_stk_subscribe_market_data(struct DFITCSECSpecificInstrumentField 
 
 static void on_stk_deep_market_data(struct DFITCStockDepthMarketDataField *deepmd) {
 	Quote *quote;
-	char contract[256];
 
 	if (deepmd == NULL)
 		return;
@@ -164,9 +161,9 @@ static void on_stk_deep_market_data(struct DFITCStockDepthMarketDataField *deepm
 		RMCHR(deepmd->sharedDataField.updateTime, ':');
 		quote->thyquote.m_nTime  = atoi(deepmd->sharedDataField.updateTime) * 1000;
 		strcpy(quote->thyquote.m_cJYS, deepmd->staticDataField.exchangeID);
-		strcpy(contract, deepmd->staticDataField.exchangeID);
-		strcat(contract, deepmd->staticDataField.securityID);
-		strncpy(quote->thyquote.m_cHYDM, contract, sizeof quote->thyquote.m_cHYDM - 1);
+		strcpy(quote->thyquote.m_cHYDM, deepmd->staticDataField.exchangeID);
+		strncat(quote->thyquote.m_cHYDM, deepmd->staticDataField.securityID,
+			sizeof quote->thyquote.m_cHYDM - strlen(quote->thyquote.m_cHYDM) - 1);
 		quote->thyquote.m_bTPBZ  = 0;
 		quote->thyquote.m_dZJSJ  = 0;
 		quote->thyquote.m_dJJSJ  = 0;
@@ -236,7 +233,6 @@ static void on_sop_subscribe_market_data(struct DFITCSECSpecificInstrumentField 
 
 static void on_sop_deep_market_data(struct DFITCSOPDepthMarketDataField *deepmd) {
 	Quote *quote;
-	char contract[256];
 
 	if (deepmd == NULL)
 		return;
@@ -247,9 +243,9 @@ static void on_sop_deep_market_data(struct DFITCSOPDepthMarketDataField *deepmd)
 		RMCHR(deepmd->sharedDataField.updateTime, '.');
 		quote->thyquote.m_nTime  = atoi(deepmd->sharedDataField.updateTime);
 		strcpy(quote->thyquote.m_cJYS, deepmd->staticDataField.exchangeID);
-		strcpy(contract, deepmd->staticDataField.exchangeID);
-		strcat(contract, deepmd->specificDataField.contractID);
-		strncpy(quote->thyquote.m_cHYDM, contract, sizeof quote->thyquote.m_cHYDM - 1);
+		strcpy(quote->thyquote.m_cHYDM, deepmd->staticDataField.exchangeID);
+		strncat(quote->thyquote.m_cHYDM, deepmd->specificDataField.contractID,
+			sizeof quote->thyquote.m_cHYDM - strlen(quote->thyquote.m_cHYDM) - 1);
 		quote->thyquote.m_bTPBZ  = 0;
 		quote->thyquote.m_dZJSJ  = deepmd->specificDataField.preSettlePrice;
 		quote->thyquote.m_dJJSJ  = deepmd->specificDataField.settlePrice;

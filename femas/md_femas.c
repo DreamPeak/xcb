@@ -89,10 +89,10 @@ static void on_front_connected(void) {
 	/* FIXME */
 	strcpy(req.TradingDay, tradingday);
 	xcb_log(XCB_LOG_WARNING, "trading day is %s", tradingday);
-	strcpy(req.UserID, userid);
-	strcpy(req.BrokerID, brokerid);
+	strncat(req.BrokerID, brokerid, sizeof req.BrokerID - 1);
+	strncat(req.UserID, userid, sizeof req.UserID - 1);
 	if (passwd != NULL)
-		strcpy(req.Password, passwd);
+		strncat(req.Password, passwd, sizeof req.Password - 1);
 	strcpy(req.UserProductInfo, "demo v1.0");
 	res = femas_mdapi_user_login(mdapi, &req, 1);
 	xcb_log(XCB_LOG_NOTICE, "Login %s for user '%s'", res == 0 ? "succeeded" : "failed", userid);

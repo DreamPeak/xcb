@@ -233,9 +233,9 @@ static int load_module(void) {
 	tap_mdapi_set_spi(mdapi, mdspi);
 	tap_mdapi_set_host_addr(mdapi, front_ip, atoi(front_port));
 	memset(&loginauth, '\0', sizeof loginauth);
-	strcpy(loginauth.UserNo, userid);
+	strncat(loginauth.UserNo, userid, sizeof loginauth.UserNo - 1);
 	loginauth.ISModifyPassword = APIYNFLAG_NO;
-	strcpy(loginauth.Password, passwd);
+	strncat(loginauth.Password, passwd, sizeof loginauth.Password - 1);
 	loginauth.ISDDA = APIYNFLAG_NO;
 	tap_mdapi_login(mdapi, &loginauth);
 	return register_application(app, tap_exec, desc, NULL, mod_info->self);

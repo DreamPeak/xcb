@@ -87,9 +87,8 @@ static void on_front_connected(void) {
 
 	memset(&req, '\0', sizeof req);
 	req.lRequestID = reqid;
-	/* FIXME */
-	strcpy(req.accountID, userid);
-	strcpy(req.passwd, passwd);
+	strncat(req.accountID, userid, sizeof req.accountID - 1);
+	strncat(req.passwd, passwd, sizeof req.passwd - 1);
 	res = xspeed_l2api_user_login(l2api, &req);
 	xcb_log(XCB_LOG_NOTICE, "Login %s for user '%s'", res == 0 ? "succeeded" : "failed", userid);
 }
@@ -230,7 +229,7 @@ static int load_module(void) {
 static int unload_module(void) {
 	struct DFITCUserLogoutField req = { 0 };
 
-	strcpy(req.AccountID, userid);
+	strncat(req.AccountID, userid, sizeof req.AccountID - 1);
 	xspeed_l2api_user_logout(l2api, &req);
 	/* FIXME: ?! */
 	sleep(1);

@@ -1,6 +1,9 @@
 
 Xiaoye Meng <mengxiaoye at dce dot com dot cn>
 
+We start by getting you acquainted with the compactor(xcb-compact) and the
+command line interface(xcb-cli).
+
 By typing '
 
     service xcb-compact start<Enter>
@@ -8,9 +11,20 @@ By typing '
 ', the compactor is loaded into main memory.  It first reads the config file
 'xcb-compact.conf' located in '/etc/xcb/', then optionally loads the modules in
 '/var/lib/xcb/', and dumps all info and warning messages into the log file which
-lies in '/var/log/xcb/'.
+lies in '/var/log/xcb/'.  In certain cases, especially when you are developing a
+new module, you may want to run the compactor in foreground, then type:
+
+    xcb-compact -f /etc/xcb/xcb-compact.conf<Enter>
 
 You can start the command line interface to play with it.
+    xcb-cli -?<Enter>
+    Usage: xcb-cli [OPTION]...
+      -h <hostname> Server hostname (default: 127.0.0.1)
+      -p <port>     Server port (default: 33330)
+      -x            Execute a command and quit
+      -t            Print timestamps
+      -?            Output this help and exit
+By default, the command line interface connects to localhost on port 33330.
     xcb-cli<Enter>
     XCUBE CLI, Copyright (c) 2013-2016, Dalian Futures Information Technology Co., Ltd.
     Type 'help' or '?' for help.
@@ -55,4 +69,12 @@ You can manually load or unload a specific module.
     module 'app_kline.so' loaded OK
     xcb*CLI> module unload app_kline.so<Enter>
     module 'app_kline.so' unloaded OK
+
+ATTENTION: Replacing a running module will lead the compactor crash.  You can
+unload the module first, replace, and load it again.
+
+Don't forget the '-x' option.  If you are a system admin, and you want to open
+God mode, just type:
+
+    xcb-cli -x monitor on<Enter>
 

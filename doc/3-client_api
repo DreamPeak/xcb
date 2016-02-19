@@ -25,11 +25,12 @@ UALL
     Unsubscribe all indices.
 
 ATTENTION: Subscribe/Unsubscribe is symmetrical.  For instance, if you already
-subscribed "IMPVBAW,m", subscribing "IMPVBAW" or "IMPVBAW,m1603" won't succeed
-because they have inclusion relation with each other.  You must unsubscribe
-"IMPVBAW,m" first before subscribing "IMPVBAW" or "IMPVBAW,m1603".  But you can
-always subscribe "IMPVBAW,m1603" and "IMPVBAW,m1605" at the same time, simply
-because they don't have the inclusion relation.
+subscribed "IMPVBAW,m1603", subscribing "IMPVBAW,m" or "IMPVBAW,m1603-C-2600"
+won't succeed because they have inclusion relation with each other.  You must
+unsubscribe "IMPVBAW,m1603" first before subscribing "IMPVBAW,m" or
+"IMPVBAW,m1603-C-2600".  But you can always subscribe "IMPVBAW,m1603" and
+"IMPVBAW,m1605" at the same time, simply because they don't have the inclusion
+relation.
 
 Q<index>,<rid>,[pattern],<start time>,<end time>
     Query an 'index' according to a 'pattern', from 'start time' to 'end time'.
@@ -46,6 +47,10 @@ INDICES,<rid>
     Return all indices you can subscribe/unsubscribe.
     For example: -->INDICES,999
                  <--999,INDICES,GREEKSBAW,IMPVBAW,OTVBAW,VSML
+
+ATTENTION: When your client gets connected to XCUBE, an INDICES message like
+this 'INDICES,GREEKSBAW,IMPVBAW,OTVBAW,VSML' will be received.  This message is
+going to be updated if some modules are loaded or unloaded.
 
 INDEX,<index>
     Return the format of an 'index'.

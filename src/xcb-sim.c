@@ -134,7 +134,8 @@ int main(int argc, char **argv) {
 				tm.tm_mon  = date / 100 % 100 - 1;
 				tm.tm_year = date / 10000 - 1900;
 				quote->thyquote.m_nTime  = mktime(&tm);
-				strcpy(quote->thyquote.m_cHYDM, fields[1]);
+				strncat(quote->thyquote.m_cHYDM, fields[1],
+					sizeof quote->thyquote.m_cHYDM - 1);
 				quote->thyquote.m_dJSP   = atof(fields[5]);
 				quote->thyquote.m_dJKP   = atof(fields[4]);
 				quote->thyquote.m_nCCL   = atoi(fields[9]);
