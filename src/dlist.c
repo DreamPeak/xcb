@@ -53,6 +53,10 @@ struct dlist_iter_t {
 	int			direction;
 };
 
+static int cmpdefault(const void *x, const void *y) {
+	return x - y;
+}
+
 dlist_t dlist_new(int cmp(const void *x, const void *y), void vfree(void *value)) {
 	dlist_t dlist;
 	pthread_mutexattr_t mattr;
@@ -62,7 +66,7 @@ dlist_t dlist_new(int cmp(const void *x, const void *y), void vfree(void *value)
 		return NULL;
 	dlist->length = 0;
 	dlist->head   = dlist->tail = NULL;
-	dlist->cmp    = cmp;
+	dlist->cmp    = cmp ? cmp : cmpdefault;
 	dlist->vfree  = vfree;
 	pthread_mutexattr_init(&mattr);
 	pthread_mutexattr_settype(&mattr, PTHREAD_MUTEX_ADAPTIVE_NP);
@@ -238,7 +242,7 @@ dlist_t dlist_insert(dlist_t dlist, dlist_node_t node, void *value, int after) {
 
 /* FIXME */
 dlist_t dlist_insert_sort(dlist_t dlist, void *value) {
-	if (dlist == NULL || dlist->cmp == NULL)
+	if (dlist == NULL)
 		return NULL;
 	if (dlist->head == NULL) {
 		dlist_node_t node;
@@ -273,10 +277,7 @@ dlist_node_t dlist_find(dlist_t dlist, void *value) {
 		return NULL;
 	iter = dlist_iter_new(dlist, DLIST_START_HEAD);
 	while ((node = dlist_next(iter)))
-		if (dlist->cmp) {
-			if (dlist->cmp(node->value, value) == 0)
-				break;
-		} else if (node->value == value)
+		if (dlist->cmp(node->value, value) == 0)
 			break;
 	dlist_iter_free(&iter);
 	return node;

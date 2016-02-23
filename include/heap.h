@@ -36,6 +36,9 @@ extern void         *heap_remove(heap_t heap, void *elem);
 extern void         *heap_peek(heap_t heap, unsigned long index);
 extern void          heap_lock(heap_t heap);
 extern void          heap_unlock(heap_t heap);
+extern void          heap_rwlock_rdlock(heap_t heap);
+extern void          heap_rwlock_wrlock(heap_t heap);
+extern void          heap_rwlock_unlock(heap_t heap);
 
 #endif /* HEAP_INCLUDED */
 

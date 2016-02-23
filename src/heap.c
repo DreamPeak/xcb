@@ -24,11 +24,12 @@
 
 /* FIXME */
 struct heap_t {
-	unsigned long	avail, curr;
-	void		**h;
-	ssize_t		offset;
-	int		(*cmp)(const void *x, const void *y);
-	pthread_mutex_t	lock;
+	unsigned long		avail, curr;
+	void			**h;
+	ssize_t			offset;
+	int			(*cmp)(const void *x, const void *y);
+	pthread_mutex_t		lock;
+	pthread_rwlock_t	rwlock;
 };
 
 static inline unsigned left_node(unsigned i) {
@@ -123,6 +124,7 @@ static void *_heap_remove(heap_t heap, unsigned long i) {
 heap_t heap_new(int height, ssize_t offset, int cmp(const void *x, const void *y)) {
 	heap_t heap;
 	pthread_mutexattr_t attr;
+	pthread_rwlockattr_t rwattr;
 
 	if (height <= 0)
 		height = 8;
@@ -142,6 +144,10 @@ heap_t heap_new(int height, ssize_t offset, int cmp(const void *x, const void *y
 	pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_ADAPTIVE_NP);
 	pthread_mutex_init(&heap->lock, &attr);
 	pthread_mutexattr_destroy(&attr);
+	pthread_rwlockattr_init(&rwattr);
+	pthread_rwlockattr_setkind_np(&rwattr, PTHREAD_RWLOCK_PREFER_WRITER_NONRECURSIVE_NP);
+	pthread_rwlock_init(&heap->rwlock, &rwattr);
+	pthread_rwlockattr_destroy(&rwattr);
 	return heap;
 }
 
@@ -149,6 +155,7 @@ void heap_free(heap_t *hp) {
 	if (hp == NULL || *hp == NULL)
 		return;
 	pthread_mutex_destroy(&(*hp)->lock);
+	pthread_rwlock_destroy(&(*hp)->rwlock);
 	FREE((*hp)->h);
 	FREE(*hp);
 }
@@ -204,5 +211,23 @@ void heap_unlock(heap_t heap) {
 	if (heap == NULL)
 		return;
 	pthread_mutex_unlock(&heap->lock);
+}
+
+void heap_rwlock_rdlock(heap_t heap) {
+	if (heap == NULL)
+		return;
+	pthread_rwlock_rdlock(&heap->rwlock);
+}
+
+void heap_rwlock_wrlock(heap_t heap) {
+	if (heap == NULL)
+		return;
+	pthread_rwlock_wrlock(&heap->rwlock);
+}
+
+void heap_rwlock_unlock(heap_t heap) {
+	if (heap == NULL)
+		return;
+	pthread_rwlock_unlock(&heap->rwlock);
 }
 

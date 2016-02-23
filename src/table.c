@@ -35,6 +35,7 @@
 #include <pthread.h>
 #include <sys/time.h>
 #include "mem.h"
+#include "utilities.h"
 #include "table.h"
 
 /* FIXME */
@@ -76,6 +77,10 @@ static unsigned table_force_resize_ratio = 5;
 static void table_reset(table_intl_t *tip) {
 	tip->size    = tip->sizemask = tip->used = 0;
 	tip->buckets = NULL;
+}
+
+static int cmpdefault(const void *x, const void *y) {
+	return x - y;
 }
 
 static unsigned long table_next_power(unsigned long size) {
@@ -125,8 +130,8 @@ table_t table_new(int cmp(const void *x, const void *y), unsigned hash(const voi
 	table_reset(&table->ti[1]);
 	table->rehashidx = -1;
 	table->iterators = 0;
-	table->cmp       = cmp;
-	table->hash      = hash;
+	table->cmp       = cmp ? cmp : cmpdefault;
+	table->hash      = hash ? hash : hashdjb2;
 	table->kfree     = kfree;
 	table->vfree     = vfree;
 	pthread_mutexattr_init(&mattr);
