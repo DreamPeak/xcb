@@ -37,7 +37,9 @@ Q<index>,<rid>,[pattern],<start time>,<end time>
     'rid' is a unique identifier for each query.  'start time' and 'end time'
     must be in 'yyyy-mm-dd hh:mm' or 'yyyy-mm-dd hh:mm:ss' format.
     For example: QIMPVBAW,123,,2016-02-15 09:00,2016-02-15 10:00
-                 QIMPVBAW,123,m1603,2016-02-15 09:00:00,2016-02-15 10:00:30
+                 -->QIMPVBAW,123,m1603,2016-02-15 09:00:00,2016-02-15 10:00:30
+                 <--123,0,IMPVBAW,...
+                 <--123,1                ('0' = unfinished, '1' = finished)
 
 QC,<rid>
     Cancel a query, using 'rid'.

@@ -1310,8 +1310,6 @@ static void help_command(client c) {
 }
 
 static void config_command(client c) {
-	char *cat;
-
 	if (!strcasecmp(c->argv[1], "get")) {
 		pthread_mutex_lock(&cfg_lock);
 		if (!strcasecmp(c->argv[2], "log_level"))
@@ -1323,40 +1321,6 @@ static void config_command(client c) {
 		else if (!strcasecmp(c->argv[2], "persistence"))
 			add_reply_string_format(c, "persistence:%s\r\n",
 				variable_retrieve(cfg, "general", "persistence"));
-		else if (!strcasecmp(c->argv[2], "receiver") && !strcasecmp(c->argv[3], "network")) {
-			int count = 0, found = 0;
-
-			cat = category_browse(cfg, NULL);
-			while (cat) {
-				if (!strcasecmp(cat, "pgm_receiver")) {
-					add_reply_string_format(c, "receiver network %d:%s\r\n",
-						++count, variable_retrieve(cfg, cat, "network"));
-					found = 1;
-				}
-				cat = category_browse(cfg, cat);
-			}
-			if (!found)
-				add_reply_string(c, "-1\r\n", 4);
-		} else if (!strcasecmp(c->argv[2], "receiver") && !strcasecmp(c->argv[3], "port")) {
-			int count = 0, found = 0;
-
-			cat = category_browse(cfg, NULL);
-			while (cat) {
-				if (!strcasecmp(cat, "pgm_receiver")) {
-					add_reply_string_format(c, "receiver port %d:%s\r\n",
-						++count, variable_retrieve(cfg, cat, "port"));
-					found = 1;
-				}
-				cat = category_browse(cfg, cat);
-			}
-			if (!found)
-				add_reply_string(c, "-1\r\n", 4);
-		} else if (!strcasecmp(c->argv[2], "sender") && !strcasecmp(c->argv[3], "network"))
-			add_reply_string_format(c, "sender network:%s\r\n",
-				variable_retrieve(cfg, "pgm_sender", "network"));
-		else if (!strcasecmp(c->argv[2], "sender") && !strcasecmp(c->argv[3], "port"))
-			add_reply_string_format(c, "sender port:%s\r\n",
-				variable_retrieve(cfg, "pgm_sender", "port"));
 		else
 			add_reply_string(c, "-1\r\n", 4);
 		pthread_mutex_unlock(&cfg_lock);
@@ -1379,74 +1343,6 @@ static void config_command(client c) {
 		} else if (!strcasecmp(c->argv[2], "persistence") && c->argc >= 4) {
 			category = category_get(cfg, "general");
 			if (variable_update(category, "persistence", c->argv[3]) == 0)
-				add_reply_string(c, "OK\r\n", 4);
-			else
-				add_reply_string(c, "-1\r\n", 4);
-		} else if (!strcasecmp(c->argv[2], "receiver") && !strcasecmp(c->argv[3], "network") &&
-			c->argc >= 5) {
-			if (c->argc == 5) {
-				category = category_get(cfg, "pgm_receiver");
-				if (variable_update(category, "network", c->argv[4]) == 0)
-					add_reply_string(c, "OK\r\n", 4);
-				else
-					add_reply_string(c, "-1\r\n", 4);
-			} else {
-				int count = 0, found = 0;
-
-				cat = category_browse(cfg, NULL);
-				while (cat) {
-					if (!strcasecmp(cat, "pgm_receiver") && ++count == atoi(c->argv[4])) {
-						category = category_get(cfg, cat);
-						if (variable_update(category, "network", c->argv[5]) == 0)
-							add_reply_string(c, "OK\r\n", 4);
-						else
-							add_reply_string(c, "-1\r\n", 4);
-						found = 1;
-						break;
-					}
-					cat = category_browse(cfg, cat);
-				}
-				if (!found)
-					add_reply_string(c, "-1\r\n", 4);
-			}
-		} else if (!strcasecmp(c->argv[2], "receiver") && !strcasecmp(c->argv[3], "port") &&
-			c->argc >= 5) {
-			if (c->argc == 5) {
-				category = category_get(cfg, "pgm_receiver");
-				if (variable_update(category, "port", c->argv[4]) == 0)
-					add_reply_string(c, "OK\r\n", 4);
-				else
-					add_reply_string(c, "-1\r\n", 4);
-			} else {
-				int count = 0, found = 0;
-
-				cat = category_browse(cfg, NULL);
-				while (cat) {
-					if (!strcasecmp(cat, "pgm_receiver") && ++count == atoi(c->argv[4])) {
-						category = category_get(cfg, cat);
-						if (variable_update(category, "port", c->argv[5]) == 0)
-							add_reply_string(c, "OK\r\n", 4);
-						else
-							add_reply_string(c, "-1\r\n", 4);
-						found = 1;
-						break;
-					}
-					cat = category_browse(cfg, cat);
-				}
-				if (!found)
-					add_reply_string(c, "-1\r\n", 4);
-			}
-		} else if (!strcasecmp(c->argv[2], "sender") && !strcasecmp(c->argv[3], "network") &&
-			c->argc >= 5) {
-			category = category_get(cfg, "pgm_sender");
-			if (variable_update(category, "network", c->argv[4]) == 0)
-				add_reply_string(c, "OK\r\n", 4);
-			else
-				add_reply_string(c, "-1\r\n", 4);
-		} else if (!strcasecmp(c->argv[2], "sender") && !strcasecmp(c->argv[3], "port") &&
-			c->argc >= 5) {
-			category = category_get(cfg, "pgm_sender");
-			if (variable_update(category, "port", c->argv[4]) == 0)
 				add_reply_string(c, "OK\r\n", 4);
 			else
 				add_reply_string(c, "-1\r\n", 4);

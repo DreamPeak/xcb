@@ -1632,12 +1632,6 @@ static void config_command(client c) {
 		else if (!strcasecmp(c->argv[2], "persistence"))
 			add_reply_string_format(c, "persistence:%s\r\n",
 				variable_retrieve(cfg, "general", "persistence"));
-		else if (!strcasecmp(c->argv[2], "udp_port"))
-			add_reply_string_format(c, "udp_port:%s\r\n",
-				variable_retrieve(cfg, "general", "udp_port"));
-		else if (!strcasecmp(c->argv[2], "ctm_port"))
-			add_reply_string_format(c, "ctm_port:%s\r\n",
-				variable_retrieve(cfg, "general", "ctm_port"));
 		else
 			add_reply_string(c, "-1\r\n", 4);
 		pthread_mutex_unlock(&cfg_lock);
@@ -1660,18 +1654,6 @@ static void config_command(client c) {
 		} else if (!strcasecmp(c->argv[2], "persistence") && c->argc >= 4) {
 			category = category_get(cfg, "general");
 			if (variable_update(category, "persistence", c->argv[3]) == 0)
-				add_reply_string(c, "OK\r\n", 4);
-			else
-				add_reply_string(c, "-1\r\n", 4);
-		} else if (!strcasecmp(c->argv[2], "udp_port") && c->argc >= 4) {
-			category = category_get(cfg, "general");
-			if (variable_update(category, "udp_port", c->argv[3]) == 0)
-				add_reply_string(c, "OK\r\n", 4);
-			else
-				add_reply_string(c, "-1\r\n", 4);
-		} else if (!strcasecmp(c->argv[2], "ctm_port") && c->argc >= 4) {
-			category = category_get(cfg, "general");
-			if (variable_update(category, "ctm_port", c->argv[3]) == 0)
 				add_reply_string(c, "OK\r\n", 4);
 			else
 				add_reply_string(c, "-1\r\n", 4);

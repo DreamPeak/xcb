@@ -900,15 +900,6 @@ static void config_command(client c) {
 		if (!strcasecmp(c->argv[2], "log_level"))
 			add_reply_string_format(c, "log_level:%s\r\n",
 				variable_retrieve(cfg, "general", "log_level"));
-		else if (!strcasecmp(c->argv[2], "udp_port"))
-			add_reply_string_format(c, "udp_port:%s\r\n",
-				variable_retrieve(cfg, "general", "udp_port"));
-		else if (!strcasecmp(c->argv[2], "sender") && !strcasecmp(c->argv[3], "network"))
-			add_reply_string_format(c, "sender network:%s\r\n",
-				variable_retrieve(cfg, "pgm_sender", "network"));
-		else if (!strcasecmp(c->argv[2], "sender") && !strcasecmp(c->argv[3], "port"))
-			add_reply_string_format(c, "sender port:%s\r\n",
-				variable_retrieve(cfg, "pgm_sender", "port"));
 		else
 			add_reply_string(c, "-1\r\n", 4);
 		pthread_mutex_unlock(&cfg_lock);
@@ -919,26 +910,6 @@ static void config_command(client c) {
 		if (!strcasecmp(c->argv[2], "log_level") && c->argc >= 4) {
 			category = category_get(cfg, "general");
 			if (variable_update(category, "log_level", c->argv[3]) == 0)
-				add_reply_string(c, "OK\r\n", 4);
-			else
-				add_reply_string(c, "-1\r\n", 4);
-		} else if (!strcasecmp(c->argv[2], "udp_port") && c->argc >= 4) {
-			category = category_get(cfg, "general");
-			if (variable_update(category, "udp_port", c->argv[3]) == 0)
-				add_reply_string(c, "OK\r\n", 4);
-			else
-				add_reply_string(c, "-1\r\n", 4);
-		} else if (!strcasecmp(c->argv[2], "sender") && !strcasecmp(c->argv[3], "network") &&
-			c->argc >= 5) {
-			category = category_get(cfg, "pgm_sender");
-			if (variable_update(category, "network", c->argv[4]) == 0)
-				add_reply_string(c, "OK\r\n", 4);
-			else
-				add_reply_string(c, "-1\r\n", 4);
-		} else if (!strcasecmp(c->argv[2], "sender") && !strcasecmp(c->argv[3], "port") &&
-			c->argc >= 5) {
-			category = category_get(cfg, "pgm_sender");
-			if (variable_update(category, "port", c->argv[4]) == 0)
 				add_reply_string(c, "OK\r\n", 4);
 			else
 				add_reply_string(c, "-1\r\n", 4);

@@ -1,3 +1,51 @@
 
 Xiaoye Meng <mengxiaoye at dce dot com dot cn>
 
+config get log_level
+
+config set log_level <value>
+
+config get filter
+
+config set filter <value>
+
+config get persistence
+
+config set persistence <value>
+
+show modules
+
+show applications
+
+show queues
+
+module load <xxx.so>
+
+module unload <xxx.so>
+
+module reload <xxx.so>
+
+monitor on
+
+monitor off
+
+database head
+
+database tail
+
+database put <key> <value>
+
+database delete <key>
+
+database compact
+
+database props stats
+
+database props sstables
+
+database props <n>
+
+shutdown
+
+quit
+
