@@ -1,41 +1,62 @@
 
 Xiaoye Meng <mengxiaoye at dce dot com dot cn>
 
+We have seen many of them in previous docs.  Here we sum them up.
+
 config get log_level
+    Get log level.
 
 config set log_level <value>
+    Set log level.  'value' can be one of the following: 'debug', 'info',
+    'notice' and 'warning'.
 
 config get filter
+    Get filter string.
 
 config set filter <value>
+    Set filter string.  'value' is comma-seperated.
 
 config get persistence
+    Get persistence value.
 
 config set persistence <value>
+    Set persistence value.  'value' can be '0' or '1'.
 
 show modules
+    Show all modules.
 
 show applications
+    Show all applications.
 
 show queues
+    Show all queues.
 
 module load <xxx.so>
+    Load a module.
 
 module unload <xxx.so>
+    Unload a module.
 
 module reload <xxx.so>
+    Reload a module.
 
 monitor on
+    Open God mode.
 
 monitor off
+    Close God mode.
 
 database head
+    Display the head of database.
 
 database tail
+    Display the tail of database.
 
 database put <key> <value>
+    Put the key-value pair into database.
 
 database delete <key>
+    Delete the key from database.
 
 database compact
 

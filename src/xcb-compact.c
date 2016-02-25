@@ -148,6 +148,7 @@ static int cp_time = 6;
 static int rotate = 7;
 static int dirty = 0;
 static dlist_t filter;
+static pthread_mutex_t filter_lock = PTHREAD_ADAPTIVE_MUTEX_INITIALIZER_NP;
 static char neterr[256];
 static int udpsock = -1;
 static int tcpsock = -1;
@@ -720,6 +721,7 @@ void process_quote(void *data) {
 		}
 		dlist_rwlock_unlock(monitors);
 		/* FIXME: filter */
+		pthread_mutex_lock(&filter_lock);
 		if (dlist_length(filter) > 0) {
 			iter = dlist_iter_new(filter, DLIST_START_HEAD);
 			while ((node = dlist_next(iter))) {
@@ -731,6 +733,7 @@ void process_quote(void *data) {
 			}
 			dlist_iter_free(&iter);
 		}
+		pthread_mutex_unlock(&filter_lock);
 		if (node == NULL) {
 			FREE(data);
 			return;
@@ -1339,7 +1342,7 @@ int main(int argc, char **argv) {
 		goto err;
 	}
 	/* FIXME */
-	filter = dlist_new(NULL, NULL);
+	filter = dlist_new(NULL, vfree2);
 	if ((tmp = variable_retrieve(cfg, "general", "filter"))) {
 		dstr *fields = NULL;
 		int nfield = 0;
@@ -1641,21 +1644,42 @@ static void config_command(client c) {
 		pthread_mutex_lock(&cfg_lock);
 		if (!strcasecmp(c->argv[2], "log_level") && c->argc >= 4) {
 			category = category_get(cfg, "general");
-			if (variable_update(category, "log_level", c->argv[3]) == 0)
+			if (variable_update(category, "log_level", c->argv[3]) == 0) {
 				add_reply_string(c, "OK\r\n", 4);
-			else
+				if (!strcasecmp(c->argv[3], "debug"))
+					set_logger_level(__LOG_DEBUG);
+				else if (!strcasecmp(c->argv[3], "info"))
+					set_logger_level(__LOG_INFO);
+				else if (!strcasecmp(c->argv[3], "notice"))
+					set_logger_level(__LOG_NOTICE);
+				else if (!strcasecmp(c->argv[3], "warning"))
+					set_logger_level(__LOG_WARNING);
+			} else
 				add_reply_string(c, "-1\r\n", 4);
 		} else if (!strcasecmp(c->argv[2], "filter") && c->argc >= 4) {
 			category = category_get(cfg, "general");
-			if (variable_update(category, "filter", c->argv[3]) == 0)
+			if (variable_update(category, "filter", c->argv[3]) == 0) {
+				dstr *fields = NULL;
+				int nfield = 0, i;
+
 				add_reply_string(c, "OK\r\n", 4);
-			else
+				pthread_mutex_lock(&filter_lock);
+				dlist_free(&filter);
+				fields = dstr_split_len(c->argv[3], strlen(c->argv[3]), ",", 1, &nfield);
+				for (i = 0; i < nfield; ++i)
+					dlist_insert_tail(filter, fields[i]);
+				pthread_mutex_unlock(&filter_lock);
+			} else
 				add_reply_string(c, "-1\r\n", 4);
 		} else if (!strcasecmp(c->argv[2], "persistence") && c->argc >= 4) {
 			category = category_get(cfg, "general");
-			if (variable_update(category, "persistence", c->argv[3]) == 0)
+			if (variable_update(category, "persistence", c->argv[3]) == 0) {
 				add_reply_string(c, "OK\r\n", 4);
-			else
+				if (atoi(c->argv[3]) == 0)
+					__sync_bool_compare_and_swap(&persistence, 1, 0);
+				else if (atoi(c->argv[3]) == 1)
+					__sync_bool_compare_and_swap(&persistence, 0, 1);
+			} else
 				add_reply_string(c, "-1\r\n", 4);
 		} else
 			add_reply_string(c, "-1\r\n", 4);
@@ -1665,9 +1689,9 @@ static void config_command(client c) {
 	add_reply_string(c, "\r\n", 2);
 }
 
-/* FIXME */
 static void show_command(client c) {
 	if (!strcasecmp(c->argv[1], "modules")) {
+		/* FIXME */
 		struct module *mod = get_module_list_head();
 
 		for (; mod; mod = mod->link)
@@ -1675,6 +1699,7 @@ static void show_command(client c) {
 				mod->flags.running == 1 ? "Running" :
 					(mod->flags.declined == 1 ? "Declined" : "Failed"));
 	} else if (!strcasecmp(c->argv[1], "applications")) {
+		/* FIXME */
 		struct application *app = get_application_list_head();
 
 		for (; app; app = app->link)

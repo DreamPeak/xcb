@@ -1286,6 +1286,7 @@ static void help_command(client c) {
 	add_reply_string(c, "\r\n", 2);
 }
 
+/* FIXME */
 static void config_command(client c) {
 	if (!strcasecmp(c->argv[1], "get")) {
 		pthread_mutex_lock(&cfg_lock);
@@ -1304,15 +1305,27 @@ static void config_command(client c) {
 		pthread_mutex_lock(&cfg_lock);
 		if (!strcasecmp(c->argv[2], "log_level") && c->argc >= 4) {
 			category = category_get(cfg, "general");
-			if (variable_update(category, "log_level", c->argv[3]) == 0)
+			if (variable_update(category, "log_level", c->argv[3]) == 0) {
 				add_reply_string(c, "OK\r\n", 4);
-			else
+				if (!strcasecmp(c->argv[3], "debug"))
+					set_logger_level(__LOG_DEBUG);
+				else if (!strcasecmp(c->argv[3], "info"))
+					set_logger_level(__LOG_INFO);
+				else if (!strcasecmp(c->argv[3], "notice"))
+					set_logger_level(__LOG_NOTICE);
+				else if (!strcasecmp(c->argv[3], "warning"))
+					set_logger_level(__LOG_WARNING);
+			} else
 				add_reply_string(c, "-1\r\n", 4);
 		} else if (!strcasecmp(c->argv[2], "persistence") && c->argc >= 4) {
 			category = category_get(cfg, "general");
-			if (variable_update(category, "persistence", c->argv[3]) == 0)
+			if (variable_update(category, "persistence", c->argv[3]) == 0) {
 				add_reply_string(c, "OK\r\n", 4);
-			else
+				if (atoi(c->argv[3]) == 0)
+					__sync_bool_compare_and_swap(&persistence, 1, 0);
+				else if (atoi(c->argv[3]) == 1)
+					__sync_bool_compare_and_swap(&persistence, 0, 1);
+			} else
 				add_reply_string(c, "-1\r\n", 4);
 		} else
 			add_reply_string(c, "-1\r\n", 4);

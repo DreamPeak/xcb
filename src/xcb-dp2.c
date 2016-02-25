@@ -909,9 +909,17 @@ static void config_command(client c) {
 		pthread_mutex_lock(&cfg_lock);
 		if (!strcasecmp(c->argv[2], "log_level") && c->argc >= 4) {
 			category = category_get(cfg, "general");
-			if (variable_update(category, "log_level", c->argv[3]) == 0)
+			if (variable_update(category, "log_level", c->argv[3]) == 0) {
 				add_reply_string(c, "OK\r\n", 4);
-			else
+				if (!strcasecmp(c->argv[3], "debug"))
+					set_logger_level(__LOG_DEBUG);
+				else if (!strcasecmp(c->argv[3], "info"))
+					set_logger_level(__LOG_INFO);
+				else if (!strcasecmp(c->argv[3], "notice"))
+					set_logger_level(__LOG_NOTICE);
+				else if (!strcasecmp(c->argv[3], "warning"))
+					set_logger_level(__LOG_WARNING);
+			} else
 				add_reply_string(c, "-1\r\n", 4);
 		} else
 			add_reply_string(c, "-1\r\n", 4);
@@ -921,9 +929,9 @@ static void config_command(client c) {
 	add_reply_string(c, "\r\n", 2);
 }
 
-/* FIXME */
 static void show_command(client c) {
 	if (!strcasecmp(c->argv[1], "modules")) {
+		/* FIXME */
 		struct module *mod = get_module_list_head();
 
 		for (; mod; mod = mod->link)
