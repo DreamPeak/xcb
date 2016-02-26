@@ -1327,9 +1327,6 @@ static void config_command(client c) {
 		else if (!strcasecmp(c->argv[2], "filter"))
 			add_reply_string_format(c, "filter:%s\r\n",
 				variable_retrieve(cfg, "general", "filter"));
-		else if (!strcasecmp(c->argv[2], "persistence"))
-			add_reply_string_format(c, "persistence:%s\r\n",
-				variable_retrieve(cfg, "general", "persistence"));
 		else
 			add_reply_string(c, "-1\r\n", 4);
 		pthread_mutex_unlock(&cfg_lock);
@@ -1364,16 +1361,6 @@ static void config_command(client c) {
 				for (i = 0; i < nfield; ++i)
 					dlist_insert_tail(filter, fields[i]);
 				pthread_mutex_unlock(&filter_lock);
-			} else
-				add_reply_string(c, "-1\r\n", 4);
-		} else if (!strcasecmp(c->argv[2], "persistence") && c->argc >= 4) {
-			category = category_get(cfg, "general");
-			if (variable_update(category, "persistence", c->argv[3]) == 0) {
-				add_reply_string(c, "OK\r\n", 4);
-				if (atoi(c->argv[3]) == 0)
-					__sync_bool_compare_and_swap(&persistence, 1, 0);
-				else if (atoi(c->argv[3]) == 1)
-					__sync_bool_compare_and_swap(&persistence, 0, 1);
 			} else
 				add_reply_string(c, "-1\r\n", 4);
 		} else

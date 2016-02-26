@@ -16,12 +16,6 @@ config get filter
 config set filter <value>
     Set filter string.  'value' is comma-seperated.
 
-config get persistence
-    Get persistence value.
-
-config set persistence <value>
-    Set persistence value.  'value' can be '0' or '1'.
-
 show modules
     Show all modules.
 
@@ -59,12 +53,12 @@ database delete <key>
     Delete the key from database.
 
 database compact
+    Compact database.
 
 database props stats
-
 database props sstables
-
 database props <n>
+    Get the properties of database.
 
 shutdown
 
