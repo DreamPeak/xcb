@@ -32,9 +32,17 @@ struct ctp_tdspi_t : public CThostFtdcTraderSpi {
 	ctp_on_front_connected		on_front_connected_;
 	ctp_on_front_disconnected	on_front_disconnected_;
 	ctp_on_heartbeat_warning	on_heartbeat_warning_;
+	ctp_on_error			on_error_;
 	ctp_on_authenticate		on_authenticate_;
 	ctp_on_user_login		on_user_login_;
 	ctp_on_user_logout		on_user_logout_;
+	ctp_on_update_user_password	on_update_user_password_;
+	ctp_on_update_account_password	on_update_account_password_;
+	ctp_on_confirm_settlement	on_confirm_settlement_;
+	ctp_on_insert_order		on_insert_order_;
+	ctp_on_order_action		on_order_action_;
+	ctp_on_order			on_order_;
+	ctp_on_trade			on_trade_;
 	/* make gcc happy */
 	virtual ~ctp_tdspi_t() {};
 	void OnFrontConnected() {
@@ -48,6 +56,10 @@ struct ctp_tdspi_t : public CThostFtdcTraderSpi {
 	void OnHeartBeatWarning(int nTimeLapse) {
 		if (on_heartbeat_warning_)
 			(*on_heartbeat_warning_)(nTimeLapse);
+	}
+	void OnRspError(CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
+		if (on_error_)
+			(*on_error_)(pRspInfo, nRequestID, bIsLast ? 1 : 0);
 	}
 	void OnRspAuthenticate(CThostFtdcRspAuthenticateField *pRspAuthenticateField,
 		CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
@@ -63,6 +75,43 @@ struct ctp_tdspi_t : public CThostFtdcTraderSpi {
 		CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
 		if (on_user_logout_)
 			(*on_user_logout_)(pUserLogout, pRspInfo, nRequestID, bIsLast ? 1 : 0);
+	}
+	void OnRspUserPasswordUpdate(CThostFtdcUserPasswordUpdateField *pUserPasswordUpdate,
+		CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
+		if (on_update_user_password_)
+			(*on_update_user_password_)(pUserPasswordUpdate,
+				pRspInfo, nRequestID, bIsLast ? 1 : 0);
+	}
+	void OnRspTradingAccountPasswordUpdate(
+		CThostFtdcTradingAccountPasswordUpdateField *pTradingAccountPasswordUpdate,
+		CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
+		if (on_update_account_password_)
+			(*on_update_account_password_)(pTradingAccountPasswordUpdate,
+				pRspInfo, nRequestID, bIsLast ? 1 : 0);
+	}
+	void OnRspSettlementInfoConfirm(CThostFtdcSettlementInfoConfirmField *pSettlementInfoConfirm,
+		CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
+		if (on_confirm_settlement_)
+			(*on_confirm_settlement_)(pSettlementInfoConfirm,
+				pRspInfo, nRequestID, bIsLast ? 1 : 0);
+	}
+	void OnRspOrderInsert(CThostFtdcInputOrderField *pInputOrder,
+		CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
+		if (on_insert_order_)
+			(*on_insert_order_)(pInputOrder, pRspInfo, nRequestID, bIsLast ? 1 : 0);
+	}
+	void OnRspOrderAction(CThostFtdcInputOrderActionField *pInputOrderAction,
+		CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
+		if (on_order_action_)
+			(*on_order_action_)(pInputOrderAction, pRspInfo, nRequestID, bIsLast ? 1 : 0);
+	}
+	void OnRtnOrder(CThostFtdcOrderField *pOrder) {
+		if (on_order_)
+			(*on_order_)(pOrder);
+	}
+	void OnRtnTrade(CThostFtdcTradeField *pTrade) {
+		if (on_trade_)
+			(*on_trade_)(pTrade);
 	}
 };
 
@@ -157,6 +206,45 @@ const char *ctp_tdapi_get_tradingday(ctp_tdapi_t *tdapi) {
 	return NULL;
 }
 
+/* FIXME */
+int ctp_tdapi_confirm_settlement(ctp_tdapi_t *tdapi,
+	struct CThostFtdcSettlementInfoConfirmField *stmtconfirm, int rid) {
+	if (tdapi)
+		return tdapi->rep->ReqSettlementInfoConfirm(stmtconfirm, rid);
+	return 0;
+}
+
+/* FIXME */
+int ctp_tdapi_update_user_password(ctp_tdapi_t *tdapi,
+	struct CThostFtdcUserPasswordUpdateField *password, int rid) {
+	if (tdapi)
+		return tdapi->rep->ReqUserPasswordUpdate(password, rid);
+	return 0;
+}
+
+/* FIXME */
+int ctp_tdapi_update_account_password(ctp_tdapi_t *tdapi,
+	struct CThostFtdcTradingAccountPasswordUpdateField *password, int rid) {
+	if (tdapi)
+		return tdapi->rep->ReqTradingAccountPasswordUpdate(password, rid);
+	return 0;
+}
+
+/* FIXME */
+int ctp_tdapi_insert_order(ctp_tdapi_t *tdapi, struct CThostFtdcInputOrderField *order, int rid) {
+	if (tdapi)
+		return tdapi->rep->ReqOrderInsert(order, rid);
+	return 0;
+}
+
+/* FIXME */
+int ctp_tdapi_order_action(ctp_tdapi_t *tdapi,
+	struct CThostFtdcInputOrderActionField *orderaction, int rid) {
+	if (tdapi)
+		return tdapi->rep->ReqOrderAction(orderaction, rid);
+	return 0;
+}
+
 ctp_tdspi_t *ctp_tdspi_create() {
 	return new ctp_tdspi_t;
 }
@@ -194,6 +282,41 @@ void ctp_tdspi_on_user_login(ctp_tdspi_t *tdspi, ctp_on_user_login func) {
 void ctp_tdspi_on_user_logout(ctp_tdspi_t *tdspi, ctp_on_user_logout func) {
 	if (tdspi && func)
 		tdspi->on_user_logout_ = func;
+}
+
+void ctp_tdspi_on_update_user_password(ctp_tdspi_t *tdspi, ctp_on_update_user_password func) {
+	if (tdspi && func)
+		tdspi->on_update_user_password_ = func;
+}
+
+void ctp_tdspi_on_update_account_password(ctp_tdspi_t *tdspi, ctp_on_update_account_password func) {
+	if (tdspi && func)
+		tdspi->on_update_account_password_ = func;
+}
+
+void ctp_tdspi_on_confirm_settlement(ctp_tdspi_t *tdspi, ctp_on_confirm_settlement func) {
+	if (tdspi && func)
+		tdspi->on_confirm_settlement_ = func;
+}
+
+void ctp_tdspi_on_insert_order(ctp_tdspi_t *tdspi, ctp_on_insert_order func) {
+	if (tdspi && func)
+		tdspi->on_insert_order_ = func;
+}
+
+void ctp_tdspi_on_order_action(ctp_tdspi_t *tdspi, ctp_on_order_action func) {
+	if (tdspi && func)
+		tdspi->on_order_action_ = func;
+}
+
+void ctp_tdspi_on_order(ctp_tdspi_t *tdspi, ctp_on_order func) {
+	if (tdspi && func)
+		tdspi->on_order_ = func;
+}
+
+void ctp_tdspi_on_trade(ctp_tdspi_t *tdspi, ctp_on_trade func) {
+	if (tdspi && func)
+		tdspi->on_trade_ = func;
 }
 
 }

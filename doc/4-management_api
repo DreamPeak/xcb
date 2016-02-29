@@ -47,10 +47,10 @@ database tail
     Display the tail of database.
 
 database put <key> <value>
-    Put the key-value pair into database.
+    Put the 'key-value' pair into database.
 
 database delete <key>
-    Delete the key from database.
+    Delete the 'key' from database.
 
 database compact
     Compact database.

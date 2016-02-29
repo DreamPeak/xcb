@@ -1357,7 +1357,7 @@ static void database_command(client c) {
 			size_t klen, vlen;
 
 			key   = db_iterator_key(it, &klen);
-			value = db_iterator_key(it, &vlen);
+			value = db_iterator_value(it, &vlen);
 			add_reply_string(c, key, klen);
 			add_reply_string(c, ",", 1);
 			add_reply_string(c, value, vlen);
@@ -1384,7 +1384,7 @@ static void database_command(client c) {
 			dstr ds;
 
 			key   = db_iterator_key(it, &klen);
-			value = db_iterator_key(it, &vlen);
+			value = db_iterator_value(it, &vlen);
 			ds = dstr_new_len(key, klen);
 			ds = dstr_cat(ds, ",");
 			ds = dstr_cat_len(ds, value, vlen);
