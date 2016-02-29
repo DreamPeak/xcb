@@ -86,10 +86,12 @@ private:
 			exit(1);
 		} else {
 			if (strlen(pData->contractID) > 0) {
+				std::string str = pData->exchangeID;
 				std::ostringstream oss;
 
+				str += pData->contractID;
 				oss << pData->endTradingDay;
-				expiries.insert(std::make_pair(pData->contractID, oss.str()));
+				expiries.insert(std::make_pair(str, oss.str()));
 			}
 			if (bIsLast) {
 				const char one = '1';
