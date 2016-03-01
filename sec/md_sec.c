@@ -237,7 +237,6 @@ static void on_sop_deep_market_data(struct DFITCSOPDepthMarketDataField *deepmd)
 	if (deepmd == NULL)
 		return;
 	if (NEW0(quote)) {
-		/* FIXME */
 		quote->thyquote.m_nLen   = sizeof (tHYQuote);
 		RMCHR(deepmd->sharedDataField.updateTime, ':');
 		RMCHR(deepmd->sharedDataField.updateTime, '.');
@@ -246,6 +245,8 @@ static void on_sop_deep_market_data(struct DFITCSOPDepthMarketDataField *deepmd)
 		strcpy(quote->thyquote.m_cHYDM, deepmd->staticDataField.exchangeID);
 		strncat(quote->thyquote.m_cHYDM, deepmd->specificDataField.contractID,
 			sizeof quote->thyquote.m_cHYDM - strlen(quote->thyquote.m_cHYDM) - 1);
+		/* FIXME: ?! */
+		RTRIM(quote->thyquote.m_cHYDM);
 		quote->thyquote.m_bTPBZ  = 0;
 		quote->thyquote.m_dZJSJ  = deepmd->specificDataField.preSettlePrice;
 		quote->thyquote.m_dJJSJ  = deepmd->specificDataField.settlePrice;

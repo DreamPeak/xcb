@@ -51,8 +51,32 @@ typedef void (*ctp_on_insert_order)(struct CThostFtdcInputOrderField *order,
 		struct CThostFtdcRspInfoField *rspinfo, int rid, int islast);
 typedef void (*ctp_on_order_action)(struct CThostFtdcInputOrderActionField *orderaction,
 		struct CThostFtdcRspInfoField *rspinfo, int rid, int islast);
+typedef void (*ctp_on_err_insert_order)(struct CThostFtdcInputOrderField *order,
+		struct CThostFtdcRspInfoField *rspinfo);
+typedef void (*ctp_on_err_order_action)(struct CThostFtdcOrderActionField *orderation,
+		struct CThostFtdcRspInfoField *rspinfo);
 typedef void (*ctp_on_order)(struct CThostFtdcOrderField *order);
 typedef void (*ctp_on_trade)(struct CThostFtdcTradeField *trade);
+typedef void (*ctp_on_insert_parked_order)(struct CThostFtdcParkedOrderField *order,
+		struct CThostFtdcRspInfoField *rspinfo, int rid, int islast);
+typedef void (*ctp_on_parked_order_action)(struct CThostFtdcParkedOrderActionField *orderaction,
+		struct CThostFtdcRspInfoField *rspinfo, int rid, int islast);
+typedef void (*ctp_on_remove_parked_order)(struct CThostFtdcRemoveParkedOrderField *order,
+		struct CThostFtdcRspInfoField *rspinfo, int rid, int islast);
+typedef void (*ctp_on_remove_parked_order_action)(struct CThostFtdcRemoveParkedOrderActionField *orderaction,
+		struct CThostFtdcRspInfoField *rspinfo, int rid, int islast);
+typedef void (*ctp_on_instrument_status)(struct CThostFtdcInstrumentStatusField *status);
+typedef void (*ctp_on_trading_notice)(struct CThostFtdcTradingNoticeInfoField *notice);
+typedef void (*ctp_on_query_max_order_volume)(struct CThostFtdcQueryMaxOrderVolumeField *volume,
+		struct CThostFtdcRspInfoField *rspinfo, int rid, int islast);
+typedef void (*ctp_on_query_order)(struct CThostFtdcOrderField *order,
+		struct CThostFtdcRspInfoField *rspinfo, int rid, int islast);
+typedef void (*ctp_on_query_trade)(struct CThostFtdcTradeField *trader,
+		struct CThostFtdcRspInfoField *rspinfo, int rid, int islast);
+typedef void (*ctp_on_query_position)(struct CThostFtdcInvestorPositionField *pstn,
+		struct CThostFtdcRspInfoField *rspinfo, int rid, int islast);
+typedef void (*ctp_on_query_account)(struct CThostFtdcTradingAccountField *account,
+		struct CThostFtdcRspInfoField *rspinfo, int rid, int islast);
 
 /* FIXME: exported functions */
 extern ctp_tdapi_t *ctp_tdapi_create(const char *flowpath);
@@ -84,6 +108,22 @@ extern int          ctp_tdapi_insert_order(ctp_tdapi_t *tdapi,
 			struct CThostFtdcInputOrderField *order, int rid);
 extern int          ctp_tdapi_order_action(ctp_tdapi_t *tdapi,
 			struct CThostFtdcInputOrderActionField *orderaction, int rid);
+extern int          ctp_tdapi_insert_parked_order(ctp_tdapi_t *tdapi,
+			struct CThostFtdcParkedOrderField *order, int rid);
+extern int          ctp_tdapi_parked_order_action(ctp_tdapi_t *tdapi,
+			struct CThostFtdcParkedOrderActionField *orderaction, int rid);
+extern int          ctp_tdapi_remove_parked_order(ctp_tdapi_t *tdapi,
+			struct CThostFtdcRemoveParkedOrderField *order, int rid);
+extern int          ctp_tdapi_remove_parked_order_action(ctp_tdapi_t *tdapi,
+			struct CThostFtdcRemoveParkedOrderActionField *orderaction, int rid);
+extern int          ctp_tdapi_query_max_order_volume(ctp_tdapi_t *tdapi,
+			struct CThostFtdcQueryMaxOrderVolumeField *volume, int rid);
+extern int          ctp_tdapi_query_order(ctp_tdapi_t *tdapi, struct CThostFtdcQryOrderField *order, int rid);
+extern int          ctp_tdapi_query_trade(ctp_tdapi_t *tdapi, struct CThostFtdcQryTradeField *trade, int rid);
+extern int          ctp_tdapi_query_position(ctp_tdapi_t *tdapi,
+			struct CThostFtdcQryInvestorPositionField *pstn, int rid);
+extern int          ctp_tdapi_query_account(ctp_tdapi_t *tdapi,
+			struct CThostFtdcQryTradingAccountField *account, int rid);
 extern ctp_tdspi_t *ctp_tdspi_create(void);
 extern void         ctp_tdspi_destroy(ctp_tdspi_t *tdspi);
 extern void         ctp_tdspi_on_front_connected(ctp_tdspi_t *tdspi, ctp_on_front_connected func);
@@ -99,8 +139,23 @@ extern void         ctp_tdspi_on_update_account_password(ctp_tdspi_t *tdspi,
 extern void         ctp_tdspi_on_confirm_settlement(ctp_tdspi_t *tdspi, ctp_on_confirm_settlement func);
 extern void         ctp_tdspi_on_insert_order(ctp_tdspi_t *tdspi, ctp_on_insert_order func);
 extern void         ctp_tdspi_on_order_action(ctp_tdspi_t *tdspi, ctp_on_order_action func);
+extern void         ctp_tdspi_on_err_insert_order(ctp_tdspi_t *tdspi, ctp_on_err_insert_order func);
+extern void         ctp_tdspi_on_err_order_action(ctp_tdspi_t *tdspi, ctp_on_err_order_action func);
 extern void         ctp_tdspi_on_order(ctp_tdspi_t *tdspi, ctp_on_order func);
 extern void         ctp_tdspi_on_trade(ctp_tdspi_t *tdspi, ctp_on_trade func);
+extern void         ctp_tdspi_on_insert_parked_order(ctp_tdspi_t *tdspi, ctp_on_insert_parked_order func);
+extern void         ctp_tdspi_on_parked_order_action(ctp_tdspi_t *tdspi, ctp_on_parked_order_action func);
+extern void         ctp_tdspi_on_remove_parked_order(ctp_tdspi_t *tdspi, ctp_on_remove_parked_order func);
+extern void         ctp_tdspi_on_remove_parked_order_action(ctp_tdspi_t *tdspi,
+			ctp_on_remove_parked_order_action func);
+extern void         ctp_tdspi_on_instrument_status(ctp_tdspi_t *tdspi, ctp_on_instrument_status func);
+extern void         ctp_tdspi_on_trading_notice(ctp_tdspi_t *tdspi, ctp_on_trading_notice func);
+extern void         ctp_tdspi_on_query_max_order_volume(ctp_tdspi_t *tdspi,
+			ctp_on_query_max_order_volume func);
+extern void         ctp_tdspi_on_query_order(ctp_tdspi_t *tdspi, ctp_on_query_order func);
+extern void         ctp_tdspi_on_query_trade(ctp_tdspi_t *tdspi, ctp_on_query_trade func);
+extern void         ctp_tdspi_on_query_position(ctp_tdspi_t *tdspi, ctp_on_query_position func);
+extern void         ctp_tdspi_on_query_account(ctp_tdspi_t *tdspi, ctp_on_query_account func);
 
 #ifdef __cplusplus
 }
