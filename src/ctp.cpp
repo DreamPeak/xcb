@@ -38,24 +38,24 @@ struct ctp_tdspi_t : public CThostFtdcTraderSpi {
 	ctp_on_user_logout			on_user_logout_;
 	ctp_on_update_user_password		on_update_user_password_;
 	ctp_on_update_account_password		on_update_account_password_;
+	ctp_on_query_max_order_volume		on_query_max_order_volume_;
 	ctp_on_confirm_settlement		on_confirm_settlement_;
 	ctp_on_insert_order			on_insert_order_;
 	ctp_on_order_action			on_order_action_;
-	ctp_on_err_insert_order			on_err_insert_order_;
-	ctp_on_err_order_action			on_err_order_action_;
 	ctp_on_order				on_order_;
 	ctp_on_trade				on_trade_;
+	ctp_on_err_insert_order			on_err_insert_order_;
+	ctp_on_err_order_action			on_err_order_action_;
 	ctp_on_insert_parked_order		on_insert_parked_order_;
 	ctp_on_parked_order_action		on_parked_order_action_;
 	ctp_on_remove_parked_order		on_remove_parked_order_;
 	ctp_on_remove_parked_order_action	on_remove_parked_order_action_;
-	ctp_on_instrument_status		on_instrument_status_;
-	ctp_on_trading_notice			on_trading_notice_;
-	ctp_on_query_max_order_volume		on_query_max_order_volume_;
 	ctp_on_query_order			on_query_order_;
 	ctp_on_query_trade			on_query_trade_;
 	ctp_on_query_position			on_query_position_;
 	ctp_on_query_account			on_query_account_;
+	ctp_on_trading_notice			on_trading_notice_;
+	ctp_on_instrument_status		on_instrument_status_;
 	/* make gcc happy */
 	virtual ~ctp_tdspi_t() {};
 	void OnFrontConnected() {
@@ -102,6 +102,12 @@ struct ctp_tdspi_t : public CThostFtdcTraderSpi {
 			(*on_update_account_password_)(pTradingAccountPasswordUpdate,
 				pRspInfo, nRequestID, bIsLast ? 1 : 0);
 	}
+	void OnRspQueryMaxOrderVolume(CThostFtdcQueryMaxOrderVolumeField *pQueryMaxOrderVolume,
+		CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
+		if (on_query_max_order_volume_)
+			(*on_query_max_order_volume_)(pQueryMaxOrderVolume,
+				pRspInfo, nRequestID, bIsLast ? 1 : 0);
+	}
 	void OnRspSettlementInfoConfirm(CThostFtdcSettlementInfoConfirmField *pSettlementInfoConfirm,
 		CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
 		if (on_confirm_settlement_)
@@ -118,14 +124,6 @@ struct ctp_tdspi_t : public CThostFtdcTraderSpi {
 		if (on_order_action_)
 			(*on_order_action_)(pInputOrderAction, pRspInfo, nRequestID, bIsLast ? 1 : 0);
 	}
-	void OnErrRtnOrderInsert(CThostFtdcInputOrderField *pInputOrder, CThostFtdcRspInfoField *pRspInfo) {
-		if (on_err_insert_order_)
-			(*on_err_insert_order_)(pInputOrder, pRspInfo);
-	}
-	void OnErrRtnOrderAction(CThostFtdcOrderActionField *pOrderAction, CThostFtdcRspInfoField *pRspInfo) {
-		if (on_err_order_action_)
-			(*on_err_order_action_)(pOrderAction, pRspInfo);
-	}
 	void OnRtnOrder(CThostFtdcOrderField *pOrder) {
 		if (on_order_)
 			(*on_order_)(pOrder);
@@ -133,6 +131,14 @@ struct ctp_tdspi_t : public CThostFtdcTraderSpi {
 	void OnRtnTrade(CThostFtdcTradeField *pTrade) {
 		if (on_trade_)
 			(*on_trade_)(pTrade);
+	}
+	void OnErrRtnOrderInsert(CThostFtdcInputOrderField *pInputOrder, CThostFtdcRspInfoField *pRspInfo) {
+		if (on_err_insert_order_)
+			(*on_err_insert_order_)(pInputOrder, pRspInfo);
+	}
+	void OnErrRtnOrderAction(CThostFtdcOrderActionField *pOrderAction, CThostFtdcRspInfoField *pRspInfo) {
+		if (on_err_order_action_)
+			(*on_err_order_action_)(pOrderAction, pRspInfo);
 	}
 	void OnRspParkedOrderInsert(CThostFtdcParkedOrderField *pParkedOrder,
 		CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
@@ -155,20 +161,6 @@ struct ctp_tdspi_t : public CThostFtdcTraderSpi {
 			(*on_remove_parked_order_action_)(pRemoveParkedOrderAction,
 				pRspInfo, nRequestID, bIsLast ? 1 : 0);
 	}
-	void OnRtnInstrumentStatus(CThostFtdcInstrumentStatusField *pInstrumentStatus) {
-		if (on_instrument_status_)
-			(*on_instrument_status_)(pInstrumentStatus);
-	}
-	void OnRtnTradingNotice(CThostFtdcTradingNoticeInfoField *pTradingNoticeInfo) {
-		if (on_trading_notice_)
-			(*on_trading_notice_)(pTradingNoticeInfo);
-	}
-	void OnRspQueryMaxOrderVolume(CThostFtdcQueryMaxOrderVolumeField *pQueryMaxOrderVolume,
-		CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-		if (on_query_max_order_volume_)
-			(*on_query_max_order_volume_)(pQueryMaxOrderVolume,
-				pRspInfo, nRequestID, bIsLast ? 1 : 0);
-	}
 	void OnRspQryOrder(CThostFtdcOrderField *pOrder,
 		CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
 		if (on_query_order_)
@@ -188,6 +180,14 @@ struct ctp_tdspi_t : public CThostFtdcTraderSpi {
 		CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
 		if (on_query_account_)
 			(*on_query_account_)(pTradingAccount, pRspInfo, nRequestID, bIsLast ? 1 : 0);
+	}
+	void OnRtnTradingNotice(CThostFtdcTradingNoticeInfoField *pTradingNoticeInfo) {
+		if (on_trading_notice_)
+			(*on_trading_notice_)(pTradingNoticeInfo);
+	}
+	void OnRtnInstrumentStatus(CThostFtdcInstrumentStatusField *pInstrumentStatus) {
+		if (on_instrument_status_)
+			(*on_instrument_status_)(pInstrumentStatus);
 	}
 };
 
@@ -299,6 +299,14 @@ int ctp_tdapi_update_account_password(ctp_tdapi_t *tdapi,
 }
 
 /* FIXME */
+int ctp_tdapi_query_max_order_volume(ctp_tdapi_t *tdapi,
+	CThostFtdcQueryMaxOrderVolumeField *volume, int rid) {
+	if (tdapi)
+		return tdapi->rep->ReqQueryMaxOrderVolume(volume, rid);
+	return 0;
+}
+
+/* FIXME */
 int ctp_tdapi_confirm_settlement(ctp_tdapi_t *tdapi,
 	struct CThostFtdcSettlementInfoConfirmField *stmtconfirm, int rid) {
 	if (tdapi)
@@ -350,14 +358,6 @@ int ctp_tdapi_remove_parked_order_action(ctp_tdapi_t *tdapi,
 	struct CThostFtdcRemoveParkedOrderActionField *orderaction, int rid) {
 	if (tdapi)
 		return tdapi->rep->ReqRemoveParkedOrderAction(orderaction, rid);
-	return 0;
-}
-
-/* FIXME */
-int ctp_tdapi_query_max_order_volume(ctp_tdapi_t *tdapi,
-	CThostFtdcQueryMaxOrderVolumeField *volume, int rid) {
-	if (tdapi)
-		return tdapi->rep->ReqQueryMaxOrderVolume(volume, rid);
 	return 0;
 }
 
@@ -438,6 +438,11 @@ void ctp_tdspi_on_update_account_password(ctp_tdspi_t *tdspi, ctp_on_update_acco
 		tdspi->on_update_account_password_ = func;
 }
 
+void ctp_tdspi_on_query_max_order_volume(ctp_tdspi_t *tdspi, ctp_on_query_max_order_volume func) {
+	if (tdspi && func)
+		tdspi->on_query_max_order_volume_ = func;
+}
+
 void ctp_tdspi_on_confirm_settlement(ctp_tdspi_t *tdspi, ctp_on_confirm_settlement func) {
 	if (tdspi && func)
 		tdspi->on_confirm_settlement_ = func;
@@ -453,16 +458,6 @@ void ctp_tdspi_on_order_action(ctp_tdspi_t *tdspi, ctp_on_order_action func) {
 		tdspi->on_order_action_ = func;
 }
 
-void ctp_tdspi_on_err_insert_order(ctp_tdspi_t *tdspi, ctp_on_err_insert_order func) {
-	if (tdspi && func)
-		tdspi->on_err_insert_order_ = func;
-}
-
-void ctp_tdspi_on_err_order_action(ctp_tdspi_t *tdspi, ctp_on_err_order_action func) {
-	if (tdspi && func)
-		tdspi->on_err_order_action_ = func;
-}
-
 void ctp_tdspi_on_order(ctp_tdspi_t *tdspi, ctp_on_order func) {
 	if (tdspi && func)
 		tdspi->on_order_ = func;
@@ -471,6 +466,16 @@ void ctp_tdspi_on_order(ctp_tdspi_t *tdspi, ctp_on_order func) {
 void ctp_tdspi_on_trade(ctp_tdspi_t *tdspi, ctp_on_trade func) {
 	if (tdspi && func)
 		tdspi->on_trade_ = func;
+}
+
+void ctp_tdspi_on_err_insert_order(ctp_tdspi_t *tdspi, ctp_on_err_insert_order func) {
+	if (tdspi && func)
+		tdspi->on_err_insert_order_ = func;
+}
+
+void ctp_tdspi_on_err_order_action(ctp_tdspi_t *tdspi, ctp_on_err_order_action func) {
+	if (tdspi && func)
+		tdspi->on_err_order_action_ = func;
 }
 
 void ctp_tdspi_on_insert_parked_order(ctp_tdspi_t *tdspi, ctp_on_insert_parked_order func) {
@@ -493,16 +498,6 @@ void ctp_tdspi_on_remove_parked_order_action(ctp_tdspi_t *tdspi, ctp_on_remove_p
 		tdspi->on_remove_parked_order_action_ = func;
 }
 
-void ctp_tdspi_on_instrument_status(ctp_tdspi_t *tdspi, ctp_on_instrument_status func) {
-	if (tdspi && func)
-		tdspi->on_instrument_status_ = func;
-}
-
-void ctp_tdspi_on_trading_notice(ctp_tdspi_t *tdspi, ctp_on_trading_notice func) {
-	if (tdspi && func)
-		tdspi->on_trading_notice_ = func;
-}
-
 void ctp_tdspi_on_query_order(ctp_tdspi_t *tdspi, ctp_on_query_order func) {
 	if (tdspi && func)
 		tdspi->on_query_order_ = func;
@@ -521,6 +516,16 @@ void ctp_tdspi_on_query_position(ctp_tdspi_t *tdspi, ctp_on_query_position func)
 void ctp_tdspi_on_query_account(ctp_tdspi_t *tdspi, ctp_on_query_account func) {
 	if (tdspi && func)
 		tdspi->on_query_account_ = func;
+}
+
+void ctp_tdspi_on_trading_notice(ctp_tdspi_t *tdspi, ctp_on_trading_notice func) {
+	if (tdspi && func)
+		tdspi->on_trading_notice_ = func;
+}
+
+void ctp_tdspi_on_instrument_status(ctp_tdspi_t *tdspi, ctp_on_instrument_status func) {
+	if (tdspi && func)
+		tdspi->on_instrument_status_ = func;
 }
 
 }

@@ -320,9 +320,11 @@ static void *q_thread(void *data) {
 	}
 	key = db_iterator_key(it, &klen);
 	while (memcmp(key, crss->stop, dstr_length(crss->stop)) <= 0) {
+		char *p;
+
 		if (crss->cancel)
 			break;
-		if (!strcmp(crss->match, "") || strstr(key, crss->match)) {
+		if (!strcmp(crss->match, "") || ((p = strstr(key, crss->match)) && *(p - 1) == ',')) {
 			value = db_iterator_value(it, &vlen);
 			res = dstr_new(crss->rid);
 			res = dstr_cat(res, ",0,");
