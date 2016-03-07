@@ -59,6 +59,7 @@ typedef void (*ctp_on_err_insert_order)(struct CThostFtdcInputOrderField *order,
 		struct CThostFtdcRspInfoField *rspinfo);
 typedef void (*ctp_on_err_order_action)(struct CThostFtdcOrderActionField *orderation,
 		struct CThostFtdcRspInfoField *rspinfo);
+typedef void (*ctp_on_err_conditional_order)(struct CThostFtdcErrorConditionalOrderField *order);
 typedef void (*ctp_on_insert_parked_order)(struct CThostFtdcParkedOrderField *order,
 		struct CThostFtdcRspInfoField *rspinfo, int rid, int islast);
 typedef void (*ctp_on_parked_order_action)(struct CThostFtdcParkedOrderActionField *orderaction,
@@ -67,6 +68,36 @@ typedef void (*ctp_on_remove_parked_order)(struct CThostFtdcRemoveParkedOrderFie
 		struct CThostFtdcRspInfoField *rspinfo, int rid, int islast);
 typedef void (*ctp_on_remove_parked_order_action)(struct CThostFtdcRemoveParkedOrderActionField *orderaction,
 		struct CThostFtdcRspInfoField *rspinfo, int rid, int islast);
+typedef void (*ctp_on_bank_to_future)(struct CThostFtdcReqTransferField *transfer,
+		struct CThostFtdcRspInfoField *rspinfo, int rid, int islast);
+typedef void (*ctp_on_future_to_bank)(struct CThostFtdcReqTransferField *transfer,
+		struct CThostFtdcRspInfoField *rspinfo, int rid, int islast);
+typedef void (*ctp_on_bank_to_future_by_bank)(struct CThostFtdcRspTransferField *transfer);
+typedef void (*ctp_on_future_to_bank_by_bank)(struct CThostFtdcRspTransferField *transfer);
+typedef void (*ctp_on_repeal_bank_to_future_by_bank)(struct CThostFtdcRspRepealField *repeal);
+typedef void (*ctp_on_repeal_future_to_bank_by_bank)(struct CThostFtdcRspRepealField *repeal);
+typedef void (*ctp_on_bank_to_future_by_future)(struct CThostFtdcRspTransferField *transfer);
+typedef void (*ctp_on_future_to_bank_by_future)(struct CThostFtdcRspTransferField *transfer);
+typedef void (*ctp_on_err_bank_to_future_by_future)(struct CThostFtdcReqTransferField *transfer,
+		struct CThostFtdcRspInfoField *rspinfo);
+typedef void (*ctp_on_err_future_to_bank_by_future)(struct CThostFtdcReqTransferField *transfer,
+		struct CThostFtdcRspInfoField *rspinfo);
+typedef void (*ctp_on_repeal_bank_to_future_by_future)(struct CThostFtdcRspRepealField *repeal);
+typedef void (*ctp_on_repeal_future_to_bank_by_future)(struct CThostFtdcRspRepealField *repeal);
+typedef void (*ctp_on_repeal_bank_to_future_by_future_manual)(struct CThostFtdcRspRepealField *repeal);
+typedef void (*ctp_on_repeal_future_to_bank_by_future_manual)(struct CThostFtdcRspRepealField *repeal);
+typedef void (*ctp_on_err_repeal_bank_to_future_by_future_manual)(struct CThostFtdcReqRepealField *repeal,
+		struct CThostFtdcRspInfoField *rspinfo);
+typedef void (*ctp_on_err_repeal_future_to_bank_by_future_manual)(struct CThostFtdcReqRepealField *repeal,
+		struct CThostFtdcRspInfoField *rspinfo);
+typedef void (*ctp_on_query_bank_account)(struct CThostFtdcReqQueryAccountField *account,
+		struct CThostFtdcRspInfoField *rspinfo, int rid, int islast);
+typedef void (*ctp_on_query_bank_account_by_future)(struct CThostFtdcNotifyQueryAccountField *account);
+typedef void (*ctp_on_err_query_bank_account_by_future)(struct CThostFtdcReqQueryAccountField *account,
+		struct CThostFtdcRspInfoField *rspinfo);
+typedef void (*ctp_on_open_account_by_bank)(struct CThostFtdcOpenAccountField *account);
+typedef void (*ctp_on_cancel_account_by_bank)(struct CThostFtdcCancelAccountField *account);
+typedef void (*ctp_on_change_account_by_bank)(struct CThostFtdcChangeAccountField *account);
 typedef void (*ctp_on_query_settlement)(struct CThostFtdcSettlementInfoField *stmt,
 		struct CThostFtdcRspInfoField *rspinfo, int rid, int islast);
 typedef void (*ctp_on_query_settlement_confirm)(struct CThostFtdcSettlementInfoConfirmField *stmtconfirm,
@@ -115,6 +146,14 @@ typedef void (*ctp_on_query_trading_notice)(struct CThostFtdcTradingNoticeField 
 		struct CThostFtdcRspInfoField *rspinfo, int rid, int islast);
 typedef void (*ctp_on_trading_notice)(struct CThostFtdcTradingNoticeInfoField *notice);
 typedef void (*ctp_on_instrument_status)(struct CThostFtdcInstrumentStatusField *status);
+typedef void (*ctp_on_query_account_register)(struct CThostFtdcAccountregisterField *accountregister,
+		struct CThostFtdcRspInfoField *rspinfo, int rid, int islast);
+typedef void (*ctp_on_query_transfer_bank)(struct CThostFtdcTransferBankField *bank,
+		struct CThostFtdcRspInfoField *rspinfo, int rid, int islast);
+typedef void (*ctp_on_query_contract_bank)(struct CThostFtdcContractBankField *bank,
+		struct CThostFtdcRspInfoField *rspinfo, int rid, int islast);
+typedef void (*ctp_on_query_transfer_serial)(struct CThostFtdcTransferSerialField *serial,
+		struct CThostFtdcRspInfoField *rspinfo, int rid, int islast);
 
 /* FIXME: exported functions */
 extern ctp_tdapi_t *ctp_tdapi_create(const char *flowpath);
@@ -219,6 +258,7 @@ extern void         ctp_tdspi_destroy(ctp_tdspi_t *tdspi);
 extern void         ctp_tdspi_on_front_connected(ctp_tdspi_t *tdspi, ctp_on_front_connected func);
 extern void         ctp_tdspi_on_front_disconnected(ctp_tdspi_t *tdspi, ctp_on_front_disconnected func);
 extern void         ctp_tdspi_on_heartbeat_warning(ctp_tdspi_t *tdspi, ctp_on_heartbeat_warning func);
+extern void         ctp_tdspi_on_error(ctp_tdspi_t *tdspi, ctp_on_error func);
 extern void         ctp_tdspi_on_authenticate(ctp_tdspi_t *tdspi, ctp_on_authenticate func);
 extern void         ctp_tdspi_on_user_login(ctp_tdspi_t *tdspi, ctp_on_user_login func);
 extern void         ctp_tdspi_on_user_logout(ctp_tdspi_t *tdspi, ctp_on_user_logout func);
@@ -235,11 +275,52 @@ extern void         ctp_tdspi_on_order(ctp_tdspi_t *tdspi, ctp_on_order func);
 extern void         ctp_tdspi_on_trade(ctp_tdspi_t *tdspi, ctp_on_trade func);
 extern void         ctp_tdspi_on_err_insert_order(ctp_tdspi_t *tdspi, ctp_on_err_insert_order func);
 extern void         ctp_tdspi_on_err_order_action(ctp_tdspi_t *tdspi, ctp_on_err_order_action func);
+extern void         ctp_tdspi_on_err_conditional_order(ctp_tdspi_t *tdspi, ctp_on_err_conditional_order func);
 extern void         ctp_tdspi_on_insert_parked_order(ctp_tdspi_t *tdspi, ctp_on_insert_parked_order func);
 extern void         ctp_tdspi_on_parked_order_action(ctp_tdspi_t *tdspi, ctp_on_parked_order_action func);
 extern void         ctp_tdspi_on_remove_parked_order(ctp_tdspi_t *tdspi, ctp_on_remove_parked_order func);
 extern void         ctp_tdspi_on_remove_parked_order_action(ctp_tdspi_t *tdspi,
 			ctp_on_remove_parked_order_action func);
+extern void         ctp_tdspi_on_bank_to_future(ctp_tdspi_t *tdspi, ctp_on_bank_to_future func);
+extern void         ctp_tdspi_on_future_to_bank(ctp_tdspi_t *tdspi, ctp_on_future_to_bank func);
+extern void         ctp_tdspi_on_bank_to_future_by_bank(ctp_tdspi_t *tdspi,
+			ctp_on_bank_to_future_by_bank func);
+extern void         ctp_tdspi_on_future_to_bank_by_bank(ctp_tdspi_t *tdspi,
+			ctp_on_future_to_bank_by_bank func);
+extern void         ctp_tdspi_on_repeal_bank_to_future_by_bank(ctp_tdspi_t *tdspi,
+			ctp_on_repeal_bank_to_future_by_bank func);
+extern void         ctp_tdspi_on_repeal_future_to_bank_by_bank(ctp_tdspi_t *tdspi,
+			ctp_on_repeal_future_to_bank_by_bank func);
+extern void         ctp_tdspi_on_bank_to_future_by_future(ctp_tdspi_t *tdspi,
+			ctp_on_bank_to_future_by_future func);
+extern void         ctp_tdspi_on_future_to_bank_by_future(ctp_tdspi_t *tdspi,
+			ctp_on_future_to_bank_by_future func);
+extern void         ctp_tdspi_on_err_bank_to_future_by_future(ctp_tdspi_t *tdspi,
+			ctp_on_err_bank_to_future_by_future func);
+extern void         ctp_tdspi_on_err_future_to_bank_by_future(ctp_tdspi_t *tdspi,
+			ctp_on_err_future_to_bank_by_future func);
+extern void         ctp_tdspi_on_repeal_bank_to_future_by_future(ctp_tdspi_t *tdspi,
+			ctp_on_repeal_bank_to_future_by_future func);
+extern void         ctp_tdspi_on_repeal_future_to_bank_by_future(ctp_tdspi_t *tdspi,
+			ctp_on_repeal_future_to_bank_by_future func);
+extern void         ctp_tdspi_on_repeal_bank_to_future_by_future_manual(ctp_tdspi_t *tdspi,
+			ctp_on_repeal_bank_to_future_by_future_manual func);
+extern void         ctp_tdspi_on_repeal_future_to_bank_by_future_manual(ctp_tdspi_t *tdspi,
+			ctp_on_repeal_future_to_bank_by_future_manual func);
+extern void         ctp_tdspi_on_err_repeal_bank_to_future_by_future_manual(ctp_tdspi_t *tdspi,
+			ctp_on_err_repeal_bank_to_future_by_future_manual func);
+extern void         ctp_tdspi_on_err_repeal_future_to_bank_by_future_manual(ctp_tdspi_t *tdspi,
+			ctp_on_err_repeal_future_to_bank_by_future_manual func);
+extern void         ctp_tdspi_on_query_bank_account(ctp_tdspi_t *tdspi, ctp_on_query_bank_account func);
+extern void         ctp_tdspi_on_query_bank_account_by_future(ctp_tdspi_t *tdspi,
+			ctp_on_query_bank_account_by_future func);
+extern void         ctp_tdspi_on_err_query_bank_account_by_future(ctp_tdspi_t *tdspi,
+			ctp_on_err_query_bank_account_by_future func);
+extern void         ctp_tdspi_on_open_account_by_bank(ctp_tdspi_t *tdspi, ctp_on_open_account_by_bank func);
+extern void         ctp_tdspi_on_cancel_account_by_bank(ctp_tdspi_t *tdspi,
+			ctp_on_cancel_account_by_bank func);
+extern void         ctp_tdspi_on_change_account_by_bank(ctp_tdspi_t *tdspi,
+			ctp_on_change_account_by_bank func);
 extern void         ctp_tdspi_on_query_settlement(ctp_tdspi_t *tdspi, ctp_on_query_settlement func);
 extern void         ctp_tdspi_on_query_settlement_confirm(ctp_tdspi_t *tdspi,
 			ctp_on_query_settlement_confirm func);
@@ -270,6 +351,11 @@ extern void         ctp_tdspi_on_query_notice(ctp_tdspi_t *tdspi, ctp_on_query_n
 extern void         ctp_tdspi_on_query_trading_notice(ctp_tdspi_t *tdspi, ctp_on_query_trading_notice func);
 extern void         ctp_tdspi_on_trading_notice(ctp_tdspi_t *tdspi, ctp_on_trading_notice func);
 extern void         ctp_tdspi_on_instrument_status(ctp_tdspi_t *tdspi, ctp_on_instrument_status func);
+extern void         ctp_tdspi_on_query_account_register(ctp_tdspi_t *tdspi,
+			ctp_on_query_account_register func);
+extern void         ctp_tdspi_on_query_transfer_bank(ctp_tdspi_t *tdspi, ctp_on_query_transfer_bank func);
+extern void         ctp_tdspi_on_query_contract_bank(ctp_tdspi_t *tdspi, ctp_on_query_contract_bank func);
+extern void         ctp_tdspi_on_query_transfer_serial(ctp_tdspi_t *tdspi, ctp_on_query_transfer_serial func);
 
 #ifdef __cplusplus
 }

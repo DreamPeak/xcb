@@ -756,7 +756,7 @@ void process_quote(void *data) {
 			localtime_r(&tv.tv_sec, &lt);
 			if (quote->thyquote.m_cHYDM[0] == 'S' && quote->thyquote.m_cHYDM[1] == 'P')
 				quote->thyquote.m_nTime *= 1000;
-			else if (tlen == 6 || tlen == 7)
+			else if (hour != 0 && (tlen == 6 || tlen == 7))
 				quote->thyquote.m_nTime *= 100;
 			lt.tm_sec  = quote->thyquote.m_nTime % 100000   / 1000;
 			lt.tm_min  = quote->thyquote.m_nTime % 10000000 / 100000;

@@ -10,9 +10,10 @@ By typing '
 
 ', the compactor is loaded into main memory.  It first reads the config file
 'xcb-compact.conf' located in '/etc/xcb/', then optionally loads the modules in
-'/var/lib/xcb/', and dumps all info and warning messages into the log file which
-lies in '/var/log/xcb/'.  In certain cases, especially when you are developing a
-new module, you may want to run the compactor in foreground, then type:
+'/var/lib/xcb/', and dumps all info and warning messages into the log file
+'xcb-compact.log' which lies in '/var/log/xcb/'.  In certain cases, especially
+when you are developing a new module, you may want to run the compactor in
+foreground, then type:
 
     xcb-compact -f /etc/xcb/xcb-compact.conf<Enter>
 

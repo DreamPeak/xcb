@@ -58,7 +58,7 @@ database compact
 database props stats
 database props sstables
 database props <n>
-    Get the properties of database.
+    Get the properties of database.  'n' is a number between 0 and 6.
 
 shutdown
 
