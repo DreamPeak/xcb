@@ -63,6 +63,7 @@ struct sms {
 };
 
 /* FIXME */
+int last_quote = 0;
 table_t cache;
 ptrie_t subscribers;
 struct msgs default_msgs = {
@@ -77,7 +78,7 @@ struct msgs default_msgs = {
 dlist_t clients_to_close;
 table_t idxfmts;
 event_loop el;
-int persistence = 0;
+int persistence = 1;
 db_t *db;
 db_readoptions_t *db_ro;
 const char *password;
@@ -370,9 +371,11 @@ static int server_cron(event_loop el, unsigned long id, void *data) {
 		/* FIXME */
 		if (addms)
 			table_clear(times);
-		table_lock(cache);
-		table_clear(cache);
-		table_unlock(cache);
+		if (last_quote) {
+			table_lock(cache);
+			table_clear(cache);
+			table_unlock(cache);
+		}
 	}
 	if (shut_down) {
 		if (prepare_for_shutdown() == 0)
@@ -1050,7 +1053,7 @@ void out2rmp(const char *res) {
 			dstr key = NULL, value = NULL, index = NULL, contracts = NULL;
 			dstr *fields2 = NULL;
 			int nfield2 = 0;
-			dstr ckey, cvalue, skey;
+			dstr skey;
 			dlist_t dlist;
 			struct kvd *kvd;
 			dlist_node_t node;
@@ -1072,58 +1075,63 @@ void out2rmp(const char *res) {
 					contracts = dstr_cat(contracts, fields2[i]);
 				}
 			}
-			ckey   = dstr_new(index);
+			skey = dstr_new(index);
 			if (contracts) {
-				ckey = dstr_cat(ckey, ",");
-				ckey = dstr_cat(ckey, contracts);
+				skey = dstr_cat(skey, ",");
+				skey = dstr_cat(skey, contracts);
 			}
-			cvalue = dstr_new(fields2[1]);
-			cvalue = dstr_cat(cvalue, ",");
-			cvalue = dstr_cat(cvalue, value);
-			skey   = dstr_new(ckey);
-			/* put latest quotes into cache */
-			table_lock(cache);
-			if ((dlist = table_get_value(cache, index)) == NULL) {
-				if (NEW(kvd)) {
-					kvd->key     = ckey;
-					kvd->u.value = cvalue;
-					dlist = dlist_new(cmpkvd, kvfree);
-					dlist_insert_sort(dlist, kvd);
-					table_insert(cache, dstr_new(index), dlist);
-				} else {
-					xcb_log(XCB_LOG_ERROR, "Error allocating memory for kvd");
-					dstr_free(cvalue);
-					dstr_free(ckey);
-				}
-			} else {
-				if (NEW(kvd)) {
-					kvd->key     = ckey;
-					kvd->u.value = NULL;
-					if ((node = dlist_find(dlist, kvd)) == NULL) {
+			if (last_quote) {
+				dstr ckey, cvalue;
+
+				ckey   = dstr_new(skey);
+				cvalue = dstr_new(fields2[1]);
+				cvalue = dstr_cat(cvalue, ",");
+				cvalue = dstr_cat(cvalue, value);
+				/* put latest quotes into cache */
+				table_lock(cache);
+				if ((dlist = table_get_value(cache, index)) == NULL) {
+					if (NEW(kvd)) {
+						kvd->key     = ckey;
 						kvd->u.value = cvalue;
+						dlist = dlist_new(cmpkvd, kvfree);
 						dlist_insert_sort(dlist, kvd);
+						table_insert(cache, dstr_new(index), dlist);
 					} else {
-						FREE(kvd);
-						kvd = (struct kvd *)dlist_node_value(node);
-						if (dstr_length(kvd->u.value) == dstr_length(cvalue) &&
-							!memcmp(kvd->u.value, cvalue, dstr_length(kvd->u.value))) {
-							dstr_free(skey);
-							dstr_free(cvalue);
-							dstr_free(ckey);
-							table_unlock(cache);
-							goto end;
-						}
-						dstr_free(kvd->u.value);
-						kvd->u.value = cvalue;
+						xcb_log(XCB_LOG_ERROR, "Error allocating memory for kvd");
+						dstr_free(cvalue);
 						dstr_free(ckey);
 					}
 				} else {
-					xcb_log(XCB_LOG_ERROR, "Error allocating memory for kvd");
-					dstr_free(cvalue);
-					dstr_free(ckey);
+					if (NEW(kvd)) {
+						kvd->key     = ckey;
+						kvd->u.value = NULL;
+						if ((node = dlist_find(dlist, kvd)) == NULL) {
+							kvd->u.value = cvalue;
+							dlist_insert_sort(dlist, kvd);
+						} else {
+							FREE(kvd);
+							kvd = (struct kvd *)dlist_node_value(node);
+							if (dstr_length(kvd->u.value) == dstr_length(cvalue) &&
+								!memcmp(kvd->u.value, cvalue,
+									dstr_length(kvd->u.value))) {
+								table_unlock(cache);
+								dstr_free(cvalue);
+								dstr_free(ckey);
+								dstr_free(skey);
+								goto end;
+							}
+							dstr_free(kvd->u.value);
+							kvd->u.value = cvalue;
+							dstr_free(ckey);
+						}
+					} else {
+						xcb_log(XCB_LOG_ERROR, "Error allocating memory for kvd");
+						dstr_free(cvalue);
+						dstr_free(ckey);
+					}
 				}
+				table_unlock(cache);
 			}
-			table_unlock(cache);
 			msg_incr(msg);
 			/* send quotes as soon as possible */
 			thrpool_queue(tp, send_quote, msg, skey, msgfree, vfree2);
@@ -1250,6 +1258,10 @@ int main(int argc, char **argv) {
 	/* FIXME */
 	if (addms)
 		times = table_new(cmpstr, hashmurmur2, kfree, vfree);
+	/* FIXME */
+	if ((tmp = variable_retrieve(cfg, "general", "last_quote")))
+		if (atoi(tmp) == 1)
+			last_quote = 1;
 	cache = table_new(cmpstr, hashmurmur2, kfree, lfree);
 	subscribers = ptrie_new();
 	default_msgs.appouts = dlist_new(NULL, NULL);

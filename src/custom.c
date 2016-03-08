@@ -46,6 +46,7 @@ struct crss {
 };
 
 /* FIXME */
+extern int last_quote;
 extern table_t cache;
 extern ptrie_t subscribers;
 extern int persistence;
@@ -93,76 +94,79 @@ void s_command(client c) {
 			skey = dstr_cat(skey, ",");
 			skey = dstr_cat(skey, c->argv[i]);
 		}
-	table_lock(cache);
-	if ((dlist = table_get_value(cache, pkey))) {
-		dlist_iter_t iter = dlist_iter_new(dlist, DLIST_START_HEAD);
-		dlist_node_t node;
-		int flag = 0;
+	if (last_quote) {
+		table_lock(cache);
+		if ((dlist = table_get_value(cache, pkey))) {
+			dlist_iter_t iter = dlist_iter_new(dlist, DLIST_START_HEAD);
+			dlist_node_t node;
+			int flag = 0;
 
-		/* FIXME: still has room to improve */
-		while ((node = dlist_next(iter))) {
-			kvd = (struct kvd *)dlist_node_value(node);
-			if (dstr_length(kvd->key) >= dstr_length(skey) &&
-				!memcmp(kvd->key, skey, dstr_length(skey))) {
-				dstr *fields = NULL, *fields2 = NULL;
-				int nfield = 0, nfield2 = 0;
-				dstr res, contracts = NULL;
+			/* FIXME: still has room to improve */
+			while ((node = dlist_next(iter))) {
+				kvd = (struct kvd *)dlist_node_value(node);
+				if (dstr_length(kvd->key) >= dstr_length(skey) &&
+					!memcmp(kvd->key, skey, dstr_length(skey))) {
+					dstr *fields = NULL, *fields2 = NULL;
+					int nfield = 0, nfield2 = 0;
+					dstr res, contracts = NULL;
 
-				flag = 1;
-				fields = dstr_split_len(kvd->key, dstr_length(kvd->key), ",", 1, &nfield);
-				res = dstr_new(fields[0]);
-				if (nfield > 1) {
-					contracts = dstr_new(fields[1]);
-					for (i = 2; i < nfield; ++i) {
-						contracts = dstr_cat(contracts, ",");
-						contracts = dstr_cat(contracts, fields[i]);
-					}
-				}
-				fields2 = dstr_split_len(kvd->u.value, dstr_length(kvd->u.value),
-					",", 1, &nfield2);
-				res = dstr_cat(res, ",");
-				res = dstr_cat(res, fields2[0]);
-				if (contracts) {
-					res = dstr_cat(res, ",");
-					res = dstr_cat(res, contracts);
-				}
-				for (i = 1; i < nfield2; ++i) {
-					res = dstr_cat(res, ",");
-					res = dstr_cat(res, fields2[i]);
-				}
-				res = dstr_cat(res, "\r\n");
-				pthread_spin_lock(&c->lock);
-				if (!(c->flags & CLIENT_CLOSE_ASAP)) {
-					if (net_try_write(c->fd, res, dstr_length(res),
-						10, NET_NONBLOCK) == -1) {
-						xcb_log(XCB_LOG_WARNING, "Writing to client '%p': %s",
-							c, strerror(errno));
-						if (++c->eagcount >= 3) {
-							client_free_async(c);
-							pthread_spin_unlock(&c->lock);
-							dstr_free_tokens(fields2, nfield2);
-							dstr_free(contracts);
-							dstr_free(res);
-							dstr_free_tokens(fields, nfield);
-							table_unlock(cache);
-							dstr_free(skey);
-							dstr_free(pkey);
-							return;
+					flag = 1;
+					fields = dstr_split_len(kvd->key, dstr_length(kvd->key),
+						",", 1, &nfield);
+					res = dstr_new(fields[0]);
+					if (nfield > 1) {
+						contracts = dstr_new(fields[1]);
+						for (i = 2; i < nfield; ++i) {
+							contracts = dstr_cat(contracts, ",");
+							contracts = dstr_cat(contracts, fields[i]);
 						}
-					} else if (c->eagcount)
-						c->eagcount = 0;
-				}
-				pthread_spin_unlock(&c->lock);
-				dstr_free_tokens(fields2, nfield2);
-				dstr_free(contracts);
-				dstr_free(res);
-				dstr_free_tokens(fields, nfield);
-			} else if (flag)
-				break;
+					}
+					fields2 = dstr_split_len(kvd->u.value, dstr_length(kvd->u.value),
+						",", 1, &nfield2);
+					res = dstr_cat(res, ",");
+					res = dstr_cat(res, fields2[0]);
+					if (contracts) {
+						res = dstr_cat(res, ",");
+						res = dstr_cat(res, contracts);
+					}
+					for (i = 1; i < nfield2; ++i) {
+						res = dstr_cat(res, ",");
+						res = dstr_cat(res, fields2[i]);
+					}
+					res = dstr_cat(res, "\r\n");
+					pthread_spin_lock(&c->lock);
+					if (!(c->flags & CLIENT_CLOSE_ASAP)) {
+						if (net_try_write(c->fd, res, dstr_length(res),
+							10, NET_NONBLOCK) == -1) {
+							xcb_log(XCB_LOG_WARNING, "Writing to client '%p': %s",
+								c, strerror(errno));
+							if (++c->eagcount >= 3) {
+								client_free_async(c);
+								pthread_spin_unlock(&c->lock);
+								dstr_free_tokens(fields2, nfield2);
+								dstr_free(contracts);
+								dstr_free(res);
+								dstr_free_tokens(fields, nfield);
+								table_unlock(cache);
+								dstr_free(skey);
+								dstr_free(pkey);
+								return;
+							}
+						} else if (c->eagcount)
+							c->eagcount = 0;
+					}
+					pthread_spin_unlock(&c->lock);
+					dstr_free_tokens(fields2, nfield2);
+					dstr_free(contracts);
+					dstr_free(res);
+					dstr_free_tokens(fields, nfield);
+				} else if (flag)
+					break;
+			}
+			dlist_iter_free(&iter);
 		}
-		dlist_iter_free(&iter);
+		table_unlock(cache);
 	}
-	table_unlock(cache);
 	ptrie_rwlock_wrlock(subscribers);
 	dlist = ptrie_node_value(ptrie_get_root(subscribers));
 	if (dlist_find(dlist, c)) {
