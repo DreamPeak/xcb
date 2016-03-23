@@ -10,6 +10,12 @@ config set log_level <value>
     Set log level.  'value' can be one of the following: 'debug', 'info',
     'notice' and 'warning'.
 
+config get last_quote
+    Get last_quote value.
+
+config set last_quote
+    Set last_quote value.  'value' can be '0' or '1'.
+
 config get filter
     Get filter string.
 

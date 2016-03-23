@@ -69,7 +69,7 @@ struct btree_node_t {
 static btree_node_t node_new(int t) {
 	btree_node_t node;
 
-	if (NEW0(node) == NULL)
+	if (unlikely(NEW0(node) == NULL))
 		return NULL;
 	if ((node->bindings = CALLOC(1, (2 * t - 1) * sizeof *node->bindings)) == NULL) {
 		FREE(node);
@@ -96,8 +96,6 @@ static int btree_split_child(btree_t btree, btree_node_t x, int i) {
 	btree_node_t y, z;
 	int j;
 
-	if (x == NULL)
-		return -1;
 	y = x->u.children[i];
 	if ((z = node_new(btree->t)) == NULL)
 		return -1;
@@ -204,7 +202,7 @@ btree_t btree_new(int t, int cmp(const void *x, const void *y),
 	y->n         = 0;
 	x->u.pn.next = x->u.pn.prev = y;
 	y->u.pn.next = y->u.pn.prev = x;
-	if (NEW(btree) == NULL) {
+	if (unlikely(NEW(btree) == NULL)) {
 		node_free(y);
 		node_free(x);
 		return NULL;
@@ -223,7 +221,7 @@ btree_t btree_new(int t, int cmp(const void *x, const void *y),
 void btree_free(btree_t *bp) {
 	btree_node_t x;
 
-	if (bp == NULL || *bp == NULL)
+	if (unlikely(bp == NULL || *bp == NULL))
 		return;
 	x = (*bp)->sentinel->u.pn.next;
 	while (x != (*bp)->sentinel) {
@@ -258,31 +256,31 @@ void btree_free(btree_t *bp) {
 }
 
 unsigned long btree_length(btree_t btree) {
-	if (btree == NULL)
+	if (unlikely(btree == NULL))
 		return 0;
 	return btree->length;
 }
 
 int btree_node_n(btree_node_t node) {
-	if (node == NULL)
+	if (unlikely(node == NULL))
 		return 0;
 	return node->n;
 }
 
 btree_node_t btree_node_next(btree_node_t node) {
-	if (node == NULL)
+	if (unlikely(node == NULL))
 		return NULL;
 	return node->u.pn.next;
 }
 
 const void *btree_node_key(btree_node_t node, int i) {
-	if (node == NULL)
+	if (unlikely(node == NULL))
 		return NULL;
 	return node->bindings[i].key;
 }
 
 void *btree_node_value(btree_node_t node, int i) {
-	if (node == NULL)
+	if (unlikely(node == NULL))
 		return NULL;
 	return node->bindings[i].value;
 }
@@ -290,7 +288,7 @@ void *btree_node_value(btree_node_t node, int i) {
 void *btree_insert(btree_t btree, const void *key, void *value) {
 	btree_node_t x;
 
-	if (btree == NULL || key == NULL)
+	if (unlikely(btree == NULL || key == NULL))
 		return NULL;
 	x = btree->root;
 	if (x->n == 2 * btree->t - 1) {
@@ -320,7 +318,7 @@ btree_node_t btree_find(btree_t btree, const void *key, int *ip) {
 	/* avoid gcc warning */
 	int i = -1, k = 1;
 
-	if (btree == NULL || key == NULL)
+	if (unlikely(btree == NULL || key == NULL))
 		return NULL;
 	node = btree->root;
 	while (!node->leaf) {

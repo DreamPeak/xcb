@@ -64,7 +64,7 @@ struct ptrie_node_t {
 static ptrie_node_t node_new(const char *key) {
 	ptrie_node_t node;
 
-	if (NEW0(node) == NULL)
+	if (unlikely(NEW0(node) == NULL))
 		return NULL;
 	if ((node->key = mem_strndup(key, strlen(key))) == NULL) {
 		FREE(node);
@@ -97,7 +97,7 @@ static unsigned get_nmatches(const char *x, const char *y) {
 static void merge(ptrie_node_t x, ptrie_node_t y) {
 	ptrie_node_t z;
 
-	if (x == NULL || y == NULL)
+	if (unlikely(x == NULL || y == NULL))
 		return;
 	if (RESIZE(x->key, strlen(x->key) + strlen(y->key) + 1) == NULL)
 		return;
@@ -123,7 +123,7 @@ ptrie_t ptrie_new(void) {
 	if ((node = node_new("")) == NULL)
 		return NULL;
 	node->value = dlist_new(NULL, NULL);
-	if (NEW0(ptrie) == NULL) {
+	if (unlikely(NEW0(ptrie) == NULL)) {
 		node_free(node);
 		return NULL;
 	}
@@ -143,7 +143,7 @@ ptrie_t ptrie_new(void) {
 void ptrie_free(ptrie_t *pp) {
 	ptrie_node_t x;
 
-	if (pp == NULL || *pp == NULL)
+	if (unlikely(pp == NULL || *pp == NULL))
 		return;
 	pthread_mutex_destroy(&(*pp)->lock);
 	pthread_rwlock_destroy(&(*pp)->rwlock);
@@ -167,26 +167,26 @@ void ptrie_free(ptrie_t *pp) {
 }
 
 ptrie_node_t ptrie_node_parent(ptrie_node_t node) {
-	if (node == NULL)
+	if (unlikely(node == NULL))
 		return NULL;
 	return node->parent;
 }
 
 char *ptrie_node_key(ptrie_node_t node) {
-	if (node == NULL)
+	if (unlikely(node == NULL))
 		return NULL;
 	return node->key;
 }
 
 dlist_t ptrie_node_value(ptrie_node_t node) {
-	if (node == NULL)
+	if (unlikely(node == NULL))
 		return NULL;
 	return node->value;
 }
 
 /* FIXME */
 ptrie_node_t ptrie_get_root(ptrie_t ptrie) {
-	if (ptrie == NULL)
+	if (unlikely(ptrie == NULL))
 		return NULL;
 	return ptrie->root;
 }
@@ -195,7 +195,7 @@ ptrie_node_t ptrie_get_root(ptrie_t ptrie) {
 ptrie_node_t ptrie_set_index(ptrie_t ptrie, const char *index) {
 	ptrie_node_t node;
 
-	if (ptrie == NULL || index == NULL)
+	if (unlikely(ptrie == NULL || index == NULL))
 		return NULL;
 	if ((node = node_new(index)) == NULL)
 		return NULL;
@@ -213,7 +213,7 @@ ptrie_node_t ptrie_set_index(ptrie_t ptrie, const char *index) {
 ptrie_node_t ptrie_get_index(ptrie_t ptrie, const char *index) {
 	ptrie_node_t node;
 
-	if (ptrie == NULL || index == NULL)
+	if (unlikely(ptrie == NULL || index == NULL))
 		return NULL;
 	for (node = ptrie->indices; node; node = node->next)
 		if (!strcmp(node->key, index))
@@ -221,12 +221,13 @@ ptrie_node_t ptrie_get_index(ptrie_t ptrie, const char *index) {
 	return NULL;
 }
 
+/* Return 0 if success, otherwise -1 is returned */
 int ptrie_insert(ptrie_node_t node, const char *key, void *value) {
 	char *newkey = (char *)key;
 	ptrie_node_t x = node, y, z;
 	unsigned nmatches;
 
-	if (node == NULL || key == NULL)
+	if (unlikely(node == NULL || key == NULL))
 		return -1;
 	nmatches = get_nmatches(newkey, x->key);
 	STEP_DOWN(nmatches, newkey, x);
@@ -286,19 +287,20 @@ ptrie_node_t ptrie_find(ptrie_node_t node, const char *key) {
 	ptrie_node_t x = node;
 	unsigned nmatches;
 
-	if (node == NULL || key == NULL)
+	if (unlikely(node == NULL || key == NULL))
 		return NULL;
 	nmatches = get_nmatches(newkey, x->key);
 	STEP_DOWN(nmatches, newkey, x);
 	return nmatches == strlen(x->key) ? x : NULL;
 }
 
+/* Return 0 if success, otherwise -1 is returned */
 int ptrie_remove(ptrie_node_t node, const char *key, void *value) {
 	char *newkey = (char *)key;
 	ptrie_node_t x = node;
 	unsigned nmatches;
 
-	if (node == NULL || key == NULL)
+	if (unlikely(node == NULL || key == NULL))
 		return -1;
 	nmatches = get_nmatches(newkey, x->key);
 	STEP_DOWN(nmatches, newkey, x);
@@ -337,7 +339,7 @@ ptrie_node_t ptrie_search_prefix(ptrie_node_t node, const char *key, void *value
 	ptrie_node_t x = node;
 	unsigned nmatches;
 
-	if (node == NULL || key == NULL)
+	if (unlikely(node == NULL || key == NULL))
 		return NULL;
 	nmatches = get_nmatches(newkey, x->key);
 	/* step down */
@@ -383,31 +385,31 @@ ptrie_node_t ptrie_search_prefix(ptrie_node_t node, const char *key, void *value
 
 
 void ptrie_lock(ptrie_t ptrie) {
-	if (ptrie == NULL)
+	if (unlikely(ptrie == NULL))
 		return;
 	pthread_mutex_lock(&ptrie->lock);
 }
 
 void ptrie_unlock(ptrie_t ptrie) {
-	if (ptrie == NULL)
+	if (unlikely(ptrie == NULL))
 		return;
 	pthread_mutex_unlock(&ptrie->lock);
 }
 
 void ptrie_rwlock_rdlock(ptrie_t ptrie) {
-	if (ptrie == NULL)
+	if (unlikely(ptrie == NULL))
 		return;
 	pthread_rwlock_rdlock(&ptrie->rwlock);
 }
 
 void ptrie_rwlock_wrlock(ptrie_t ptrie) {
-	if (ptrie == NULL)
+	if (unlikely(ptrie == NULL))
 		return;
 	pthread_rwlock_wrlock(&ptrie->rwlock);
 }
 
 void ptrie_rwlock_unlock(ptrie_t ptrie) {
-	if (ptrie == NULL)
+	if (unlikely(ptrie == NULL))
 		return;
 	pthread_rwlock_unlock(&ptrie->rwlock);
 }

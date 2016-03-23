@@ -1291,6 +1291,9 @@ static void config_command(client c) {
 		if (!strcasecmp(c->argv[2], "log_level"))
 			add_reply_string_format(c, "log_level:%s\r\n",
 				variable_retrieve(cfg, "general", "log_level"));
+		else if (!strcasecmp(c->argv[2], "last_quote"))
+			add_reply_string_format(c, "last_quote:%s\r\n",
+				variable_retrieve(cfg, "general", "last_quote"));
 		else
 			add_reply_string(c, "-1\r\n", 4);
 		pthread_mutex_unlock(&cfg_lock);
@@ -1310,6 +1313,16 @@ static void config_command(client c) {
 					set_logger_level(__LOG_NOTICE);
 				else if (!strcasecmp(c->argv[3], "warning"))
 					set_logger_level(__LOG_WARNING);
+			} else
+				add_reply_string(c, "-1\r\n", 4);
+		} else if (!strcasecmp(c->argv[2], "last_quote") && c->argc >= 4) {
+			category = category_get(cfg, "general");
+			if (variable_update(category, "last_quote", c->argv[3]) == 0) {
+				add_reply_string(c, "OK\r\n", 4);
+				if (atoi(c->argv[3]) == 0)
+					__sync_bool_compare_and_swap(&last_quote, 1, 0);
+				else if (atoi(c->argv[3]) == 1)
+					__sync_bool_compare_and_swap(&last_quote, 0, 1);
 			} else
 				add_reply_string(c, "-1\r\n", 4);
 		} else
