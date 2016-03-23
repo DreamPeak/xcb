@@ -25,7 +25,7 @@
 #include <netdb.h>
 #include <string.h>
 #include <time.h>
-#include "utilities.h"
+#include "utils.h"
 
 /* FIXME */
 int cmpstr(const void *x, const void *y) {

@@ -26,7 +26,7 @@
 #include "macros.h"
 #include "mem.h"
 #include "dstr.h"
-#include "utilities.h"
+#include "utils.h"
 #include "logger.h"
 #include "config.h"
 #include "module.h"

@@ -82,7 +82,7 @@ md_xspeed_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(CXXFLAGS) $(md_xspeed_la_LDFLAGS) $(LDFLAGS) -o $@
 PROGRAMS = $(sbin_PROGRAMS)
 am_xcb_exp_OBJECTS = xcb_exp-mem.$(OBJEXT) xcb_exp-dstr.$(OBJEXT) \
-	xcb_exp-utilities.$(OBJEXT) xcb_exp-logger.$(OBJEXT) \
+	xcb_exp-utils.$(OBJEXT) xcb_exp-logger.$(OBJEXT) \
 	xcb_exp-config.$(OBJEXT) xcb_exp-xcb-exp.$(OBJEXT)
 xcb_exp_OBJECTS = $(am_xcb_exp_OBJECTS)
 xcb_exp_DEPENDENCIES = libDFITCTraderApi.so
@@ -234,8 +234,8 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 xcb_exp_SOURCES = $(top_srcdir)/src/mem.c $(top_srcdir)/src/dstr.c             \
-$(top_srcdir)/src/utilities.c $(top_srcdir)/src/logger.c                       \
-$(top_srcdir)/src/config.c xcb-exp.cpp
+$(top_srcdir)/src/utils.c $(top_srcdir)/src/logger.c $(top_srcdir)/src/config.c\
+xcb-exp.cpp
 
 xcb_exp_CPPFLAGS = -I$(top_srcdir)/include
 xcb_exp_CFLAGS = -Wall -Winline
@@ -374,7 +374,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_exp-dstr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_exp-logger.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_exp-mem.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_exp-utilities.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_exp-utils.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_exp-xcb-exp.Po@am__quote@
 
 .c.o:
@@ -433,19 +433,19 @@ xcb_exp-dstr.obj: $(top_srcdir)/src/dstr.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_exp_CPPFLAGS) $(CPPFLAGS) $(xcb_exp_CFLAGS) $(CFLAGS) -c -o xcb_exp-dstr.obj `if test -f '$(top_srcdir)/src/dstr.c'; then $(CYGPATH_W) '$(top_srcdir)/src/dstr.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/dstr.c'; fi`
 
-xcb_exp-utilities.o: $(top_srcdir)/src/utilities.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_exp_CPPFLAGS) $(CPPFLAGS) $(xcb_exp_CFLAGS) $(CFLAGS) -MT xcb_exp-utilities.o -MD -MP -MF $(DEPDIR)/xcb_exp-utilities.Tpo -c -o xcb_exp-utilities.o `test -f '$(top_srcdir)/src/utilities.c' || echo '$(srcdir)/'`$(top_srcdir)/src/utilities.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_exp-utilities.Tpo $(DEPDIR)/xcb_exp-utilities.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/src/utilities.c' object='xcb_exp-utilities.o' libtool=no @AMDEPBACKSLASH@
+xcb_exp-utils.o: $(top_srcdir)/src/utils.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_exp_CPPFLAGS) $(CPPFLAGS) $(xcb_exp_CFLAGS) $(CFLAGS) -MT xcb_exp-utils.o -MD -MP -MF $(DEPDIR)/xcb_exp-utils.Tpo -c -o xcb_exp-utils.o `test -f '$(top_srcdir)/src/utils.c' || echo '$(srcdir)/'`$(top_srcdir)/src/utils.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_exp-utils.Tpo $(DEPDIR)/xcb_exp-utils.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/src/utils.c' object='xcb_exp-utils.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_exp_CPPFLAGS) $(CPPFLAGS) $(xcb_exp_CFLAGS) $(CFLAGS) -c -o xcb_exp-utilities.o `test -f '$(top_srcdir)/src/utilities.c' || echo '$(srcdir)/'`$(top_srcdir)/src/utilities.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_exp_CPPFLAGS) $(CPPFLAGS) $(xcb_exp_CFLAGS) $(CFLAGS) -c -o xcb_exp-utils.o `test -f '$(top_srcdir)/src/utils.c' || echo '$(srcdir)/'`$(top_srcdir)/src/utils.c
 
-xcb_exp-utilities.obj: $(top_srcdir)/src/utilities.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_exp_CPPFLAGS) $(CPPFLAGS) $(xcb_exp_CFLAGS) $(CFLAGS) -MT xcb_exp-utilities.obj -MD -MP -MF $(DEPDIR)/xcb_exp-utilities.Tpo -c -o xcb_exp-utilities.obj `if test -f '$(top_srcdir)/src/utilities.c'; then $(CYGPATH_W) '$(top_srcdir)/src/utilities.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/utilities.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_exp-utilities.Tpo $(DEPDIR)/xcb_exp-utilities.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/src/utilities.c' object='xcb_exp-utilities.obj' libtool=no @AMDEPBACKSLASH@
+xcb_exp-utils.obj: $(top_srcdir)/src/utils.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_exp_CPPFLAGS) $(CPPFLAGS) $(xcb_exp_CFLAGS) $(CFLAGS) -MT xcb_exp-utils.obj -MD -MP -MF $(DEPDIR)/xcb_exp-utils.Tpo -c -o xcb_exp-utils.obj `if test -f '$(top_srcdir)/src/utils.c'; then $(CYGPATH_W) '$(top_srcdir)/src/utils.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/utils.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_exp-utils.Tpo $(DEPDIR)/xcb_exp-utils.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/src/utils.c' object='xcb_exp-utils.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_exp_CPPFLAGS) $(CPPFLAGS) $(xcb_exp_CFLAGS) $(CFLAGS) -c -o xcb_exp-utilities.obj `if test -f '$(top_srcdir)/src/utilities.c'; then $(CYGPATH_W) '$(top_srcdir)/src/utilities.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/utilities.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_exp_CPPFLAGS) $(CPPFLAGS) $(xcb_exp_CFLAGS) $(CFLAGS) -c -o xcb_exp-utils.obj `if test -f '$(top_srcdir)/src/utils.c'; then $(CYGPATH_W) '$(top_srcdir)/src/utils.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/utils.c'; fi`
 
 xcb_exp-logger.o: $(top_srcdir)/src/logger.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_exp_CPPFLAGS) $(CPPFLAGS) $(xcb_exp_CFLAGS) $(CFLAGS) -MT xcb_exp-logger.o -MD -MP -MF $(DEPDIR)/xcb_exp-logger.Tpo -c -o xcb_exp-logger.o `test -f '$(top_srcdir)/src/logger.c' || echo '$(srcdir)/'`$(top_srcdir)/src/logger.c

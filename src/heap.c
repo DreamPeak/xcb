@@ -19,6 +19,7 @@
  */
 
 #include <pthread.h>
+#include "macros.h"
 #include "mem.h"
 #include "heap.h"
 
@@ -130,7 +131,7 @@ heap_t heap_new(int height, ssize_t offset, int cmp(const void *x, const void *y
 		height = 8;
 	if (cmp == NULL)
 		return NULL;
-	if (NEW(heap) == NULL)
+	if (unlikely(NEW(heap) == NULL))
 		return NULL;
 	heap->avail  = (height << 1) - 1;
 	heap->curr   = 0;
@@ -152,7 +153,7 @@ heap_t heap_new(int height, ssize_t offset, int cmp(const void *x, const void *y
 }
 
 void heap_free(heap_t *hp) {
-	if (hp == NULL || *hp == NULL)
+	if (unlikely(hp == NULL || *hp == NULL))
 		return;
 	pthread_mutex_destroy(&(*hp)->lock);
 	pthread_rwlock_destroy(&(*hp)->rwlock);
@@ -161,14 +162,14 @@ void heap_free(heap_t *hp) {
 }
 
 unsigned long heap_length(heap_t heap) {
-	if (heap == NULL)
+	if (unlikely(heap == NULL))
 		return 0;
 	return heap->curr;
 }
 
 /* Return 0 if success, otherwise -1 is returned */
 int heap_push(heap_t heap, void *elem) {
-	if (heap == NULL || elem == NULL)
+	if (unlikely(heap == NULL || elem == NULL))
 		return -1;
 	if (heap->curr == heap->avail && grow_heap(heap))
 		return -1;
@@ -178,7 +179,7 @@ int heap_push(heap_t heap, void *elem) {
 }
 
 void *heap_pop(heap_t heap) {
-	if (heap == NULL)
+	if (unlikely(heap == NULL))
 		return NULL;
 	return _heap_remove(heap, 1);
 }
@@ -186,7 +187,7 @@ void *heap_pop(heap_t heap) {
 void *heap_remove(heap_t heap, void *elem) {
 	unsigned long i;
 
-	if (heap == NULL || elem == NULL)
+	if (unlikely(heap == NULL || elem == NULL))
 		return NULL;
 	if ((i = get_index(heap, elem)) == 0)
 		return NULL;
@@ -194,7 +195,7 @@ void *heap_remove(heap_t heap, void *elem) {
 }
 
 void *heap_peek(heap_t heap, unsigned long index) {
-	if (heap == NULL)
+	if (unlikely(heap == NULL))
 		return NULL;
 	if (heap->curr == 0 || index == 0 || index > heap->curr)
 		return NULL;
@@ -202,31 +203,31 @@ void *heap_peek(heap_t heap, unsigned long index) {
 }
 
 void heap_lock(heap_t heap) {
-	if (heap == NULL)
+	if (unlikely(heap == NULL))
 		return;
 	pthread_mutex_lock(&heap->lock);
 }
 
 void heap_unlock(heap_t heap) {
-	if (heap == NULL)
+	if (unlikely(heap == NULL))
 		return;
 	pthread_mutex_unlock(&heap->lock);
 }
 
 void heap_rwlock_rdlock(heap_t heap) {
-	if (heap == NULL)
+	if (unlikely(heap == NULL))
 		return;
 	pthread_rwlock_rdlock(&heap->rwlock);
 }
 
 void heap_rwlock_wrlock(heap_t heap) {
-	if (heap == NULL)
+	if (unlikely(heap == NULL))
 		return;
 	pthread_rwlock_wrlock(&heap->rwlock);
 }
 
 void heap_rwlock_unlock(heap_t heap) {
-	if (heap == NULL)
+	if (unlikely(heap == NULL))
 		return;
 	pthread_rwlock_unlock(&heap->rwlock);
 }

@@ -34,8 +34,9 @@
 #include <limits.h>
 #include <pthread.h>
 #include <sys/time.h>
+#include "macros.h"
 #include "mem.h"
-#include "utilities.h"
+#include "utils.h"
 #include "table.h"
 
 /* FIXME */
@@ -124,7 +125,7 @@ table_t table_new(int cmp(const void *x, const void *y), unsigned hash(const voi
 	pthread_mutexattr_t mattr;
 	pthread_rwlockattr_t rwattr;
 
-	if (NEW(table) == NULL)
+	if (unlikely(NEW(table) == NULL))
 		return NULL;
 	table_reset(&table->ti[0]);
 	table_reset(&table->ti[1]);
@@ -146,7 +147,7 @@ table_t table_new(int cmp(const void *x, const void *y), unsigned hash(const voi
 }
 
 void table_free(table_t *tp) {
-	if (tp == NULL || *tp == NULL)
+	if (unlikely(tp == NULL || *tp == NULL))
 		return;
 	pthread_mutex_destroy(&(*tp)->lock);
 	pthread_rwlock_destroy(&(*tp)->rwlock);
@@ -155,43 +156,43 @@ void table_free(table_t *tp) {
 }
 
 unsigned long table_size(table_t table) {
-	if (table == NULL)
+	if (unlikely(table == NULL))
 		return 0;
 	return table->ti[0].size + table->ti[1].size;
 }
 
 unsigned long table_length(table_t table) {
-	if (table == NULL)
+	if (unlikely(table == NULL))
 		return 0;
 	return table->ti[0].used + table->ti[1].used;
 }
 
 const void *table_node_key(table_node_t node) {
-	if (node == NULL)
+	if (unlikely(node == NULL))
 		return NULL;
 	return node->key;
 }
 
 void *table_node_value(table_node_t node) {
-	if (node == NULL)
+	if (unlikely(node == NULL))
 		return NULL;
 	return node->v.value;
 }
 
 int table_node_int(table_node_t node) {
-	if (node == NULL)
+	if (unlikely(node == NULL))
 		return 0;
 	return node->v.i;
 }
 
 float table_node_float(table_node_t node) {
-	if (node == NULL)
+	if (unlikely(node == NULL))
 		return 0;
 	return node->v.f;
 }
 
 double table_node_double(table_node_t node) {
-	if (node == NULL)
+	if (unlikely(node == NULL))
 		return 0;
 	return node->v.d;
 }
@@ -199,7 +200,7 @@ double table_node_double(table_node_t node) {
 table_iter_t table_iter_new(table_t table) {
 	table_iter_t iter;
 
-	if (table == NULL || NEW0(iter) == NULL)
+	if (unlikely(table == NULL || NEW0(iter) == NULL))
 		return NULL;
 	iter->table = table;
 	iter->i     = 0;
@@ -217,7 +218,7 @@ table_iter_t table_iter_safe_new(table_t table) {
 }
 
 void table_iter_rewind(table_iter_t iter) {
-	if (iter == NULL)
+	if (unlikely(iter == NULL))
 		return;
 	iter->i     = 0;
 	iter->index = -1;
@@ -251,7 +252,7 @@ table_node_t table_next(table_iter_t iter) {
 }
 
 void table_iter_free(table_iter_t *tip) {
-	if (tip == NULL || *tip == NULL)
+	if (unlikely(tip == NULL || *tip == NULL))
 		return;
 	if ((*tip)->safe && !((*tip)->i == 0 && (*tip)->index == -1))
 		--(*tip)->table->iterators;
@@ -262,7 +263,9 @@ int table_expand(table_t table, unsigned long size) {
 	unsigned long n = table_next_power(size);
 	table_intl_t ti;
 
-	if (table == NULL || table->rehashidx != -1 || table->ti[0].used > size)
+	if (unlikely(table == NULL))
+		return -1;
+	if (table->rehashidx != -1 || table->ti[0].used > size)
 		return -1;
 	ti.size     = n;
 	ti.sizemask = n - 1;
@@ -281,7 +284,9 @@ int table_expand(table_t table, unsigned long size) {
 int table_resize(table_t table) {
 	unsigned long size;
 
-	if (table == NULL || !table_can_resize || table->rehashidx != -1)
+	if (unlikely(table == NULL))
+		return -1;
+	if (!table_can_resize || table->rehashidx != -1)
 		return -1;
 	if ((size = table->ti[0].used) < TABLE_INIT_SIZE)
 		size = TABLE_INIT_SIZE;
@@ -301,7 +306,7 @@ table_node_t table_insert_raw(table_t table, const void *key) {
 	table_intl_t *tip;
 	unsigned long index;
 
-	if (table == NULL)
+	if (unlikely(table == NULL))
 		return NULL;
 	if ((node = table_find(table, key)))
 		return node;
@@ -319,25 +324,25 @@ table_node_t table_insert_raw(table_t table, const void *key) {
 }
 
 void table_set_value(table_node_t node, void *value) {
-	if (node == NULL)
+	if (unlikely(node == NULL))
 		return;
 	node->v.value = value;
 }
 
 void table_set_int(table_node_t node, int i) {
-	if (node == NULL)
+	if (unlikely(node == NULL))
 		return;
 	node->v.i = i;
 }
 
 void table_set_float(table_node_t node, float f) {
-	if (node == NULL)
+	if (unlikely(node == NULL))
 		return;
 	node->v.f = f;
 }
 
 void table_set_double(table_node_t node, double d) {
-	if (node == NULL)
+	if (unlikely(node == NULL))
 		return;
 	node->v.d = d;
 }
@@ -346,7 +351,7 @@ void *table_insert(table_t table, const void *key, void *value) {
 	table_node_t node;
 	void *prev;
 
-	if (key == NULL)
+	if (unlikely(key == NULL))
 		return NULL;
 	if ((node = table_insert_raw(table, key)) == NULL)
 		return NULL;
@@ -358,7 +363,9 @@ void *table_insert(table_t table, const void *key, void *value) {
 table_node_t table_find(table_t table, const void *key) {
 	unsigned h, i;
 
-	if (table == NULL || table->ti[0].buckets == NULL)
+	if (unlikely(table == NULL))
+		return NULL;
+	if (table->ti[0].buckets == NULL)
 		return NULL;
 	if (table->rehashidx != -1)
 		table_rehash_step(table);
@@ -385,7 +392,9 @@ void *table_get_value(table_t table, const void *key) {
 void *table_remove(table_t table, const void *key) {
 	unsigned h, i;
 
-	if (table == NULL || table->ti[0].buckets == NULL)
+	if (unlikely(table == NULL))
+		return NULL;
+	if (table->ti[0].buckets == NULL)
 		return NULL;
 	if (table->rehashidx != -1)
 		table_rehash_step(table);
@@ -418,7 +427,9 @@ void *table_remove(table_t table, const void *key) {
 void table_clear(table_t table) {
 	unsigned long i, j;
 
-	if (table == NULL || table->ti[0].buckets == NULL)
+	if (unlikely(table == NULL))
+		return;
+	if (table->ti[0].buckets == NULL)
 		return;
 	for (i = 0; i < 2; ++i) {
 		for (j = 0; j < table->ti[i].size && table->ti[i].used > 0; ++j) {
@@ -446,7 +457,9 @@ void table_clear(table_t table) {
 
 /* Return 1 if there are still keys to move, otherwise 0 is returned. */
 int table_rehash(table_t table, int n) {
-	if (table == NULL || table->rehashidx == -1)
+	if (unlikely(table == NULL))
+		return 0;
+	if (table->rehashidx == -1)
 		return 0;
 	while (n--) {
 		table_node_t curr, next;
@@ -487,31 +500,31 @@ void table_rehash_ms(table_t table, int ms) {
 }
 
 void table_lock(table_t table) {
-	if (table == NULL)
+	if (unlikely(table == NULL))
 		return;
 	pthread_mutex_lock(&table->lock);
 }
 
 void table_unlock(table_t table) {
-	if (table == NULL)
+	if (unlikely(table == NULL))
 		return;
 	pthread_mutex_unlock(&table->lock);
 }
 
 void table_rwlock_rdlock(table_t table) {
-	if (table == NULL)
+	if (unlikely(table == NULL))
 		return;
 	pthread_rwlock_rdlock(&table->rwlock);
 }
 
 void table_rwlock_wrlock(table_t table) {
-	if (table == NULL)
+	if (unlikely(table == NULL))
 		return;
 	pthread_rwlock_wrlock(&table->rwlock);
 }
 
 void table_rwlock_unlock(table_t table) {
-	if (table == NULL)
+	if (unlikely(table == NULL))
 		return;
 	pthread_rwlock_unlock(&table->rwlock);
 }

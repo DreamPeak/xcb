@@ -18,34 +18,41 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+/*
+ * adapted from CLRS, Chapter 18
+ */
+
 #include <string.h>
+#include "macros.h"
 #include "mem.h"
 #include "btree.h"
 
 /* FIXME */
-struct node {
-	unsigned char	leaf:1;
-	/* the number of keys currently stored in the node */
-	int		n;
-	struct {
-		const void	*key;
-		void		*value;
-	}		*bindings;
-	union {
-		/* pointers to the node's children */
-		struct node	**children;
-		struct {
-			struct node	*prev, *next;
-		}		pn;
-	}		u;
-	struct node	*parent;
-};
 struct btree_t {
 	/* minimum degree */
 	int		t;
 	unsigned long	length;
-	struct node	*root, *sentinel;
+	btree_node_t	root, sentinel;
 	int		(*cmp)(const void *x, const void *y);
+	void		(*kfree)(const void *key);
+	void		(*vfree)(void *value);
+};
+struct btree_node_t {
+	unsigned char	leaf:1;
+	/* the number of keys currently stored in the node */
+	int		n;
+	btree_node_t	parent;
+	union {
+		/* pointers to the node's children */
+		btree_node_t	*children;
+		struct {
+			btree_node_t	prev, next;
+		}		pn;
+	}		u;
+	struct {
+		const void	*key;
+		void		*value;
+	}		*bindings;
 };
 
 #define BSEARCH(x, skey, i, k) \
@@ -53,42 +60,41 @@ struct btree_t {
 		int lo = 0, hi = x->n - 1; \
 		while (lo <= hi) { \
 			i = (lo + hi) >> 1; \
-			if ((k = (*btree->cmp)(skey, x->bindings[i].key)) == 0) \
+			if ((k = btree->cmp(skey, x->bindings[i].key)) == 0) \
 				break; \
 			k > 0 ? (lo = i + 1) : (hi = i - 1); \
 		} \
 	}
 
 /* FIXME */
-static struct node *node_new(int t) {
-	struct node *node;
+static btree_node_t node_new(int t) {
+	btree_node_t node;
 
 	if (NEW0(node) == NULL)
 		return NULL;
-	if ((node->bindings = ALLOC((2 * t - 1) * sizeof *node->bindings)) == NULL) {
+	if ((node->bindings = CALLOC(1, (2 * t - 1) * sizeof *node->bindings)) == NULL) {
 		FREE(node);
 		return NULL;
 	}
-	memset(node->bindings, '\0', (2 * t - 1) * sizeof *node->bindings);
 	return node;
 }
 
 /* FIXME */
-static void node_free(struct node *node) {
+static void node_free(btree_node_t node) {
 	if (node) {
 		FREE(node->bindings);
-		if (node->leaf == 0)
+		if (!node->leaf)
 			FREE(node->u.children);
 		FREE(node);
 	}
 }
 
 static int cmpdefault(const void *x, const void *y) {
-	return strcmp((char *)x, (char *)y);
+	return x - y;
 }
 
-static int btree_split_child(btree_t btree, struct node *x, int i) {
-	struct node *y, *z;
+static int btree_split_child(btree_t btree, btree_node_t x, int i) {
+	btree_node_t y, z;
 	int j;
 
 	if (x == NULL)
@@ -96,12 +102,12 @@ static int btree_split_child(btree_t btree, struct node *x, int i) {
 	y = x->u.children[i];
 	if ((z = node_new(btree->t)) == NULL)
 		return -1;
-	if (y->leaf == 0) {
-		if ((z->u.children = ALLOC(2 * btree->t * sizeof *z->u.children)) == NULL) {
+	if (!y->leaf) {
+		if ((z->u.children = CALLOC(1, 2 * btree->t * sizeof *z->u.children)) == NULL) {
 			node_free(z);
 			return -1;
 		}
-		memset(z->u.children, '\0', 2 * btree->t * sizeof *z->u.children);
+		/* FIXME */
 		for (j = 0; j < btree->t; ++j) {
 			z->u.children[j] = y->u.children[j + btree->t];
 			y->u.children[j + btree->t] = NULL;
@@ -114,24 +120,24 @@ static int btree_split_child(btree_t btree, struct node *x, int i) {
 	}
 	z->leaf   = y->leaf;
 	z->n      = btree->t - 1;
+	z->parent = x;
+	/* FIXME */
 	for (j = 0; j < btree->t - 1; ++j) {
 		z->bindings[j].key   = y->bindings[j + btree->t].key;
 		z->bindings[j].value = y->bindings[j + btree->t].value;
 		y->bindings[j + btree->t].key   = NULL;
 		y->bindings[j + btree->t].value = NULL;
 	}
-	z->parent = x;
 	for (j = x->n; j > i; --j)
 		x->u.children[j + 1] = x->u.children[j];
 	x->u.children[i + 1] = z;
-	/* FIXME */
 	for (j = x->n - 1; j > i - 1; --j) {
 		x->bindings[j + 1].key   = x->bindings[j].key;
 		x->bindings[j + 1].value = x->bindings[j].value;
 	}
 	x->bindings[i].key   = y->bindings[btree->t - 1].key;
 	x->bindings[i].value = y->bindings[btree->t - 1].value;
-	if (y->leaf == 0) {
+	if (!y->leaf) {
 		y->bindings[btree->t - 1].key   = NULL;
 		y->bindings[btree->t - 1].value = NULL;
 		y->n = btree->t - 1;
@@ -141,48 +147,47 @@ static int btree_split_child(btree_t btree, struct node *x, int i) {
 	return 0;
 }
 
-static void *btree_put_nonfull(btree_t btree, struct node *x, const void *key, void *value) {
+static void *btree_put_nonfull(btree_t btree, btree_node_t node, const void *key, void *value) {
 	/* avoid gcc warning */
-	int i = 0, j = 0, k = 0;
+	int i = -1, j, k = 1;
 
-	if (x == NULL)
-		return NULL;
-	while (x->leaf == 0) {
-		BSEARCH(x, key, i, k);
+	while (!node->leaf) {
+		BSEARCH(node, key, i, k);
 		if (k > 0)
 			++i;
-		if (x->u.children[i]->n == 2 * btree->t - 1) {
-			if (btree_split_child(btree, x, i) == -1)
+		if (node->u.children[i]->n == 2 * btree->t - 1) {
+			if (btree_split_child(btree, node, i) == -1)
 				return NULL;
-			if ((*btree->cmp)(key, x->bindings[i].key) > 0)
+			if (btree->cmp(key, node->bindings[i].key) > 0)
 				++i;
 		}
-		x = x->u.children[i];
+		node = node->u.children[i];
 	}
 	i = -1, k = 1;
-	BSEARCH(x, key, i, k);
+	BSEARCH(node, key, i, k);
 	if (k == 0) {
 		void *prev;
 
-		prev = x->bindings[i].value;
-		x->bindings[i].value = value;
+		prev = node->bindings[i].value;
+		node->bindings[i].value = value;
 		return prev;
 	} else if (k < 0)
 		--i;
-	/* FIXME */
-	for (j = x->n - 1; j > i; --j) {
-		x->bindings[j + 1].key   = x->bindings[j].key;
-		x->bindings[j + 1].value = x->bindings[j].value;
+	/* think about the first pair got inserted */
+	for (j = node->n - 1; j > i; --j) {
+		node->bindings[j + 1].key   = node->bindings[j].key;
+		node->bindings[j + 1].value = node->bindings[j].value;
 	}
-	x->bindings[i + 1].key   = key;
-	x->bindings[i + i].value = value;
-	++x->n;
+	node->bindings[i + 1].key   = key;
+	node->bindings[i + i].value = value;
+	++node->n;
 	++btree->length;
 	return NULL;
 }
 
-btree_t btree_new(int t, int cmp(const void *x, const void *y)) {
-	struct node *x, *y;
+btree_t btree_new(int t, int cmp(const void *x, const void *y),
+	void kfree(const void *key), void vfree(void *value)) {
+	btree_node_t x, y;
 	btree_t btree;
 
 	/* 2-3-4 tree when t == 2 */
@@ -210,27 +215,41 @@ btree_t btree_new(int t, int cmp(const void *x, const void *y)) {
 	btree->root     = x;
 	btree->sentinel = y;
 	btree->cmp      = cmp ? cmp : cmpdefault;
+	btree->kfree    = kfree;
+	btree->vfree    = vfree;
 	return btree;
 }
 
 /* FIXME */
 void btree_free(btree_t *bp) {
-	struct node *x;
+	btree_node_t x;
 
 	if (bp == NULL || *bp == NULL)
 		return;
 	x = (*bp)->sentinel->u.pn.next;
 	while (x != (*bp)->sentinel) {
-		struct node *y = x->parent, *z = x;
+		btree_node_t y = x->parent, z = x;
+		int i;
 
 		while (y) {
-			int i;
-			struct node *tmp = y;
+			btree_node_t tmp = y;
 
-			for (i = 0; i < y->n; ++i)
+			for (i = 0; i < y->n; ++i) {
 				y->u.children[i]->parent = NULL;
+				if ((*bp)->kfree)
+					(*bp)->kfree(tmp->bindings[i].key);
+				if ((*bp)->vfree)
+					(*bp)->vfree(tmp->bindings[i].value);
+			}
+			y->u.children[y->n]->parent = NULL;
 			y = y->parent;
 			node_free(tmp);
+		}
+		for (i = 0; i < x->n; ++i) {
+			if ((*bp)->kfree)
+				(*bp)->kfree(z->bindings[i].key);
+			if ((*bp)->vfree)
+				(*bp)->vfree(z->bindings[i].value);
 		}
 		x = x->u.pn.next;
 		node_free(z);
@@ -245,24 +264,47 @@ unsigned long btree_length(btree_t btree) {
 	return btree->length;
 }
 
+int btree_node_n(btree_node_t node) {
+	if (node == NULL)
+		return 0;
+	return node->n;
+}
+
+btree_node_t btree_node_next(btree_node_t node) {
+	if (node == NULL)
+		return NULL;
+	return node->u.pn.next;
+}
+
+const void *btree_node_key(btree_node_t node, int i) {
+	if (node == NULL)
+		return NULL;
+	return node->bindings[i].key;
+}
+
+void *btree_node_value(btree_node_t node, int i) {
+	if (node == NULL)
+		return NULL;
+	return node->bindings[i].value;
+}
+
 void *btree_insert(btree_t btree, const void *key, void *value) {
-	struct node *x;
+	btree_node_t x;
 
 	if (btree == NULL || key == NULL)
 		return NULL;
 	x = btree->root;
 	if (x->n == 2 * btree->t - 1) {
-		struct node *y;
+		btree_node_t y;
 
 		if ((y = node_new(btree->t)) == NULL)
 			return NULL;
 		y->leaf = 0;
 		y->n    = 0;
-		if ((y->u.children = ALLOC(2 * btree->t * sizeof *y->u.children)) == NULL) {
+		if ((y->u.children = CALLOC(1, 2 * btree->t * sizeof *y->u.children)) == NULL) {
 			node_free(y);
 			return NULL;
 		}
-		memset(y->u.children, '\0', 2 * btree->t * sizeof *y->u.children);
 		y->u.children[0] = x;
 		x->parent = y;
 		btree->root = y;
@@ -273,31 +315,34 @@ void *btree_insert(btree_t btree, const void *key, void *value) {
 		return btree_put_nonfull(btree, x, key, value);
 }
 
-void *btree_find(btree_t btree, const void *key) {
-	struct node *x;
+btree_node_t btree_find(btree_t btree, const void *key, int *ip) {
+	btree_node_t node;
 	/* avoid gcc warning */
-	int i = 0, k = 0;
+	int i = -1, k = 1;
 
 	if (btree == NULL || key == NULL)
 		return NULL;
-	x = btree->root;
-	while (x->leaf == 0) {
-		BSEARCH(x, key, i, k);
+	node = btree->root;
+	while (!node->leaf) {
+		BSEARCH(node, key, i, k);
 		if (k > 0)
 			++i;
-		else if (k == 0)
-			return x->bindings[i].value;
-		x = x->u.children[i];
+		node = node->u.children[i];
 	}
 	i = -1, k = 1;
-	BSEARCH(x, key, i, k);
-	if (k == 0)
-		return x->bindings[i].value;
+	BSEARCH(node, key, i, k);
+	if (k <= 0) {
+		*ip = i;
+		return node;
+	}
 	return NULL;
 }
 
 /* FIXME */
 void *btree_remove(btree_t btree, const void *key) {
+	NOT_USED(btree);
+	NOT_USED(key);
+
 	return NULL;
 }
 

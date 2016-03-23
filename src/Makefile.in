@@ -109,13 +109,14 @@ xcb_cli_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 am_xcb_compact_OBJECTS = xcb_compact-mem.$(OBJEXT) \
 	xcb_compact-dlist.$(OBJEXT) xcb_compact-table.$(OBJEXT) \
 	xcb_compact-ring.$(OBJEXT) xcb_compact-heap.$(OBJEXT) \
-	xcb_compact-ptrie.$(OBJEXT) xcb_compact-dstr.$(OBJEXT) \
-	xcb_compact-utilities.$(OBJEXT) xcb_compact-logger.$(OBJEXT) \
-	xcb_compact-config.$(OBJEXT) xcb_compact-event.$(OBJEXT) \
-	xcb_compact-net.$(OBJEXT) xcb_compact-loader.$(OBJEXT) \
-	xcb_compact-thrpool.$(OBJEXT) xcb_compact-db.$(OBJEXT) \
-	xcb_compact-networking.$(OBJEXT) xcb_compact-basics.$(OBJEXT) \
-	xcb_compact-custom.$(OBJEXT) xcb_compact-xcb-compact.$(OBJEXT)
+	xcb_compact-ptrie.$(OBJEXT) xcb_compact-btree.$(OBJEXT) \
+	xcb_compact-dstr.$(OBJEXT) xcb_compact-utils.$(OBJEXT) \
+	xcb_compact-logger.$(OBJEXT) xcb_compact-config.$(OBJEXT) \
+	xcb_compact-event.$(OBJEXT) xcb_compact-net.$(OBJEXT) \
+	xcb_compact-loader.$(OBJEXT) xcb_compact-thrpool.$(OBJEXT) \
+	xcb_compact-db.$(OBJEXT) xcb_compact-networking.$(OBJEXT) \
+	xcb_compact-basics.$(OBJEXT) xcb_compact-custom.$(OBJEXT) \
+	xcb_compact-xcb-compact.$(OBJEXT)
 xcb_compact_OBJECTS = $(am_xcb_compact_OBJECTS)
 xcb_compact_LDADD = $(LDADD)
 xcb_compact_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
@@ -124,7 +125,7 @@ xcb_compact_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 am_xcb_dp2_OBJECTS = xcb_dp2-mem.$(OBJEXT) xcb_dp2-dlist.$(OBJEXT) \
 	xcb_dp2-table.$(OBJEXT) xcb_dp2-ring.$(OBJEXT) \
 	xcb_dp2-heap.$(OBJEXT) xcb_dp2-dstr.$(OBJEXT) \
-	xcb_dp2-utilities.$(OBJEXT) xcb_dp2-logger.$(OBJEXT) \
+	xcb_dp2-utils.$(OBJEXT) xcb_dp2-logger.$(OBJEXT) \
 	xcb_dp2-config.$(OBJEXT) xcb_dp2-event.$(OBJEXT) \
 	xcb_dp2-net.$(OBJEXT) xcb_dp2-loader.$(OBJEXT) \
 	xcb_dp2-thrpool.$(OBJEXT) xcb_dp2-pgmsock.$(OBJEXT) \
@@ -138,13 +139,13 @@ xcb_dp2_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 am_xcb_pb2_OBJECTS = xcb_pb2-mem.$(OBJEXT) xcb_pb2-dlist.$(OBJEXT) \
 	xcb_pb2-table.$(OBJEXT) xcb_pb2-ring.$(OBJEXT) \
 	xcb_pb2-heap.$(OBJEXT) xcb_pb2-ptrie.$(OBJEXT) \
-	xcb_pb2-dstr.$(OBJEXT) xcb_pb2-utilities.$(OBJEXT) \
-	xcb_pb2-logger.$(OBJEXT) xcb_pb2-config.$(OBJEXT) \
-	xcb_pb2-event.$(OBJEXT) xcb_pb2-net.$(OBJEXT) \
-	xcb_pb2-thrpool.$(OBJEXT) xcb_pb2-db.$(OBJEXT) \
-	xcb_pb2-pgmsock.$(OBJEXT) xcb_pb2-networking.$(OBJEXT) \
-	xcb_pb2-basics.$(OBJEXT) xcb_pb2-custom.$(OBJEXT) \
-	xcb_pb2-xcb-pb2.$(OBJEXT)
+	xcb_pb2-btree.$(OBJEXT) xcb_pb2-dstr.$(OBJEXT) \
+	xcb_pb2-utils.$(OBJEXT) xcb_pb2-logger.$(OBJEXT) \
+	xcb_pb2-config.$(OBJEXT) xcb_pb2-event.$(OBJEXT) \
+	xcb_pb2-net.$(OBJEXT) xcb_pb2-thrpool.$(OBJEXT) \
+	xcb_pb2-db.$(OBJEXT) xcb_pb2-pgmsock.$(OBJEXT) \
+	xcb_pb2-networking.$(OBJEXT) xcb_pb2-basics.$(OBJEXT) \
+	xcb_pb2-custom.$(OBJEXT) xcb_pb2-xcb-pb2.$(OBJEXT)
 xcb_pb2_OBJECTS = $(am_xcb_pb2_OBJECTS)
 xcb_pb2_LDADD = $(LDADD)
 xcb_pb2_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
@@ -161,7 +162,7 @@ xcb_sim_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 am_xcb_wk2_OBJECTS = xcb_wk2-mem.$(OBJEXT) xcb_wk2-dlist.$(OBJEXT) \
 	xcb_wk2-table.$(OBJEXT) xcb_wk2-ring.$(OBJEXT) \
 	xcb_wk2-heap.$(OBJEXT) xcb_wk2-dstr.$(OBJEXT) \
-	xcb_wk2-utilities.$(OBJEXT) xcb_wk2-logger.$(OBJEXT) \
+	xcb_wk2-utils.$(OBJEXT) xcb_wk2-logger.$(OBJEXT) \
 	xcb_wk2-config.$(OBJEXT) xcb_wk2-event.$(OBJEXT) \
 	xcb_wk2-net.$(OBJEXT) xcb_wk2-loader.$(OBJEXT) \
 	xcb_wk2-thrpool.$(OBJEXT) xcb_wk2-db.$(OBJEXT) \
@@ -312,29 +313,29 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-xcb_dp2_SOURCES = mem.c dlist.c table.c ring.c heap.c dstr.c utilities.c       \
-logger.c config.c event.c net.c loader.c thrpool.c pgmsock.c networking.c      \
-basics.c xcb-dp2.c
+xcb_dp2_SOURCES = mem.c dlist.c table.c ring.c heap.c dstr.c utils.c logger.c  \
+config.c event.c net.c loader.c thrpool.c pgmsock.c networking.c basics.c      \
+xcb-dp2.c
 
 xcb_dp2_CPPFLAGS = -I$(top_srcdir)/include -I/usr/include/pgm-5.1
 xcb_dp2_CFLAGS = -Wall -Winline -pthread -rdynamic
 xcb_dp2_LDFLAGS = -lrt -ldl -lpgm -ltcmalloc
-xcb_wk2_SOURCES = mem.c dlist.c table.c ring.c heap.c dstr.c utilities.c       \
-logger.c config.c event.c net.c loader.c thrpool.c db.c pgmsock.c networking.c \
-basics.c xcb-wk2.c
+xcb_wk2_SOURCES = mem.c dlist.c table.c ring.c heap.c dstr.c utils.c logger.c  \
+config.c event.c net.c loader.c thrpool.c db.c pgmsock.c networking.c basics.c \
+xcb-wk2.c
 
 xcb_wk2_CPPFLAGS = -I$(top_srcdir)/include -I/usr/include/pgm-5.1
 xcb_wk2_CFLAGS = -Wall -Winline -pthread -rdynamic
 xcb_wk2_LDFLAGS = -lrt -ldl -lm -lpgm -lleveldb -ltcmalloc
-xcb_pb2_SOURCES = mem.c dlist.c table.c ring.c heap.c ptrie.c dstr.c           \
-utilities.c logger.c config.c event.c net.c thrpool.c db.c pgmsock.c           \
-networking.c basics.c custom.c xcb-pb2.c
+xcb_pb2_SOURCES = mem.c dlist.c table.c ring.c heap.c ptrie.c btree.c dstr.c   \
+utils.c logger.c config.c event.c net.c thrpool.c db.c pgmsock.c networking.c  \
+basics.c custom.c xcb-pb2.c
 
 xcb_pb2_CPPFLAGS = -I$(top_srcdir)/include -I/usr/include/pgm-5.1
 xcb_pb2_CFLAGS = -Wall -Winline -pthread
 xcb_pb2_LDFLAGS = -lrt -lpgm -lleveldb -ltcmalloc
-xcb_compact_SOURCES = mem.c dlist.c table.c ring.c heap.c ptrie.c dstr.c       \
-utilities.c logger.c config.c event.c net.c loader.c thrpool.c db.c            \
+xcb_compact_SOURCES = mem.c dlist.c table.c ring.c heap.c ptrie.c btree.c      \
+dstr.c utils.c logger.c config.c event.c net.c loader.c thrpool.c db.c         \
 networking.c basics.c custom.c xcb-compact.c
 
 xcb_compact_CPPFLAGS = -I$(top_srcdir)/include
@@ -518,6 +519,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_cli-net.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_cli-xcb-cli.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_compact-basics.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_compact-btree.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_compact-config.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_compact-custom.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_compact-db.Po@am__quote@
@@ -534,7 +536,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_compact-ring.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_compact-table.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_compact-thrpool.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_compact-utilities.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_compact-utils.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_compact-xcb-compact.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_dp2-basics.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_dp2-config.Po@am__quote@
@@ -551,9 +553,10 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_dp2-ring.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_dp2-table.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_dp2-thrpool.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_dp2-utilities.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_dp2-utils.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_dp2-xcb-dp2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_pb2-basics.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_pb2-btree.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_pb2-config.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_pb2-custom.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_pb2-db.Po@am__quote@
@@ -570,7 +573,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_pb2-ring.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_pb2-table.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_pb2-thrpool.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_pb2-utilities.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_pb2-utils.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_pb2-xcb-pb2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_sim-dlist.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_sim-dstr.Po@am__quote@
@@ -593,7 +596,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_wk2-ring.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_wk2-table.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_wk2-thrpool.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_wk2-utilities.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_wk2-utils.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_wk2-xcb-wk2.Po@am__quote@
 
 .c.o:
@@ -806,6 +809,20 @@ xcb_compact-ptrie.obj: ptrie.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_compact_CPPFLAGS) $(CPPFLAGS) $(xcb_compact_CFLAGS) $(CFLAGS) -c -o xcb_compact-ptrie.obj `if test -f 'ptrie.c'; then $(CYGPATH_W) 'ptrie.c'; else $(CYGPATH_W) '$(srcdir)/ptrie.c'; fi`
 
+xcb_compact-btree.o: btree.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_compact_CPPFLAGS) $(CPPFLAGS) $(xcb_compact_CFLAGS) $(CFLAGS) -MT xcb_compact-btree.o -MD -MP -MF $(DEPDIR)/xcb_compact-btree.Tpo -c -o xcb_compact-btree.o `test -f 'btree.c' || echo '$(srcdir)/'`btree.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_compact-btree.Tpo $(DEPDIR)/xcb_compact-btree.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='btree.c' object='xcb_compact-btree.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_compact_CPPFLAGS) $(CPPFLAGS) $(xcb_compact_CFLAGS) $(CFLAGS) -c -o xcb_compact-btree.o `test -f 'btree.c' || echo '$(srcdir)/'`btree.c
+
+xcb_compact-btree.obj: btree.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_compact_CPPFLAGS) $(CPPFLAGS) $(xcb_compact_CFLAGS) $(CFLAGS) -MT xcb_compact-btree.obj -MD -MP -MF $(DEPDIR)/xcb_compact-btree.Tpo -c -o xcb_compact-btree.obj `if test -f 'btree.c'; then $(CYGPATH_W) 'btree.c'; else $(CYGPATH_W) '$(srcdir)/btree.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_compact-btree.Tpo $(DEPDIR)/xcb_compact-btree.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='btree.c' object='xcb_compact-btree.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_compact_CPPFLAGS) $(CPPFLAGS) $(xcb_compact_CFLAGS) $(CFLAGS) -c -o xcb_compact-btree.obj `if test -f 'btree.c'; then $(CYGPATH_W) 'btree.c'; else $(CYGPATH_W) '$(srcdir)/btree.c'; fi`
+
 xcb_compact-dstr.o: dstr.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_compact_CPPFLAGS) $(CPPFLAGS) $(xcb_compact_CFLAGS) $(CFLAGS) -MT xcb_compact-dstr.o -MD -MP -MF $(DEPDIR)/xcb_compact-dstr.Tpo -c -o xcb_compact-dstr.o `test -f 'dstr.c' || echo '$(srcdir)/'`dstr.c
 @am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_compact-dstr.Tpo $(DEPDIR)/xcb_compact-dstr.Po
@@ -820,19 +837,19 @@ xcb_compact-dstr.obj: dstr.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_compact_CPPFLAGS) $(CPPFLAGS) $(xcb_compact_CFLAGS) $(CFLAGS) -c -o xcb_compact-dstr.obj `if test -f 'dstr.c'; then $(CYGPATH_W) 'dstr.c'; else $(CYGPATH_W) '$(srcdir)/dstr.c'; fi`
 
-xcb_compact-utilities.o: utilities.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_compact_CPPFLAGS) $(CPPFLAGS) $(xcb_compact_CFLAGS) $(CFLAGS) -MT xcb_compact-utilities.o -MD -MP -MF $(DEPDIR)/xcb_compact-utilities.Tpo -c -o xcb_compact-utilities.o `test -f 'utilities.c' || echo '$(srcdir)/'`utilities.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_compact-utilities.Tpo $(DEPDIR)/xcb_compact-utilities.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='utilities.c' object='xcb_compact-utilities.o' libtool=no @AMDEPBACKSLASH@
+xcb_compact-utils.o: utils.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_compact_CPPFLAGS) $(CPPFLAGS) $(xcb_compact_CFLAGS) $(CFLAGS) -MT xcb_compact-utils.o -MD -MP -MF $(DEPDIR)/xcb_compact-utils.Tpo -c -o xcb_compact-utils.o `test -f 'utils.c' || echo '$(srcdir)/'`utils.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_compact-utils.Tpo $(DEPDIR)/xcb_compact-utils.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='utils.c' object='xcb_compact-utils.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_compact_CPPFLAGS) $(CPPFLAGS) $(xcb_compact_CFLAGS) $(CFLAGS) -c -o xcb_compact-utilities.o `test -f 'utilities.c' || echo '$(srcdir)/'`utilities.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_compact_CPPFLAGS) $(CPPFLAGS) $(xcb_compact_CFLAGS) $(CFLAGS) -c -o xcb_compact-utils.o `test -f 'utils.c' || echo '$(srcdir)/'`utils.c
 
-xcb_compact-utilities.obj: utilities.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_compact_CPPFLAGS) $(CPPFLAGS) $(xcb_compact_CFLAGS) $(CFLAGS) -MT xcb_compact-utilities.obj -MD -MP -MF $(DEPDIR)/xcb_compact-utilities.Tpo -c -o xcb_compact-utilities.obj `if test -f 'utilities.c'; then $(CYGPATH_W) 'utilities.c'; else $(CYGPATH_W) '$(srcdir)/utilities.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_compact-utilities.Tpo $(DEPDIR)/xcb_compact-utilities.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='utilities.c' object='xcb_compact-utilities.obj' libtool=no @AMDEPBACKSLASH@
+xcb_compact-utils.obj: utils.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_compact_CPPFLAGS) $(CPPFLAGS) $(xcb_compact_CFLAGS) $(CFLAGS) -MT xcb_compact-utils.obj -MD -MP -MF $(DEPDIR)/xcb_compact-utils.Tpo -c -o xcb_compact-utils.obj `if test -f 'utils.c'; then $(CYGPATH_W) 'utils.c'; else $(CYGPATH_W) '$(srcdir)/utils.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_compact-utils.Tpo $(DEPDIR)/xcb_compact-utils.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='utils.c' object='xcb_compact-utils.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_compact_CPPFLAGS) $(CPPFLAGS) $(xcb_compact_CFLAGS) $(CFLAGS) -c -o xcb_compact-utilities.obj `if test -f 'utilities.c'; then $(CYGPATH_W) 'utilities.c'; else $(CYGPATH_W) '$(srcdir)/utilities.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_compact_CPPFLAGS) $(CPPFLAGS) $(xcb_compact_CFLAGS) $(CFLAGS) -c -o xcb_compact-utils.obj `if test -f 'utils.c'; then $(CYGPATH_W) 'utils.c'; else $(CYGPATH_W) '$(srcdir)/utils.c'; fi`
 
 xcb_compact-logger.o: logger.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_compact_CPPFLAGS) $(CPPFLAGS) $(xcb_compact_CFLAGS) $(CFLAGS) -MT xcb_compact-logger.o -MD -MP -MF $(DEPDIR)/xcb_compact-logger.Tpo -c -o xcb_compact-logger.o `test -f 'logger.c' || echo '$(srcdir)/'`logger.c
@@ -1072,19 +1089,19 @@ xcb_dp2-dstr.obj: dstr.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_dp2_CPPFLAGS) $(CPPFLAGS) $(xcb_dp2_CFLAGS) $(CFLAGS) -c -o xcb_dp2-dstr.obj `if test -f 'dstr.c'; then $(CYGPATH_W) 'dstr.c'; else $(CYGPATH_W) '$(srcdir)/dstr.c'; fi`
 
-xcb_dp2-utilities.o: utilities.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_dp2_CPPFLAGS) $(CPPFLAGS) $(xcb_dp2_CFLAGS) $(CFLAGS) -MT xcb_dp2-utilities.o -MD -MP -MF $(DEPDIR)/xcb_dp2-utilities.Tpo -c -o xcb_dp2-utilities.o `test -f 'utilities.c' || echo '$(srcdir)/'`utilities.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_dp2-utilities.Tpo $(DEPDIR)/xcb_dp2-utilities.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='utilities.c' object='xcb_dp2-utilities.o' libtool=no @AMDEPBACKSLASH@
+xcb_dp2-utils.o: utils.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_dp2_CPPFLAGS) $(CPPFLAGS) $(xcb_dp2_CFLAGS) $(CFLAGS) -MT xcb_dp2-utils.o -MD -MP -MF $(DEPDIR)/xcb_dp2-utils.Tpo -c -o xcb_dp2-utils.o `test -f 'utils.c' || echo '$(srcdir)/'`utils.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_dp2-utils.Tpo $(DEPDIR)/xcb_dp2-utils.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='utils.c' object='xcb_dp2-utils.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_dp2_CPPFLAGS) $(CPPFLAGS) $(xcb_dp2_CFLAGS) $(CFLAGS) -c -o xcb_dp2-utilities.o `test -f 'utilities.c' || echo '$(srcdir)/'`utilities.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_dp2_CPPFLAGS) $(CPPFLAGS) $(xcb_dp2_CFLAGS) $(CFLAGS) -c -o xcb_dp2-utils.o `test -f 'utils.c' || echo '$(srcdir)/'`utils.c
 
-xcb_dp2-utilities.obj: utilities.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_dp2_CPPFLAGS) $(CPPFLAGS) $(xcb_dp2_CFLAGS) $(CFLAGS) -MT xcb_dp2-utilities.obj -MD -MP -MF $(DEPDIR)/xcb_dp2-utilities.Tpo -c -o xcb_dp2-utilities.obj `if test -f 'utilities.c'; then $(CYGPATH_W) 'utilities.c'; else $(CYGPATH_W) '$(srcdir)/utilities.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_dp2-utilities.Tpo $(DEPDIR)/xcb_dp2-utilities.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='utilities.c' object='xcb_dp2-utilities.obj' libtool=no @AMDEPBACKSLASH@
+xcb_dp2-utils.obj: utils.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_dp2_CPPFLAGS) $(CPPFLAGS) $(xcb_dp2_CFLAGS) $(CFLAGS) -MT xcb_dp2-utils.obj -MD -MP -MF $(DEPDIR)/xcb_dp2-utils.Tpo -c -o xcb_dp2-utils.obj `if test -f 'utils.c'; then $(CYGPATH_W) 'utils.c'; else $(CYGPATH_W) '$(srcdir)/utils.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_dp2-utils.Tpo $(DEPDIR)/xcb_dp2-utils.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='utils.c' object='xcb_dp2-utils.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_dp2_CPPFLAGS) $(CPPFLAGS) $(xcb_dp2_CFLAGS) $(CFLAGS) -c -o xcb_dp2-utilities.obj `if test -f 'utilities.c'; then $(CYGPATH_W) 'utilities.c'; else $(CYGPATH_W) '$(srcdir)/utilities.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_dp2_CPPFLAGS) $(CPPFLAGS) $(xcb_dp2_CFLAGS) $(CFLAGS) -c -o xcb_dp2-utils.obj `if test -f 'utils.c'; then $(CYGPATH_W) 'utils.c'; else $(CYGPATH_W) '$(srcdir)/utils.c'; fi`
 
 xcb_dp2-logger.o: logger.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_dp2_CPPFLAGS) $(CPPFLAGS) $(xcb_dp2_CFLAGS) $(CFLAGS) -MT xcb_dp2-logger.o -MD -MP -MF $(DEPDIR)/xcb_dp2-logger.Tpo -c -o xcb_dp2-logger.o `test -f 'logger.c' || echo '$(srcdir)/'`logger.c
@@ -1310,6 +1327,20 @@ xcb_pb2-ptrie.obj: ptrie.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_pb2_CPPFLAGS) $(CPPFLAGS) $(xcb_pb2_CFLAGS) $(CFLAGS) -c -o xcb_pb2-ptrie.obj `if test -f 'ptrie.c'; then $(CYGPATH_W) 'ptrie.c'; else $(CYGPATH_W) '$(srcdir)/ptrie.c'; fi`
 
+xcb_pb2-btree.o: btree.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_pb2_CPPFLAGS) $(CPPFLAGS) $(xcb_pb2_CFLAGS) $(CFLAGS) -MT xcb_pb2-btree.o -MD -MP -MF $(DEPDIR)/xcb_pb2-btree.Tpo -c -o xcb_pb2-btree.o `test -f 'btree.c' || echo '$(srcdir)/'`btree.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_pb2-btree.Tpo $(DEPDIR)/xcb_pb2-btree.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='btree.c' object='xcb_pb2-btree.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_pb2_CPPFLAGS) $(CPPFLAGS) $(xcb_pb2_CFLAGS) $(CFLAGS) -c -o xcb_pb2-btree.o `test -f 'btree.c' || echo '$(srcdir)/'`btree.c
+
+xcb_pb2-btree.obj: btree.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_pb2_CPPFLAGS) $(CPPFLAGS) $(xcb_pb2_CFLAGS) $(CFLAGS) -MT xcb_pb2-btree.obj -MD -MP -MF $(DEPDIR)/xcb_pb2-btree.Tpo -c -o xcb_pb2-btree.obj `if test -f 'btree.c'; then $(CYGPATH_W) 'btree.c'; else $(CYGPATH_W) '$(srcdir)/btree.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_pb2-btree.Tpo $(DEPDIR)/xcb_pb2-btree.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='btree.c' object='xcb_pb2-btree.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_pb2_CPPFLAGS) $(CPPFLAGS) $(xcb_pb2_CFLAGS) $(CFLAGS) -c -o xcb_pb2-btree.obj `if test -f 'btree.c'; then $(CYGPATH_W) 'btree.c'; else $(CYGPATH_W) '$(srcdir)/btree.c'; fi`
+
 xcb_pb2-dstr.o: dstr.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_pb2_CPPFLAGS) $(CPPFLAGS) $(xcb_pb2_CFLAGS) $(CFLAGS) -MT xcb_pb2-dstr.o -MD -MP -MF $(DEPDIR)/xcb_pb2-dstr.Tpo -c -o xcb_pb2-dstr.o `test -f 'dstr.c' || echo '$(srcdir)/'`dstr.c
 @am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_pb2-dstr.Tpo $(DEPDIR)/xcb_pb2-dstr.Po
@@ -1324,19 +1355,19 @@ xcb_pb2-dstr.obj: dstr.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_pb2_CPPFLAGS) $(CPPFLAGS) $(xcb_pb2_CFLAGS) $(CFLAGS) -c -o xcb_pb2-dstr.obj `if test -f 'dstr.c'; then $(CYGPATH_W) 'dstr.c'; else $(CYGPATH_W) '$(srcdir)/dstr.c'; fi`
 
-xcb_pb2-utilities.o: utilities.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_pb2_CPPFLAGS) $(CPPFLAGS) $(xcb_pb2_CFLAGS) $(CFLAGS) -MT xcb_pb2-utilities.o -MD -MP -MF $(DEPDIR)/xcb_pb2-utilities.Tpo -c -o xcb_pb2-utilities.o `test -f 'utilities.c' || echo '$(srcdir)/'`utilities.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_pb2-utilities.Tpo $(DEPDIR)/xcb_pb2-utilities.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='utilities.c' object='xcb_pb2-utilities.o' libtool=no @AMDEPBACKSLASH@
+xcb_pb2-utils.o: utils.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_pb2_CPPFLAGS) $(CPPFLAGS) $(xcb_pb2_CFLAGS) $(CFLAGS) -MT xcb_pb2-utils.o -MD -MP -MF $(DEPDIR)/xcb_pb2-utils.Tpo -c -o xcb_pb2-utils.o `test -f 'utils.c' || echo '$(srcdir)/'`utils.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_pb2-utils.Tpo $(DEPDIR)/xcb_pb2-utils.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='utils.c' object='xcb_pb2-utils.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_pb2_CPPFLAGS) $(CPPFLAGS) $(xcb_pb2_CFLAGS) $(CFLAGS) -c -o xcb_pb2-utilities.o `test -f 'utilities.c' || echo '$(srcdir)/'`utilities.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_pb2_CPPFLAGS) $(CPPFLAGS) $(xcb_pb2_CFLAGS) $(CFLAGS) -c -o xcb_pb2-utils.o `test -f 'utils.c' || echo '$(srcdir)/'`utils.c
 
-xcb_pb2-utilities.obj: utilities.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_pb2_CPPFLAGS) $(CPPFLAGS) $(xcb_pb2_CFLAGS) $(CFLAGS) -MT xcb_pb2-utilities.obj -MD -MP -MF $(DEPDIR)/xcb_pb2-utilities.Tpo -c -o xcb_pb2-utilities.obj `if test -f 'utilities.c'; then $(CYGPATH_W) 'utilities.c'; else $(CYGPATH_W) '$(srcdir)/utilities.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_pb2-utilities.Tpo $(DEPDIR)/xcb_pb2-utilities.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='utilities.c' object='xcb_pb2-utilities.obj' libtool=no @AMDEPBACKSLASH@
+xcb_pb2-utils.obj: utils.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_pb2_CPPFLAGS) $(CPPFLAGS) $(xcb_pb2_CFLAGS) $(CFLAGS) -MT xcb_pb2-utils.obj -MD -MP -MF $(DEPDIR)/xcb_pb2-utils.Tpo -c -o xcb_pb2-utils.obj `if test -f 'utils.c'; then $(CYGPATH_W) 'utils.c'; else $(CYGPATH_W) '$(srcdir)/utils.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_pb2-utils.Tpo $(DEPDIR)/xcb_pb2-utils.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='utils.c' object='xcb_pb2-utils.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_pb2_CPPFLAGS) $(CPPFLAGS) $(xcb_pb2_CFLAGS) $(CFLAGS) -c -o xcb_pb2-utilities.obj `if test -f 'utilities.c'; then $(CYGPATH_W) 'utilities.c'; else $(CYGPATH_W) '$(srcdir)/utilities.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_pb2_CPPFLAGS) $(CPPFLAGS) $(xcb_pb2_CFLAGS) $(CFLAGS) -c -o xcb_pb2-utils.obj `if test -f 'utils.c'; then $(CYGPATH_W) 'utils.c'; else $(CYGPATH_W) '$(srcdir)/utils.c'; fi`
 
 xcb_pb2-logger.o: logger.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_pb2_CPPFLAGS) $(CPPFLAGS) $(xcb_pb2_CFLAGS) $(CFLAGS) -MT xcb_pb2-logger.o -MD -MP -MF $(DEPDIR)/xcb_pb2-logger.Tpo -c -o xcb_pb2-logger.o `test -f 'logger.c' || echo '$(srcdir)/'`logger.c
@@ -1646,19 +1677,19 @@ xcb_wk2-dstr.obj: dstr.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_wk2_CPPFLAGS) $(CPPFLAGS) $(xcb_wk2_CFLAGS) $(CFLAGS) -c -o xcb_wk2-dstr.obj `if test -f 'dstr.c'; then $(CYGPATH_W) 'dstr.c'; else $(CYGPATH_W) '$(srcdir)/dstr.c'; fi`
 
-xcb_wk2-utilities.o: utilities.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_wk2_CPPFLAGS) $(CPPFLAGS) $(xcb_wk2_CFLAGS) $(CFLAGS) -MT xcb_wk2-utilities.o -MD -MP -MF $(DEPDIR)/xcb_wk2-utilities.Tpo -c -o xcb_wk2-utilities.o `test -f 'utilities.c' || echo '$(srcdir)/'`utilities.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_wk2-utilities.Tpo $(DEPDIR)/xcb_wk2-utilities.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='utilities.c' object='xcb_wk2-utilities.o' libtool=no @AMDEPBACKSLASH@
+xcb_wk2-utils.o: utils.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_wk2_CPPFLAGS) $(CPPFLAGS) $(xcb_wk2_CFLAGS) $(CFLAGS) -MT xcb_wk2-utils.o -MD -MP -MF $(DEPDIR)/xcb_wk2-utils.Tpo -c -o xcb_wk2-utils.o `test -f 'utils.c' || echo '$(srcdir)/'`utils.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_wk2-utils.Tpo $(DEPDIR)/xcb_wk2-utils.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='utils.c' object='xcb_wk2-utils.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_wk2_CPPFLAGS) $(CPPFLAGS) $(xcb_wk2_CFLAGS) $(CFLAGS) -c -o xcb_wk2-utilities.o `test -f 'utilities.c' || echo '$(srcdir)/'`utilities.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_wk2_CPPFLAGS) $(CPPFLAGS) $(xcb_wk2_CFLAGS) $(CFLAGS) -c -o xcb_wk2-utils.o `test -f 'utils.c' || echo '$(srcdir)/'`utils.c
 
-xcb_wk2-utilities.obj: utilities.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_wk2_CPPFLAGS) $(CPPFLAGS) $(xcb_wk2_CFLAGS) $(CFLAGS) -MT xcb_wk2-utilities.obj -MD -MP -MF $(DEPDIR)/xcb_wk2-utilities.Tpo -c -o xcb_wk2-utilities.obj `if test -f 'utilities.c'; then $(CYGPATH_W) 'utilities.c'; else $(CYGPATH_W) '$(srcdir)/utilities.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_wk2-utilities.Tpo $(DEPDIR)/xcb_wk2-utilities.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='utilities.c' object='xcb_wk2-utilities.obj' libtool=no @AMDEPBACKSLASH@
+xcb_wk2-utils.obj: utils.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_wk2_CPPFLAGS) $(CPPFLAGS) $(xcb_wk2_CFLAGS) $(CFLAGS) -MT xcb_wk2-utils.obj -MD -MP -MF $(DEPDIR)/xcb_wk2-utils.Tpo -c -o xcb_wk2-utils.obj `if test -f 'utils.c'; then $(CYGPATH_W) 'utils.c'; else $(CYGPATH_W) '$(srcdir)/utils.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_wk2-utils.Tpo $(DEPDIR)/xcb_wk2-utils.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='utils.c' object='xcb_wk2-utils.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_wk2_CPPFLAGS) $(CPPFLAGS) $(xcb_wk2_CFLAGS) $(CFLAGS) -c -o xcb_wk2-utilities.obj `if test -f 'utilities.c'; then $(CYGPATH_W) 'utilities.c'; else $(CYGPATH_W) '$(srcdir)/utilities.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_wk2_CPPFLAGS) $(CPPFLAGS) $(xcb_wk2_CFLAGS) $(CFLAGS) -c -o xcb_wk2-utils.obj `if test -f 'utils.c'; then $(CYGPATH_W) 'utils.c'; else $(CYGPATH_W) '$(srcdir)/utils.c'; fi`
 
 xcb_wk2-logger.o: logger.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_wk2_CPPFLAGS) $(CPPFLAGS) $(xcb_wk2_CFLAGS) $(CFLAGS) -MT xcb_wk2-logger.o -MD -MP -MF $(DEPDIR)/xcb_wk2-logger.Tpo -c -o xcb_wk2-logger.o `test -f 'logger.c' || echo '$(srcdir)/'`logger.c

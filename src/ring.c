@@ -22,6 +22,7 @@
  */
 
 #include <stdarg.h>
+#include "macros.h"
 #include "mem.h"
 #include "ring.h"
 
@@ -36,7 +37,7 @@ struct ring_t {
 ring_t ring_new(void) {
 	ring_t ring;
 
-	if (NEW(ring) == NULL)
+	if (unlikely(NEW(ring) == NULL))
 		return NULL;
 	ring->length = 0;
 	ring->head   = NULL;
@@ -60,7 +61,7 @@ void ring_free(ring_t *rp) {
 	struct node *p, *q;
 
 	/* assert(rp && *rp); */
-	if (rp == NULL || *rp == NULL)
+	if (unlikely(rp == NULL || *rp == NULL))
 		return;
 	if ((p = (*rp)->head) != NULL) {
 		int n = (*rp)->length;
@@ -75,7 +76,7 @@ void ring_free(ring_t *rp) {
 
 size_t ring_length(ring_t ring) {
 	/* assert(ring); */
-	if (ring == NULL)
+	if (unlikely(ring == NULL))
 		return 0;
 	return ring->length;
 }
@@ -86,7 +87,7 @@ void *ring_put(ring_t ring, int i, void *x) {
 
 	/* assert(ring);                       */
 	/* assert(i >= 0 && i < ring->length); */
-	if (ring == NULL)
+	if (unlikely(ring == NULL))
 		return NULL;
 	if (i < 0 || i >= ring->length)
 		return NULL;
@@ -115,7 +116,7 @@ void *ring_get(ring_t ring, int i) {
 
 	/* assert(ring);                       */
 	/* assert(i >= 0 && i < ring->length); */
-	if (ring == NULL)
+	if (unlikely(ring == NULL))
 		return NULL;
 	if (i < 0 || i >= ring->length)
 		return NULL;
@@ -136,7 +137,7 @@ void *ring_get(ring_t ring, int i) {
 void *ring_add(ring_t ring, int pos, void *x) {
 	/* assert(ring);                                            */
 	/* assert(pos >= -ring->length && pos <= ring->length + 1); */
-	if (ring == NULL)
+	if (unlikely(ring == NULL))
 		return NULL;
 	if (pos < -ring->length || pos > ring->length + 1)
 		return NULL;
@@ -174,7 +175,7 @@ void *ring_add(ring_t ring, int pos, void *x) {
 
 void *ring_addlo(ring_t ring, void *x) {
 	/* assert(ring); */
-	if (ring == NULL)
+	if (unlikely(ring == NULL))
 		return NULL;
 	ring_addhi(ring, x);
 	ring->head = ring->head->prev;
@@ -185,7 +186,7 @@ void *ring_addhi(ring_t ring, void *x) {
 	struct node *p, *q;
 
 	/* assert(ring); */
-	if (ring == NULL)
+	if (unlikely(ring == NULL))
 		return NULL;
 	if (NEW(p) == NULL)
 		return NULL;
@@ -207,7 +208,7 @@ void *ring_remove(ring_t ring, int i) {
 	/* assert(ring);                       */
 	/* assert(ring->length > 0);           */
 	/* assert(i >= 0 && i < ring->length); */
-	if (ring == NULL || ring->length <= 0)
+	if (unlikely(ring == NULL || ring->length <= 0))
 		return NULL;
 	if (i < 0 || i >= ring->length)
 		return NULL;
@@ -236,7 +237,7 @@ void *ring_remove(ring_t ring, int i) {
 void *ring_remlo(ring_t ring) {
 	/* assert(ring);             */
 	/* assert(ring->length > 0); */
-	if (ring == NULL || ring->length <= 0)
+	if (unlikely(ring == NULL || ring->length <= 0))
 		return NULL;
 	ring->head = ring->head->next;
 	return ring_remhi(ring);
@@ -248,7 +249,7 @@ void *ring_remhi(ring_t ring) {
 
 	/* assert(ring);             */
 	/* assert(ring->length > 0); */
-	if (ring == NULL || ring->length <= 0)
+	if (unlikely(ring == NULL || ring->length <= 0))
 		return NULL;
 	q = ring->head->prev;
 	x = q->value;
@@ -266,7 +267,7 @@ void ring_rotate(ring_t ring, int n) {
 
 	/* assert(ring);                                    */
 	/* assert(n >= -ring->length && n <= ring->length); */
-	if (ring == NULL)
+	if (unlikely(ring == NULL))
 		return;
 	if (n < -ring->length || n > ring->length)
 		return;

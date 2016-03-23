@@ -32,6 +32,7 @@
  */
 
 #include <pthread.h>
+#include "macros.h"
 #include "mem.h"
 #include "dlist.h"
 
@@ -62,7 +63,7 @@ dlist_t dlist_new(int cmp(const void *x, const void *y), void vfree(void *value)
 	pthread_mutexattr_t mattr;
 	pthread_rwlockattr_t rwattr;
 
-	if (NEW(dlist) == NULL)
+	if (unlikely(NEW(dlist) == NULL))
 		return NULL;
 	dlist->length = 0;
 	dlist->head   = dlist->tail = NULL;
@@ -84,7 +85,7 @@ void dlist_free(dlist_t *dlp) {
 	dlist_node_t curr, next;
 	unsigned long len;
 
-	if (dlp == NULL || *dlp == NULL)
+	if (unlikely(dlp == NULL || *dlp == NULL))
 		return;
 	pthread_mutex_destroy(&(*dlp)->lock);
 	pthread_rwlock_destroy(&(*dlp)->rwlock);
@@ -101,37 +102,37 @@ void dlist_free(dlist_t *dlp) {
 }
 
 unsigned long dlist_length(dlist_t dlist) {
-	if (dlist == NULL)
+	if (unlikely(dlist == NULL))
 		return 0;
 	return dlist->length;
 }
 
 dlist_node_t dlist_head(dlist_t dlist) {
-	if (dlist == NULL)
+	if (unlikely(dlist == NULL))
 		return NULL;
 	return dlist->head;
 }
 
 dlist_node_t dlist_tail(dlist_t dlist) {
-	if (dlist == NULL)
+	if (unlikely(dlist == NULL))
 		return NULL;
 	return dlist->tail;
 }
 
 dlist_node_t dlist_node_prev(dlist_node_t node) {
-	if (node == NULL)
+	if (unlikely(node == NULL))
 		return NULL;
 	return node->prev;
 }
 
 dlist_node_t dlist_node_next(dlist_node_t node) {
-	if (node == NULL)
+	if (unlikely(node == NULL))
 		return NULL;
 	return node->next;
 }
 
 void *dlist_node_value(dlist_node_t node) {
-	if (node == NULL)
+	if (unlikely(node == NULL))
 		return NULL;
 	return node->value;
 }
@@ -139,7 +140,7 @@ void *dlist_node_value(dlist_node_t node) {
 dlist_iter_t dlist_iter_new(dlist_t dlist, int direction) {
 	dlist_iter_t iter;
 
-	if (dlist == NULL || NEW(iter) == NULL)
+	if (unlikely(dlist == NULL || NEW(iter) == NULL))
 		return NULL;
 	iter->next      = direction == DLIST_START_HEAD ? dlist->head : dlist->tail;
 	iter->direction = direction;
@@ -147,20 +148,20 @@ dlist_iter_t dlist_iter_new(dlist_t dlist, int direction) {
 }
 
 void dlist_iter_free(dlist_iter_t *dlip) {
-	if (dlip == NULL || *dlip == NULL)
+	if (unlikely(dlip == NULL || *dlip == NULL))
 		return;
 	FREE(*dlip);
 }
 
 void dlist_iter_rewind_head(dlist_iter_t iter, dlist_t dlist) {
-	if (iter == NULL || dlist == NULL)
+	if (unlikely(iter == NULL || dlist == NULL))
 		return;
 	iter->next      = dlist->head;
 	iter->direction = DLIST_START_HEAD;
 }
 
 void dlist_iter_rewind_tail(dlist_iter_t iter, dlist_t dlist) {
-	if (iter == NULL || dlist == NULL)
+	if (unlikely(iter == NULL || dlist == NULL))
 		return;
 	iter->next      = dlist->tail;
 	iter->direction = DLIST_START_TAIL;
@@ -169,7 +170,7 @@ void dlist_iter_rewind_tail(dlist_iter_t iter, dlist_t dlist) {
 dlist_node_t dlist_next(dlist_iter_t iter) {
 	dlist_node_t node;
 
-	if (iter == NULL)
+	if (unlikely(iter == NULL))
 		return NULL;
 	node = iter->next;
 	if (node)
@@ -180,7 +181,7 @@ dlist_node_t dlist_next(dlist_iter_t iter) {
 dlist_t dlist_insert_head(dlist_t dlist, void *value) {
 	dlist_node_t node;
 
-	if (dlist == NULL || NEW(node) == NULL)
+	if (unlikely(dlist == NULL || NEW(node) == NULL))
 		return NULL;
 	node->value = value;
 	if (dlist->head == NULL) {
@@ -199,7 +200,7 @@ dlist_t dlist_insert_head(dlist_t dlist, void *value) {
 dlist_t dlist_insert_tail(dlist_t dlist, void *value) {
 	dlist_node_t node;
 
-	if (dlist == NULL || NEW(node) == NULL)
+	if (unlikely(dlist == NULL || NEW(node) == NULL))
 		return NULL;
 	node->value = value;
 	if (dlist->head == NULL) {
@@ -218,7 +219,7 @@ dlist_t dlist_insert_tail(dlist_t dlist, void *value) {
 dlist_t dlist_insert(dlist_t dlist, dlist_node_t node, void *value, int after) {
 	dlist_node_t new_node;
 
-	if (dlist == NULL || node == NULL || NEW(new_node) == NULL)
+	if (unlikely(dlist == NULL || node == NULL || NEW(new_node) == NULL))
 		return NULL;
 	new_node->value = value;
 	if (after) {
@@ -242,7 +243,7 @@ dlist_t dlist_insert(dlist_t dlist, dlist_node_t node, void *value, int after) {
 
 /* FIXME */
 dlist_t dlist_insert_sort(dlist_t dlist, void *value) {
-	if (dlist == NULL)
+	if (unlikely(dlist == NULL))
 		return NULL;
 	if (dlist->head == NULL) {
 		dlist_node_t node;
@@ -273,7 +274,7 @@ dlist_node_t dlist_find(dlist_t dlist, void *value) {
 	dlist_iter_t iter;
 	dlist_node_t node;
 
-	if (dlist == NULL)
+	if (unlikely(dlist == NULL))
 		return NULL;
 	iter = dlist_iter_new(dlist, DLIST_START_HEAD);
 	while ((node = dlist_next(iter)))
@@ -286,7 +287,7 @@ dlist_node_t dlist_find(dlist_t dlist, void *value) {
 dlist_node_t dlist_index(dlist_t dlist, long index) {
 	dlist_node_t node;
 
-	if (dlist == NULL)
+	if (unlikely(dlist == NULL))
 		return NULL;
 	if (index < 0) {
 		index = (-index) - 1;
@@ -305,7 +306,7 @@ void *dlist_remove_head(dlist_t dlist) {
 	dlist_node_t node;
 	void *value = NULL;
 
-	if (dlist == NULL)
+	if (unlikely(dlist == NULL))
 		return NULL;
 	if ((node = dlist->head)) {
 		dlist->head = node->next;
@@ -324,7 +325,7 @@ void *dlist_remove_tail(dlist_t dlist) {
 	dlist_node_t node;
 	void *value = NULL;
 
-	if (dlist == NULL)
+	if (unlikely(dlist == NULL))
 		return NULL;
 	if ((node = dlist->tail)) {
 		dlist->tail = node->prev;
@@ -342,7 +343,7 @@ void *dlist_remove_tail(dlist_t dlist) {
 void *dlist_remove(dlist_t dlist, dlist_node_t node) {
 	void *value;
 
-	if (dlist == NULL || node == NULL)
+	if (unlikely(dlist == NULL || node == NULL))
 		return NULL;
 	if (node->prev)
 		node->prev->next = node->next;
@@ -359,7 +360,7 @@ void *dlist_remove(dlist_t dlist, dlist_node_t node) {
 }
 
 dlist_t dlist_append(dlist_t dlist, dlist_t tail) {
-	if (dlist == NULL || tail == NULL)
+	if (unlikely(dlist == NULL || tail == NULL))
 		return NULL;
 	if (tail->head == NULL)
 		return dlist;
@@ -383,7 +384,9 @@ dlist_t dlist_copy(dlist_t dlist) {
 	dlist_iter_t iter;
 	dlist_node_t node;
 
-	if (dlist == NULL || (copy = dlist_new(dlist->cmp, dlist->vfree)) == NULL)
+	if (unlikely(dlist == NULL))
+		return NULL;
+	if ((copy = dlist_new(dlist->cmp, dlist->vfree)) == NULL)
 		return NULL;
 	iter = dlist_iter_new(dlist, DLIST_START_HEAD);
 	while ((node = dlist_next(iter))) {
@@ -402,7 +405,7 @@ dlist_t dlist_copy(dlist_t dlist) {
 void dlist_rotate(dlist_t dlist) {
 	dlist_node_t node;
 
-	if (dlist == NULL || dlist->length <= 1)
+	if (unlikely(dlist == NULL || dlist->length <= 1))
 		return;
 	node = dlist->tail;
 	dlist->tail = node->prev;
@@ -414,31 +417,31 @@ void dlist_rotate(dlist_t dlist) {
 }
 
 void dlist_lock(dlist_t dlist) {
-	if (dlist == NULL)
+	if (unlikely(dlist == NULL))
 		return;
 	pthread_mutex_lock(&dlist->lock);
 }
 
 void dlist_unlock(dlist_t dlist) {
-	if (dlist == NULL)
+	if (unlikely(dlist == NULL))
 		return;
 	pthread_mutex_unlock(&dlist->lock);
 }
 
 void dlist_rwlock_rdlock(dlist_t dlist) {
-	if (dlist == NULL)
+	if (unlikely(dlist == NULL))
 		return;
 	pthread_rwlock_rdlock(&dlist->rwlock);
 }
 
 void dlist_rwlock_wrlock(dlist_t dlist) {
-	if (dlist == NULL)
+	if (unlikely(dlist == NULL))
 		return;
 	pthread_rwlock_wrlock(&dlist->rwlock);
 }
 
 void dlist_rwlock_unlock(dlist_t dlist) {
-	if (dlist == NULL)
+	if (unlikely(dlist == NULL))
 		return;
 	pthread_rwlock_unlock(&dlist->rwlock);
 }

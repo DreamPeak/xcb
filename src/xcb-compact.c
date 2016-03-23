@@ -45,8 +45,9 @@
 #include "dlist.h"
 #include "table.h"
 #include "ptrie.h"
+#include "btree.h"
 #include "dstr.h"
-#include "utilities.h"
+#include "utils.h"
 #include "logger.h"
 #include "config.h"
 #include "module.h"
@@ -246,10 +247,10 @@ static void vfree2(void *value) {
 }
 
 /* FIXME */
-static void lfree(void *value) {
-	dlist_t dlist = (dlist_t)value;
+static void bfree(void *value) {
+	btree_t btree = (btree_t)value;
 
-	dlist_free(&dlist);
+	btree_free(&btree);
 }
 
 /* FIXME */
@@ -1052,11 +1053,8 @@ void out2rmp(const char *res) {
 		{
 			dstr key = NULL, value = NULL, index = NULL, contracts = NULL;
 			dstr *fields2 = NULL;
-			int nfield2 = 0;
+			int nfield2 = 0, i;
 			dstr skey;
-			dlist_t dlist;
-			struct kvd *kvd;
-			dlist_node_t node;
 
 			if (nfield != 2)
 				goto end;
@@ -1067,8 +1065,6 @@ void out2rmp(const char *res) {
 				goto end;
 			index = dstr_new(fields2[0]);
 			if (nfield2 > 2) {
-				int i;
-
 				contracts = dstr_new(fields2[2]);
 				for (i = 3; i < nfield2; ++i) {
 					contracts = dstr_cat(contracts, ",");
@@ -1082,6 +1078,7 @@ void out2rmp(const char *res) {
 			}
 			if (last_quote) {
 				dstr ckey, cvalue;
+				btree_t btree;
 
 				ckey   = dstr_new(skey);
 				cvalue = dstr_new(fields2[1]);
@@ -1089,45 +1086,33 @@ void out2rmp(const char *res) {
 				cvalue = dstr_cat(cvalue, value);
 				/* put latest quotes into cache */
 				table_lock(cache);
-				if ((dlist = table_get_value(cache, index)) == NULL) {
-					if (NEW(kvd)) {
-						kvd->key     = ckey;
-						kvd->u.value = cvalue;
-						dlist = dlist_new(cmpkvd, kvfree);
-						dlist_insert_sort(dlist, kvd);
-						table_insert(cache, dstr_new(index), dlist);
-					} else {
-						xcb_log(XCB_LOG_ERROR, "Error allocating memory for kvd");
-						dstr_free(cvalue);
-						dstr_free(ckey);
-					}
+				if ((btree = table_get_value(cache, index)) == NULL) {
+					btree = btree_new(32, cmpstr, kfree, vfree);
+					btree_insert(btree, ckey, cvalue);
+					table_insert(cache, dstr_new(index), btree);
 				} else {
-					if (NEW(kvd)) {
-						kvd->key     = ckey;
-						kvd->u.value = NULL;
-						if ((node = dlist_find(dlist, kvd)) == NULL) {
-							kvd->u.value = cvalue;
-							dlist_insert_sort(dlist, kvd);
+					btree_node_t node;
+
+					if ((node = btree_find(btree, ckey, &i)) == NULL)
+						btree_insert(btree, ckey, cvalue);
+					else {
+						dstr key   = (dstr)btree_node_key(node, i);
+						dstr value = (dstr)btree_node_value(node, i);
+
+						if (strcmp(key, ckey))
+							btree_insert(btree, ckey, cvalue);
+						else if (dstr_length(value) == dstr_length(cvalue) &&
+							!memcmp(value, cvalue, dstr_length(value))) {
+							table_unlock(cache);
+							dstr_free(cvalue);
+							dstr_free(ckey);
+							dstr_free(skey);
+							goto end;
 						} else {
-							FREE(kvd);
-							kvd = (struct kvd *)dlist_node_value(node);
-							if (dstr_length(kvd->u.value) == dstr_length(cvalue) &&
-								!memcmp(kvd->u.value, cvalue,
-									dstr_length(kvd->u.value))) {
-								table_unlock(cache);
-								dstr_free(cvalue);
-								dstr_free(ckey);
-								dstr_free(skey);
-								goto end;
-							}
-							dstr_free(kvd->u.value);
-							kvd->u.value = cvalue;
+							btree_insert(btree, ckey, cvalue);
+							dstr_free(value);
 							dstr_free(ckey);
 						}
-					} else {
-						xcb_log(XCB_LOG_ERROR, "Error allocating memory for kvd");
-						dstr_free(cvalue);
-						dstr_free(ckey);
 					}
 				}
 				table_unlock(cache);
@@ -1149,6 +1134,7 @@ end:
 			if (dlist_length(monitors) > 0) {
 				dstr res = dstr_new("TX '");
 				dlist_iter_t iter = dlist_iter_new(monitors, DLIST_START_HEAD);
+				dlist_node_t node;
 
 				if (key && value) {
 					res = dstr_cat(res, key);
@@ -1262,7 +1248,7 @@ int main(int argc, char **argv) {
 	if ((tmp = variable_retrieve(cfg, "general", "last_quote")))
 		if (atoi(tmp) == 1)
 			last_quote = 1;
-	cache = table_new(cmpstr, hashmurmur2, kfree, lfree);
+	cache = table_new(cmpstr, hashmurmur2, kfree, bfree);
 	subscribers = ptrie_new();
 	default_msgs.appouts = dlist_new(NULL, NULL);
 	queues = dlist_new(NULL, NULL);

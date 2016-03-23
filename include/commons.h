@@ -69,15 +69,6 @@ struct cmd {
 };
 
 /* FIXME */
-struct kvd {
-	dstr			key;
-	union {
-	dstr			value;
-	dlist_t			dlist;
-	}			u;
-};
-
-/* FIXME */
 #define NANOSLEEP(nanosec) \
 	do { \
 		struct timespec ts; \
@@ -95,9 +86,6 @@ extern void add_reply_string_format(client c, const char *fmt, ...);
 extern void add_reply_error(client c, const char *err);
 extern void add_reply_error_format(client c, const char *fmt, ...);
 extern void read_from_client(event_loop el, int fd, int mask, void *data);
-extern int  cmpkvd(const void *x, const void *y);
-extern void kvfree(void *value);
-extern void kdfree(void *value);
 
 #endif /* COMMONS_INCLUDED */
 

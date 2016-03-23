@@ -31,8 +31,9 @@
 #include "dlist.h"
 #include "table.h"
 #include "ptrie.h"
+#include "btree.h"
 #include "dstr.h"
-#include "utilities.h"
+#include "utils.h"
 #include "logger.h"
 #include "net.h"
 #include "db.h"
@@ -63,25 +64,10 @@ extern dstr get_indices(void);
 /* FIXME */
 static table_t rids = NULL;
 
-/* FIXME */
-int cmpkvd(const void *x, const void *y) {
-	return strcmp(((struct kvd *)x)->key, ((struct kvd *)y)->key);
-}
-
-/* FIXME */
-void kvfree(void *value) {
-	struct kvd *kvd = (struct kvd *)value;
-
-	dstr_free(kvd->key);
-	dstr_free(kvd->u.value);
-	FREE(kvd);
-}
-
 void s_command(client c) {
 	dstr pkey, skey;
 	int i;
 	dlist_t dlist;
-	struct kvd *kvd;
 
 	if (dstr_length(c->argv[0]) == 1) {
 		add_reply_error(c, "index can't be empty\r\n");
@@ -95,43 +81,46 @@ void s_command(client c) {
 			skey = dstr_cat(skey, c->argv[i]);
 		}
 	if (last_quote) {
-		table_lock(cache);
-		if ((dlist = table_get_value(cache, pkey))) {
-			dlist_iter_t iter = dlist_iter_new(dlist, DLIST_START_HEAD);
-			dlist_node_t node;
-			int flag = 0;
+		btree_t btree;
 
-			/* FIXME: still has room to improve */
-			while ((node = dlist_next(iter))) {
-				kvd = (struct kvd *)dlist_node_value(node);
-				if (dstr_length(kvd->key) >= dstr_length(skey) &&
-					!memcmp(kvd->key, skey, dstr_length(skey))) {
+		table_lock(cache);
+		if ((btree = table_get_value(cache, pkey))) {
+			btree_node_t node = btree_find(btree, skey, &i);
+
+			while (node) {
+				int n = btree_node_n(node);
+
+				for (; i < n; ++i) {
+					dstr key   = (dstr)btree_node_key(node, i);
+					dstr value = (dstr)btree_node_value(node, i);
 					dstr *fields = NULL, *fields2 = NULL;
-					int nfield = 0, nfield2 = 0;
+					int nfield = 0, nfield2 = 0, j;
 					dstr res, contracts = NULL;
 
-					flag = 1;
-					fields = dstr_split_len(kvd->key, dstr_length(kvd->key),
-						",", 1, &nfield);
+					xcb_log(XCB_LOG_WARNING, "skey=%s, key=%s, value=%s",
+						skey, key, value);
+					if (dstr_length(key) < dstr_length(skey) ||
+						memcmp(key, skey, dstr_length(skey)))
+						break;
+					fields = dstr_split_len(key, dstr_length(key), ",", 1, &nfield);
 					res = dstr_new(fields[0]);
 					if (nfield > 1) {
 						contracts = dstr_new(fields[1]);
-						for (i = 2; i < nfield; ++i) {
+						for (j = 2; j < nfield; ++j) {
 							contracts = dstr_cat(contracts, ",");
-							contracts = dstr_cat(contracts, fields[i]);
+							contracts = dstr_cat(contracts, fields[j]);
 						}
 					}
-					fields2 = dstr_split_len(kvd->u.value, dstr_length(kvd->u.value),
-						",", 1, &nfield2);
+					fields2 = dstr_split_len(value, dstr_length(value), ",", 1, &nfield2);
 					res = dstr_cat(res, ",");
 					res = dstr_cat(res, fields2[0]);
 					if (contracts) {
 						res = dstr_cat(res, ",");
 						res = dstr_cat(res, contracts);
 					}
-					for (i = 1; i < nfield2; ++i) {
+					for (j = 1; j < nfield2; ++j) {
 						res = dstr_cat(res, ",");
-						res = dstr_cat(res, fields2[i]);
+						res = dstr_cat(res, fields2[j]);
 					}
 					res = dstr_cat(res, "\r\n");
 					pthread_spin_lock(&c->lock);
@@ -160,10 +149,10 @@ void s_command(client c) {
 					dstr_free(contracts);
 					dstr_free(res);
 					dstr_free_tokens(fields, nfield);
-				} else if (flag)
-					break;
+				}
+				node = btree_node_next(node);
+				i = 0;
 			}
-			dlist_iter_free(&iter);
 		}
 		table_unlock(cache);
 	}

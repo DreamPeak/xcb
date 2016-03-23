@@ -30,7 +30,7 @@
 #include <sys/time.h>
 #include "macros.h"
 #include "mem.h"
-#include "utilities.h"
+#include "utils.h"
 #include "logger.h"
 
 /* FIXME */

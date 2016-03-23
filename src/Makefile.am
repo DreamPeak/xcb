@@ -1,24 +1,24 @@
 sbin_PROGRAMS = xcb-dp2 xcb-wk2 xcb-pb2 xcb-compact xcb-cli xcb-sim
-xcb_dp2_SOURCES = mem.c dlist.c table.c ring.c heap.c dstr.c utilities.c       \
-logger.c config.c event.c net.c loader.c thrpool.c pgmsock.c networking.c      \
-basics.c xcb-dp2.c
+xcb_dp2_SOURCES = mem.c dlist.c table.c ring.c heap.c dstr.c utils.c logger.c  \
+config.c event.c net.c loader.c thrpool.c pgmsock.c networking.c basics.c      \
+xcb-dp2.c
 xcb_dp2_CPPFLAGS = -I$(top_srcdir)/include -I/usr/include/pgm-5.1
 xcb_dp2_CFLAGS = -Wall -Winline -pthread -rdynamic
 xcb_dp2_LDFLAGS = -lrt -ldl -lpgm -ltcmalloc
-xcb_wk2_SOURCES = mem.c dlist.c table.c ring.c heap.c dstr.c utilities.c       \
-logger.c config.c event.c net.c loader.c thrpool.c db.c pgmsock.c networking.c \
-basics.c xcb-wk2.c
+xcb_wk2_SOURCES = mem.c dlist.c table.c ring.c heap.c dstr.c utils.c logger.c  \
+config.c event.c net.c loader.c thrpool.c db.c pgmsock.c networking.c basics.c \
+xcb-wk2.c
 xcb_wk2_CPPFLAGS = -I$(top_srcdir)/include -I/usr/include/pgm-5.1
 xcb_wk2_CFLAGS = -Wall -Winline -pthread -rdynamic
 xcb_wk2_LDFLAGS = -lrt -ldl -lm -lpgm -lleveldb -ltcmalloc
-xcb_pb2_SOURCES = mem.c dlist.c table.c ring.c heap.c ptrie.c dstr.c           \
-utilities.c logger.c config.c event.c net.c thrpool.c db.c pgmsock.c           \
-networking.c basics.c custom.c xcb-pb2.c
+xcb_pb2_SOURCES = mem.c dlist.c table.c ring.c heap.c ptrie.c btree.c dstr.c   \
+utils.c logger.c config.c event.c net.c thrpool.c db.c pgmsock.c networking.c  \
+basics.c custom.c xcb-pb2.c
 xcb_pb2_CPPFLAGS = -I$(top_srcdir)/include -I/usr/include/pgm-5.1
 xcb_pb2_CFLAGS = -Wall -Winline -pthread
 xcb_pb2_LDFLAGS = -lrt -lpgm -lleveldb -ltcmalloc
-xcb_compact_SOURCES = mem.c dlist.c table.c ring.c heap.c ptrie.c dstr.c       \
-utilities.c logger.c config.c event.c net.c loader.c thrpool.c db.c            \
+xcb_compact_SOURCES = mem.c dlist.c table.c ring.c heap.c ptrie.c btree.c      \
+dstr.c utils.c logger.c config.c event.c net.c loader.c thrpool.c db.c         \
 networking.c basics.c custom.c xcb-compact.c
 xcb_compact_CPPFLAGS = -I$(top_srcdir)/include
 xcb_compact_CFLAGS = -Wall -Winline -pthread -rdynamic

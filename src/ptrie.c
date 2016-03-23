@@ -26,6 +26,7 @@
 
 #include <pthread.h>
 #include <string.h>
+#include "macros.h"
 #include "mem.h"
 #include "ptrie.h"
 

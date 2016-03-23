@@ -18,8 +18,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef UTILITIES_INCLUDED
-#define UTILITIES_INCLUDED
+#ifndef UTILS_INCLUDED
+#define UTILS_INCLUDED
 
 #ifdef __cplusplus
 extern "C" {
@@ -45,5 +45,5 @@ extern int      diffnow(int endday);
 }
 #endif
 
-#endif /* UTILITIES_INCLUDED */
+#endif /* UTILS_INCLUDED */
 

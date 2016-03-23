@@ -18,18 +18,28 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+/*
+ * adapted from CLRS, Chapter 18
+ */
+
 #ifndef BTREE_INCLUDED
 #define BTREE_INCLUDED
 
-/* FIXME: exported types */
-typedef struct btree_t *btree_t;
+/* exported types */
+typedef struct btree_t      *btree_t;
+typedef struct btree_node_t *btree_node_t;
 
 /* FIXME: exported functions */
-extern btree_t       btree_new(int t, int cmp(const void *x, const void *y));
+extern btree_t       btree_new(int t, int cmp(const void *x, const void *y),
+			void kfree(const void *key), void vfree(void *value));
 extern void          btree_free(btree_t* bp);
 extern unsigned long btree_length(btree_t btree);
+extern int           btree_node_n(btree_node_t node);
+extern btree_node_t  btree_node_next(btree_node_t node);
+extern const void   *btree_node_key(btree_node_t node, int i);
+extern void         *btree_node_value(btree_node_t node, int i);
 extern void         *btree_insert(btree_t btree, const void *key, void *value);
-extern void         *btree_find(btree_t btree, const void *key);
+extern btree_node_t  btree_find(btree_t btree, const void *key, int *ip);
 extern void         *btree_remove(btree_t btree, const void *key);
 
 #endif /* BTREE_INCLUDED */
