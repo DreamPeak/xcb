@@ -34,6 +34,7 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <string.h>
+#include "macros.h"
 #include "mem.h"
 #include "dstr.h"
 
@@ -81,7 +82,7 @@ dstr dstr_new_len(const char *str, size_t length) {
 	struct dshdr *dh;
 
 	dh = str ? ALLOC(sizeof *dh + length + 1) : CALLOC(1, sizeof *dh + length + 1);
-	if (dh == NULL)
+	if (unlikely(dh == NULL))
 		return NULL;
 	dh->len   = length;
 	dh->avail = 0;
@@ -101,7 +102,7 @@ dstr dstr_new(const char *str) {
 void dstr_free(dstr ds) {
 	struct dshdr *dh;
 
-	if (ds == NULL)
+	if (unlikely(ds == NULL))
 		return;
 	dh = (struct dshdr *)(ds - sizeof *dh);
 	FREE(dh);
@@ -110,7 +111,7 @@ void dstr_free(dstr ds) {
 size_t dstr_length(const dstr ds) {
 	struct dshdr *dh;
 
-	if (ds == NULL)
+	if (unlikely(ds == NULL))
 		return 0;
 	dh = (struct dshdr *)(ds - sizeof *dh);
 	return dh->len;
@@ -119,7 +120,7 @@ size_t dstr_length(const dstr ds) {
 size_t dstr_avail(const dstr ds) {
 	struct dshdr *dh;
 
-	if (ds == NULL)
+	if (unlikely(ds == NULL))
 		return 0;
 	dh = (struct dshdr *)(ds - sizeof *dh);
 	return dh->avail;
@@ -129,7 +130,7 @@ dstr dstr_make_room(dstr ds, size_t length) {
 	struct dshdr *dh;
 	size_t newlen;
 
-	if (ds == NULL)
+	if (unlikely(ds == NULL))
 		return NULL;
 	dh = (struct dshdr *)(ds - sizeof *dh);
 	if (dh->avail >= length)
@@ -148,7 +149,7 @@ dstr dstr_make_room(dstr ds, size_t length) {
 void dstr_incr_len(dstr ds, int incr) {
 	struct dshdr *dh;
 
-	if (ds == NULL)
+	if (unlikely(ds == NULL))
 		return;
 	dh = (struct dshdr *)(ds - sizeof *dh);
 	if (dh->avail >= incr) {
@@ -161,7 +162,7 @@ void dstr_incr_len(dstr ds, int incr) {
 dstr dstr_remove_avail(dstr ds) {
 	struct dshdr *dh;
 
-	if (ds == NULL)
+	if (unlikely(ds == NULL))
 		return NULL;
 	dh = (struct dshdr *)(ds - sizeof *dh);
 	if (RESIZE(dh, sizeof *dh + dh->len + 1) == NULL)
@@ -173,7 +174,7 @@ dstr dstr_remove_avail(dstr ds) {
 size_t dstr_alloc_size(dstr ds) {
 	struct dshdr *dh;
 
-	if (ds == NULL)
+	if (unlikely(ds == NULL))
 		return 0;
 	dh = (struct dshdr *)(ds - sizeof *dh);
 	return sizeof *dh + dh->len + dh->avail + 1;
@@ -237,7 +238,7 @@ dstr dstr_trim(dstr ds, const char *cset) {
 	char *start, *sp, *end, *ep;
 	size_t len;
 
-	if (ds == NULL)
+	if (unlikely(ds == NULL))
 		return NULL;
 	dh = (struct dshdr *)(ds - sizeof *dh);
 	sp = start = ds;
@@ -259,7 +260,7 @@ dstr dstr_range(dstr ds, int start, int end) {
 	struct dshdr *dh;
 	size_t newlen;
 
-	if (ds == NULL)
+	if (unlikely(ds == NULL))
 		return NULL;
 	dh = (struct dshdr *)(ds - sizeof *dh);
 	if (dh->len == 0)
@@ -296,7 +297,7 @@ dstr dstr_range(dstr ds, int start, int end) {
 void dstr_clear(dstr ds) {
 	struct dshdr *dh;
 
-	if (ds == NULL)
+	if (unlikely(ds == NULL))
 		return;
 	dh = (struct dshdr *)(ds - sizeof *dh);
 	dh->avail += dh->len;
@@ -309,7 +310,7 @@ dstr *dstr_split_len(const char *str, size_t length, const char *sep, size_t sep
 	dstr *tokens;
 
 	/* FIXME */
-	if (str == NULL || sep == NULL)
+	if (unlikely(str == NULL || sep == NULL))
 		return NULL;
 	if (length < 0 || seplength < 1)
 		return NULL;
@@ -352,7 +353,7 @@ err:
 void dstr_free_tokens(dstr *tokens, int count) {
 	int i;
 
-	if (tokens == NULL)
+	if (unlikely(tokens == NULL))
 		return;
 	for (i = 0; i < count; ++i)
 		dstr_free(tokens[i]);

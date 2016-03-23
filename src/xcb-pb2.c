@@ -710,8 +710,6 @@ static int on_msgv(struct pgm_msgv_t *msgv, size_t len) {
 						dstr key   = (dstr)btree_node_key(node, i);
 						dstr value = (dstr)btree_node_value(node, i);
 
-						xcb_log(XCB_LOG_WARNING, "ckey=%s, cvalue=%s, key=%s, value=%s",
-							ckey, cvalue, key, value);
 						if (strcmp(key, ckey))
 							btree_insert(btree, ckey, cvalue);
 						else if (dstr_length(value) == dstr_length(cvalue) &&

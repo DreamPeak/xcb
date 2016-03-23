@@ -22,7 +22,6 @@
  * adapted from CLRS, Chapter 18
  */
 
-#include <string.h>
 #include "macros.h"
 #include "mem.h"
 #include "btree.h"
@@ -107,7 +106,7 @@ static int btree_split_child(btree_t btree, btree_node_t x, int i) {
 			node_free(z);
 			return -1;
 		}
-		/* FIXME */
+		/* FIXME: memmove? */
 		for (j = 0; j < btree->t; ++j) {
 			z->u.children[j] = y->u.children[j + btree->t];
 			y->u.children[j + btree->t] = NULL;
@@ -121,7 +120,7 @@ static int btree_split_child(btree_t btree, btree_node_t x, int i) {
 	z->leaf   = y->leaf;
 	z->n      = btree->t - 1;
 	z->parent = x;
-	/* FIXME */
+	/* FIXME: memmove? */
 	for (j = 0; j < btree->t - 1; ++j) {
 		z->bindings[j].key   = y->bindings[j + btree->t].key;
 		z->bindings[j].value = y->bindings[j + btree->t].value;
@@ -179,7 +178,7 @@ static void *btree_put_nonfull(btree_t btree, btree_node_t node, const void *key
 		node->bindings[j + 1].value = node->bindings[j].value;
 	}
 	node->bindings[i + 1].key   = key;
-	node->bindings[i + i].value = value;
+	node->bindings[i + 1].value = value;
 	++node->n;
 	++btree->length;
 	return NULL;
@@ -315,6 +314,7 @@ void *btree_insert(btree_t btree, const void *key, void *value) {
 		return btree_put_nonfull(btree, x, key, value);
 }
 
+/* FIXME */
 btree_node_t btree_find(btree_t btree, const void *key, int *ip) {
 	btree_node_t node;
 	/* avoid gcc warning */

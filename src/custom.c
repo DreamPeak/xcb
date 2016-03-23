@@ -97,8 +97,7 @@ void s_command(client c) {
 					int nfield = 0, nfield2 = 0, j;
 					dstr res, contracts = NULL;
 
-					xcb_log(XCB_LOG_WARNING, "skey=%s, key=%s, value=%s",
-						skey, key, value);
+					/* FIXME */
 					if (dstr_length(key) < dstr_length(skey) ||
 						memcmp(key, skey, dstr_length(skey)))
 						break;
