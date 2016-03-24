@@ -109,28 +109,28 @@ extern void auth_command(client c);
 /* FIXME */
 static table_t cmds;
 static struct cmd commands[] = {
-	{"help",	help_command,		"Display this text",			1},
-	{"?",		help_command,		"Synonym for 'help'",			1},
-	{"config",	config_command,		"Get or set configurations",		-3},
-	{"show",	show_command,		"Show modules, applications or queues",	2},
-	{"module",	module_command,		"Load, unload or reload module",	3},
-	{"monitor",	monitor_command,	"Monitor on or off",			2},
-	{"database",	database_command,	"Database operations",			-2},
-	{"shutdown",	shutdown_command,	"Shut down xcb-compact",		1},
-	{"quit",	NULL,			"Quit connecting to xcb-compact",	1}
+	{"help",	help_command,		"Display this text",				1},
+	{"?",		help_command,		"Synonym for 'help'",				1},
+	{"config",	config_command,		"Get or set configurations",			-3},
+	{"show",	show_command,		"Show modules, applications, queues, etc.",	2},
+	{"module",	module_command,		"Load, unload or reload module",		3},
+	{"monitor",	monitor_command,	"Monitor on or off",				2},
+	{"database",	database_command,	"Database operations",				-2},
+	{"shutdown",	shutdown_command,	"Shut down xcb-compact",			1},
+	{"quit",	NULL,			"Quit connecting to xcb-compact",		1}
 };
 static table_t ctm_cmds;
 static struct cmd ctm_commands[] = {
-	{"S",		s_command,		"Subscribe",				-1},
-	{"SALL",	sall_command,		"Subscribe all",			1},
-	{"U",		u_command,		"Unsubscribe",				-1},
-	{"UALL",	uall_command,		"Unsubscribe all",			1},
-	{"Q",		q_command,		"Query",				5},
-	{"QC",		qc_command,		"Query cancellation",			2},
-	{"INDICES",	indices_command,	"Indices",				2},
-	{"INDEX",	index_command,		"Index",				2},
-	{"AUTH",	auth_command,		"Authenticate",				2},
-	{"QUIT",	NULL,			"Quit connecting to xcb-compact",	1}
+	{"S",		s_command,		"Subscribe",					-1},
+	{"SALL",	sall_command,		"Subscribe all",				1},
+	{"U",		u_command,		"Unsubscribe",					-1},
+	{"UALL",	uall_command,		"Unsubscribe all",				1},
+	{"Q",		q_command,		"Query",					5},
+	{"QC",		qc_command,		"Query cancellation",				2},
+	{"INDICES",	indices_command,	"Indices",					2},
+	{"INDEX",	index_command,		"Index",					2},
+	{"AUTH",	auth_command,		"Authenticate",					2},
+	{"QUIT",	NULL,			"Quit connecting to xcb-compact",		1}
 };
 static struct config *cfg;
 static pthread_mutex_t cfg_lock = PTHREAD_ADAPTIVE_MUTEX_INITIALIZER_NP;
@@ -429,8 +429,8 @@ static int server_cron(event_loop el, unsigned long id, void *data) {
 					pthread_spin_lock(&c->lock);
 					if (net_try_write(c->fd, res, dstr_length(res),
 						10, NET_NONBLOCK) == -1)
-						xcb_log(XCB_LOG_WARNING, "Writing to client '%p': %s",
-							c, strerror(errno));
+						xcb_log(XCB_LOG_WARNING, "Writing to client '%s:%d': %s",
+							c->ip, c->port, strerror(errno));
 					pthread_spin_unlock(&c->lock);
 				}
 			}
@@ -452,8 +452,8 @@ static int server_cron(event_loop el, unsigned long id, void *data) {
 					pthread_spin_lock(&c->lock);
 					if (net_try_write(c->fd, res, dstr_length(res),
 						10, NET_NONBLOCK) == -1)
-						xcb_log(XCB_LOG_WARNING, "Writing to client '%p': %s",
-							c, strerror(errno));
+						xcb_log(XCB_LOG_WARNING, "Writing to client '%s:%d': %s",
+							c->ip, c->port, strerror(errno));
 					pthread_spin_unlock(&c->lock);
 				}
 				dlist_iter_free(&iter);
@@ -502,8 +502,8 @@ static int send_quote(void *data, void *data2) {
 				if (!(c->flags & CLIENT_CLOSE_ASAP)) {
 					if (net_try_write(c->fd, res, dstr_length(res),
 						10, NET_NONBLOCK) == -1) {
-						xcb_log(XCB_LOG_WARNING, "Writing to client '%p': %s",
-							c, strerror(errno));
+						xcb_log(XCB_LOG_WARNING, "Writing to client '%s:%d': %s",
+							c->ip, c->port, strerror(errno));
 						if (++c->eagcount >= 3)
 							client_free_async(c);
 					} else if (c->eagcount)
@@ -526,8 +526,9 @@ static int send_quote(void *data, void *data2) {
 					if (!(c->flags & CLIENT_CLOSE_ASAP)) {
 						if (net_try_write(c->fd, res, dstr_length(res),
 							10, NET_NONBLOCK) == -1) {
-							xcb_log(XCB_LOG_WARNING, "Writing to client '%p': %s",
-								c, strerror(errno));
+							xcb_log(XCB_LOG_WARNING,
+								"Writing to client '%s:%d': %s",
+								c->ip, c->port, strerror(errno));
 							if (++c->eagcount >= 3)
 								client_free_async(c);
 						} else if (c->eagcount)
@@ -712,8 +713,8 @@ void process_quote(void *data) {
 				if (!(c->flags & CLIENT_CLOSE_ASAP)) {
 					if (net_try_write(c->fd, res, strlen(res),
 						10, NET_NONBLOCK) == -1) {
-						xcb_log(XCB_LOG_WARNING, "Writing to client '%p': %s",
-							c, strerror(errno));
+						xcb_log(XCB_LOG_WARNING, "Writing to client '%s:%d': %s",
+							c->ip, c->port, strerror(errno));
 						if (++c->eagcount >= 3)
 							client_free_async(c);
 					} else if (c->eagcount)
@@ -1150,8 +1151,9 @@ end:
 					if (!(c->flags & CLIENT_CLOSE_ASAP)) {
 						if (net_try_write(c->fd, res, dstr_length(res),
 							10, NET_NONBLOCK) == -1) {
-							xcb_log(XCB_LOG_WARNING, "Writing to client '%p': %s",
-								c, strerror(errno));
+							xcb_log(XCB_LOG_WARNING,
+								"Writing to client '%s:%d': %s",
+								c->ip, c->port, strerror(errno));
 							if (++c->eagcount >= 3)
 								client_free_async(c);
 						} else if (c->eagcount)
@@ -1470,7 +1472,7 @@ void client_free(client c) {
 	FREE(c->argv);
 	pthread_spin_destroy(&c->lock);
 	close(c->fd);
-	xcb_log(XCB_LOG_NOTICE, "Client '%p' got freed", c);
+	xcb_log(XCB_LOG_NOTICE, "Client '%s:%d' got freed", c->ip, c->port);
 	FREE(c);
 }
 
@@ -1526,7 +1528,7 @@ void process_inbuf(client c) {
 			FREE(c->argv);
 		/* FIXME */
 		*newline = '\0';
-		xcb_log(XCB_LOG_INFO, "Client '%p' issued command '%s'", c, c->inbuf);
+		xcb_log(XCB_LOG_INFO, "Client '%s:%d' issued command '%s'", c->ip, c->port, c->inbuf);
 		c->argv = c->sock == ctmsock ? dstr_split_len(c->inbuf, len, ",", 1, &c->argc)
 			: dstr_split_args(c->inbuf, &c->argc);
 		memmove(c->inbuf, c->inbuf + len + 2, sizeof c->inbuf - len - 2);
@@ -1536,7 +1538,7 @@ void process_inbuf(client c) {
 	}
 }
 
-static client client_new(int fd, int sock) {
+static client client_new(int fd, int sock, char *ip, int port) {
 	client c;
 
 	if (NEW(c) == NULL)
@@ -1552,6 +1554,8 @@ static client client_new(int fd, int sock) {
 	c->fd            = fd;
 	pthread_spin_init(&c->lock, 0);
 	c->sock          = sock;
+	strcpy(c->ip, ip);
+	c->port          = port;
 	c->flags         = 0;
 	c->inpos         = 0;
 	c->argc          = 0;
@@ -1581,7 +1585,7 @@ static void tcp_accept_handler(event_loop el, int fd, int mask, void *data) {
 		xcb_log(XCB_LOG_WARNING, "Accepting client connection: %s", neterr);
 		return;
 	}
-	if ((c = client_new(cfd, fd)) == NULL) {
+	if ((c = client_new(cfd, fd, cip, cport)) == NULL) {
 		xcb_log(XCB_LOG_WARNING, "Error registering fd '%d' event for the new client: %s",
 			cfd, strerror(errno));
 		close(cfd);
@@ -1590,21 +1594,23 @@ static void tcp_accept_handler(event_loop el, int fd, int mask, void *data) {
 		dstr res = dstr_new("HEARTBEAT|");
 		dstr ip = getipv4();
 
-		xcb_log(XCB_LOG_NOTICE, "Accepted %s:%d, client '%p'", cip, cport, c);
+		xcb_log(XCB_LOG_NOTICE, "Accepted client '%s:%d'", c->ip, c->port);
 		res = dstr_cat(res, ip);
 		res = dstr_cat(res, "\r\n");
 		res = dstr_cat(res, indices);
 		pthread_spin_lock(&c->lock);
 		if (net_try_write(c->fd, res, dstr_length(res), 10, NET_NONBLOCK) == -1)
-			xcb_log(XCB_LOG_WARNING, "Writing to client '%p': %s", c, strerror(errno));
+			xcb_log(XCB_LOG_WARNING, "Writing to client '%s:%d': %s",
+				c->ip, c->port, strerror(errno));
 		pthread_spin_unlock(&c->lock);
 		dstr_free(ip);
 		dstr_free(res);
 	} else {
-		xcb_log(XCB_LOG_NOTICE, "Accepted %s:%d, client '%p'", cip, cport, c);
+		xcb_log(XCB_LOG_NOTICE, "Accepted client '%s:%d'", c->ip, c->port);
 		pthread_spin_lock(&c->lock);
 		if (net_try_write(c->fd, indices, dstr_length(indices), 10, NET_NONBLOCK) == -1)
-			xcb_log(XCB_LOG_WARNING, "Writing to client '%p': %s", c, strerror(errno));
+			xcb_log(XCB_LOG_WARNING, "Writing to client '%s:%d': %s",
+				c->ip, c->port, strerror(errno));
 		pthread_spin_unlock(&c->lock);
 	}
 }
@@ -1688,6 +1694,9 @@ static void config_command(client c) {
 }
 
 static void show_command(client c) {
+	dlist_iter_t iter;
+	dlist_node_t node;
+
 	if (!strcasecmp(c->argv[1], "modules")) {
 		/* FIXME */
 		struct module *mod = get_module_list_head();
@@ -1706,9 +1715,7 @@ static void show_command(client c) {
 	} else if (!strcasecmp(c->argv[1], "queues")) {
 		dlist_lock(queues);
 		if (dlist_length(queues) > 0) {
-			dlist_iter_t iter = dlist_iter_new(queues, DLIST_START_HEAD);
-			dlist_node_t node;
-
+			iter = dlist_iter_new(queues, DLIST_START_HEAD);
 			while ((node = dlist_next(iter))) {
 				struct msgs *msgs = (struct msgs *)dlist_node_value(node);
 				dstr appnames = dstr_new_len("", 0);
@@ -1736,6 +1743,18 @@ static void show_command(client c) {
 			dlist_iter_free(&iter);
 		}
 		dlist_unlock(queues);
+	} else if (!strcasecmp(c->argv[1], "clients")) {
+		dlist_lock(clients);
+		if (dlist_length(clients) > 0) {
+			iter = dlist_iter_new(clients, DLIST_START_HEAD);
+			while ((node = dlist_next(iter))) {
+				client ct = (client)dlist_node_value(node);
+
+				add_reply_string_format(c, "%30.30s  %d\r\n", ct->ip, ct->port);
+			}
+			dlist_iter_free(&iter);
+		}
+		dlist_unlock(clients);
 	} else
 		add_reply_error_format(c, "unknown property '%s'", c->argv[1]);
 	add_reply_string(c, "\r\n", 2);

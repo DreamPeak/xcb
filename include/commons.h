@@ -43,6 +43,8 @@ typedef struct client {
 	int			fd;
 	pthread_spinlock_t	lock;
 	int			sock;
+	char			ip[128];
+	int			port;
 	struct cmd		*cmd;
 	int			flags;
 	int			inpos;

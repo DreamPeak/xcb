@@ -80,14 +80,14 @@ static void shutdown_command(client c);
 /* FIXME */
 static table_t cmds;
 static struct cmd commands[] = {
-	{"help",	help_command,		"Display this text",			1},
-	{"?",		help_command,		"Synonym for 'help'",			1},
-	{"config",	config_command,		"Get or set configurations",		-3},
-	{"show",	show_command,		"Show modules",				2},
-	{"module",	module_command,		"Load, unload or reload module",	3},
-	{"monitor",	monitor_command,	"Monitor on or off",			2},
-	{"shutdown",	shutdown_command,	"Shut down xcb-dp2",			1},
-	{"quit",	NULL,			"Quit connecting to xcb-dp2",		1}
+	{"help",	help_command,		"Display this text",				1},
+	{"?",		help_command,		"Synonym for 'help'",				1},
+	{"config",	config_command,		"Get or set configurations",			-3},
+	{"show",	show_command,		"Show modules",					2},
+	{"module",	module_command,		"Load, unload or reload module",		3},
+	{"monitor",	monitor_command,	"Monitor on or off",				2},
+	{"shutdown",	shutdown_command,	"Shut down xcb-dp2",				1},
+	{"quit",	NULL,			"Quit connecting to xcb-dp2",			1}
 };
 static struct config *cfg;
 static pthread_mutex_t cfg_lock = PTHREAD_ADAPTIVE_MUTEX_INITIALIZER_NP;
@@ -295,8 +295,8 @@ static int server_cron(event_loop el, unsigned long id, void *data) {
 
 				pthread_spin_lock(&c->lock);
 				if (net_try_write(c->fd, res, dstr_length(res), 10, NET_NONBLOCK) == -1)
-					xcb_log(XCB_LOG_WARNING, "Writing to client '%p': %s",
-						c, strerror(errno));
+					xcb_log(XCB_LOG_WARNING, "Writing to client '%s:%d': %s",
+						c->ip, c->port, strerror(errno));
 				pthread_spin_unlock(&c->lock);
 			}
 			dlist_iter_free(&iter);
@@ -382,8 +382,8 @@ static int send_quote(void *data, void *data2) {
 				pthread_spin_lock(&c->lock);
 				if (!(c->flags & CLIENT_CLOSE_ASAP)) {
 					if (net_try_write(c->fd, res, strlen(res), 10, NET_NONBLOCK) == -1) {
-						xcb_log(XCB_LOG_WARNING, "Writing to client '%p': %s",
-							c, strerror(errno));
+						xcb_log(XCB_LOG_WARNING, "Writing to client '%s:%d': %s",
+							c->ip, c->port, strerror(errno));
 						if (++c->eagcount >= 3)
 							client_free_async(c);
 					} else if (c->eagcount)
@@ -449,8 +449,8 @@ void process_quote(void *data) {
 				if (!(c->flags & CLIENT_CLOSE_ASAP)) {
 					if (net_try_write(c->fd, res, strlen(res),
 						10, NET_NONBLOCK) == -1) {
-						xcb_log(XCB_LOG_WARNING, "Writing to client '%p': %s",
-							c, strerror(errno));
+						xcb_log(XCB_LOG_WARNING, "Writing to client '%s:%d': %s",
+							c->ip, c->port, strerror(errno));
 						if (++c->eagcount >= 3)
 							client_free_async(c);
 					} else if (c->eagcount)
@@ -764,7 +764,7 @@ void client_free(client c) {
 	FREE(c->argv);
 	pthread_spin_destroy(&c->lock);
 	close(c->fd);
-	xcb_log(XCB_LOG_NOTICE, "Client '%p' got freed", c);
+	xcb_log(XCB_LOG_NOTICE, "Client '%s:%d' got freed", c->ip, c->port);
 	FREE(c);
 }
 
@@ -807,7 +807,7 @@ void process_inbuf(client c) {
 			FREE(c->argv);
 		/* FIXME */
 		*newline = '\0';
-		xcb_log(XCB_LOG_INFO, "Client '%p' issued command '%s'", c, c->inbuf);
+		xcb_log(XCB_LOG_INFO, "Client '%s:%d' issued command '%s'", c->ip, c->port, c->inbuf);
 		c->argv = dstr_split_args(c->inbuf, &c->argc);
 		memmove(c->inbuf, c->inbuf + len + 2, sizeof c->inbuf - len - 2);
 		c->inpos -= len + 2;
@@ -816,7 +816,7 @@ void process_inbuf(client c) {
 	}
 }
 
-static client client_new(int fd, int sock) {
+static client client_new(int fd, int sock, char *ip, int port) {
 	client c;
 
 	if (NEW(c) == NULL)
@@ -832,6 +832,8 @@ static client client_new(int fd, int sock) {
 	c->fd            = fd;
 	pthread_spin_init(&c->lock, 0);
 	c->sock          = sock;
+	strcpy(c->ip, ip);
+	c->port          = port;
 	c->flags         = 0;
 	c->inpos         = 0;
 	c->argc          = 0;
@@ -860,7 +862,7 @@ static void tcp_accept_handler(event_loop el, int fd, int mask, void *data) {
 		xcb_log(XCB_LOG_WARNING, "Accepting client connection: %s", neterr);
 		return;
 	}
-	if ((c = client_new(cfd, fd)) == NULL) {
+	if ((c = client_new(cfd, fd, cip, cport)) == NULL) {
 		xcb_log(XCB_LOG_WARNING, "Error registering fd '%d' event for the new client: %s",
 			cfd, strerror(errno));
 		close(cfd);
@@ -869,12 +871,13 @@ static void tcp_accept_handler(event_loop el, int fd, int mask, void *data) {
 		dstr res = dstr_new("HEARTBEAT|");
 		dstr ip = getipv4();
 
-		xcb_log(XCB_LOG_NOTICE, "Accepted %s:%d, client '%p'", cip, cport, c);
+		xcb_log(XCB_LOG_NOTICE, "Accepted client '%s:%d'", c->ip, c->port);
 		res = dstr_cat(res, ip);
 		res = dstr_cat(res, "\r\n");
 		pthread_spin_lock(&c->lock);
 		if (net_try_write(c->fd, res, dstr_length(res), 10, NET_NONBLOCK) == -1)
-			xcb_log(XCB_LOG_WARNING, "Writing to client '%p': %s", c, strerror(errno));
+			xcb_log(XCB_LOG_WARNING, "Writing to client '%s:%d': %s",
+				c->ip, c->port, strerror(errno));
 		pthread_spin_unlock(&c->lock);
 		dstr_free(ip);
 		dstr_free(res);

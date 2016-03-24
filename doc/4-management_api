@@ -31,6 +31,9 @@ show applications
 show queues
     Show all queues.
 
+show clients
+    Show all clients.
+
 module load <xxx.so>
     Load a module.
 

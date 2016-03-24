@@ -24,6 +24,7 @@
 
 #include "macros.h"
 #include "mem.h"
+#include "dlist.h"
 #include "btree.h"
 
 /* FIXME */
@@ -40,7 +41,6 @@ struct btree_node_t {
 	unsigned char	leaf:1;
 	/* the number of keys currently stored in the node */
 	int		n;
-	btree_node_t	parent;
 	union {
 		/* pointers to the node's children */
 		btree_node_t	*children;
@@ -115,9 +115,8 @@ static int btree_split_child(btree_t btree, btree_node_t x, int i) {
 		y->u.pn.next->u.pn.prev = z;
 		y->u.pn.next = z;
 	}
-	z->leaf   = y->leaf;
-	z->n      = btree->t - 1;
-	z->parent = x;
+	z->leaf = y->leaf;
+	z->n    = btree->t - 1;
 	/* FIXME: memmove? */
 	for (j = 0; j < btree->t - 1; ++j) {
 		z->bindings[j].key   = y->bindings[j + btree->t].key;
@@ -219,39 +218,28 @@ btree_t btree_new(int t, int cmp(const void *x, const void *y),
 
 /* FIXME */
 void btree_free(btree_t *bp) {
-	btree_node_t x;
+	dlist_t queue = dlist_new(NULL, NULL);
 
 	if (unlikely(bp == NULL || *bp == NULL))
 		return;
-	x = (*bp)->sentinel->u.pn.next;
-	while (x != (*bp)->sentinel) {
-		btree_node_t y = x->parent, z = x;
+	dlist_insert_tail(queue, (*bp)->root);
+	while (dlist_length(queue)) {
+		btree_node_t node = dlist_remove_head(queue);
 		int i;
 
-		while (y) {
-			btree_node_t tmp = y;
-
-			for (i = 0; i < y->n; ++i) {
-				y->u.children[i]->parent = NULL;
+		if (!node->leaf)
+			for (i = 0; i <= node->n; ++i)
+				dlist_insert_tail(queue, node->u.children[i]);
+		else
+			for (i = 0; i < node->n; ++i) {
 				if ((*bp)->kfree)
-					(*bp)->kfree(tmp->bindings[i].key);
+					(*bp)->kfree(node->bindings[i].key);
 				if ((*bp)->vfree)
-					(*bp)->vfree(tmp->bindings[i].value);
+					(*bp)->vfree(node->bindings[i].value);
 			}
-			y->u.children[y->n]->parent = NULL;
-			y = y->parent;
-			node_free(tmp);
-		}
-		for (i = 0; i < x->n; ++i) {
-			if ((*bp)->kfree)
-				(*bp)->kfree(z->bindings[i].key);
-			if ((*bp)->vfree)
-				(*bp)->vfree(z->bindings[i].value);
-		}
-		x = x->u.pn.next;
-		node_free(z);
+		node_free(node);
 	}
-	node_free(x);
+	node_free((*bp)->sentinel);
 	FREE(*bp);
 }
 
@@ -303,7 +291,6 @@ void *btree_insert(btree_t btree, const void *key, void *value) {
 			return NULL;
 		}
 		y->u.children[0] = x;
-		x->parent = y;
 		btree->root = y;
 		if (btree_split_child(btree, y, 0) == -1)
 			return NULL;
