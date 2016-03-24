@@ -63,7 +63,7 @@ void client_decr(client c) {
 		return;
 	ret = __sync_fetch_and_add(&c->refcount, -1);
 	if ((val = ret - 1) < 0)
-		xcb_log(XCB_LOG_WARNING, "Invalid refcount %d on client '%p'", val, c);
+		xcb_log(XCB_LOG_WARNING, "Invalid refcount %d on client '%s:%d'", val, c->ip, c->port);
 }
 
 void client_free_async(client c) {
@@ -120,7 +120,8 @@ static void send_to_client(event_loop el, int fd, int mask, void *data) {
 		if (errno == EAGAIN || errno == EINTR)
 			nwritten = 0;
 		else {
-			xcb_log(XCB_LOG_WARNING, "Writing to client '%p': %s", c, strerror(errno));
+			xcb_log(XCB_LOG_WARNING, "Writing to client '%s:%d': %s",
+				c->ip, c->port, strerror(errno));
 			if (c->refcount == 0)
 				client_free(c);
 			return;
@@ -214,13 +215,14 @@ void read_from_client(event_loop el, int fd, int mask, void *data) {
 		if (errno == EAGAIN || errno == EINTR)
 			nread = 0;
 		else {
-			xcb_log(XCB_LOG_WARNING, "Reading from client '%p': %s", c, strerror(errno));
+			xcb_log(XCB_LOG_WARNING, "Reading from client '%s:%d': %s",
+				c->ip, c->port, strerror(errno));
 			if (c->refcount == 0)
 				client_free(c);
 			return;
 		}
 	} else if (nread == 0) {
-		xcb_log(XCB_LOG_WARNING, "Client '%p' closed connection", c);
+		xcb_log(XCB_LOG_WARNING, "Client '%s:%d' closed connection", c->ip, c->port);
 		if (c->refcount == 0)
 			client_free(c);
 		return;
@@ -230,7 +232,8 @@ void read_from_client(event_loop el, int fd, int mask, void *data) {
 	else
 		return;
 	if (c->inpos >= sizeof c->inbuf) {
-		xcb_log(XCB_LOG_WARNING, "Closing client '%p' that reached max input buffer length", c);
+		xcb_log(XCB_LOG_WARNING, "Closing client '%s:%d' that reached max input buffer length",
+			c->ip, c->port);
 		if (c->refcount == 0)
 			client_free(c);
 		return;

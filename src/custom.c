@@ -126,8 +126,9 @@ void s_command(client c) {
 					if (!(c->flags & CLIENT_CLOSE_ASAP)) {
 						if (net_try_write(c->fd, res, dstr_length(res),
 							10, NET_NONBLOCK) == -1) {
-							xcb_log(XCB_LOG_WARNING, "Writing to client '%p': %s",
-								c, strerror(errno));
+							xcb_log(XCB_LOG_WARNING,
+								"Writing to client '%s:%d': %s",
+								c->ip, c->port, strerror(errno));
 							if (++c->eagcount >= 3) {
 								client_free_async(c);
 								pthread_spin_unlock(&c->lock);
@@ -306,7 +307,8 @@ static void *q_thread(void *data) {
 		res = dstr_cat(res, ",1\r\n\r\n");
 		pthread_spin_lock(&crss->c->lock);
 		if (net_try_write(crss->c->fd, res, dstr_length(res), 10, NET_NONBLOCK) == -1)
-			xcb_log(XCB_LOG_WARNING, "Writing to client '%p': %s", crss->c, strerror(errno));
+			xcb_log(XCB_LOG_WARNING, "Writing to client '%s:%d': %s",
+				crss->c->ip, crss->c->port, strerror(errno));
 		pthread_spin_unlock(&crss->c->lock);
 		goto end;
 	}
@@ -326,8 +328,8 @@ static void *q_thread(void *data) {
 			res = dstr_cat(res, "\r\n");
 			pthread_spin_lock(&crss->c->lock);
 			if (net_try_write(crss->c->fd, res, dstr_length(res), 10, NET_NONBLOCK) == -1) {
-				xcb_log(XCB_LOG_WARNING, "Writing to client '%p': %s",
-					crss->c, strerror(errno));
+				xcb_log(XCB_LOG_WARNING, "Writing to client '%s:%d': %s",
+					crss->c->ip, crss->c->port, strerror(errno));
 				pthread_spin_unlock(&crss->c->lock);
 				goto end;
 			}
@@ -343,7 +345,8 @@ static void *q_thread(void *data) {
 	res = dstr_cat(res, ",1\r\n\r\n");
 	pthread_spin_lock(&crss->c->lock);
 	if (net_try_write(crss->c->fd, res, dstr_length(res), 10, NET_NONBLOCK) == -1)
-		xcb_log(XCB_LOG_WARNING, "Writing to client '%p': %s", crss->c, strerror(errno));
+		xcb_log(XCB_LOG_WARNING, "Writing to client '%s:%d': %s",
+			crss->c->ip, crss->c->port, strerror(errno));
 	pthread_spin_unlock(&crss->c->lock);
 
 end:
