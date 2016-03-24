@@ -249,6 +249,12 @@ unsigned long btree_length(btree_t btree) {
 	return btree->length;
 }
 
+btree_node_t btree_sentinel(btree_t btree) {
+	if (unlikely(btree == NULL))
+		return NULL;
+	return btree->sentinel;
+}
+
 int btree_node_n(btree_node_t node) {
 	if (unlikely(node == NULL))
 		return 0;

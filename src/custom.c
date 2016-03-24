@@ -86,8 +86,9 @@ void s_command(client c) {
 		table_lock(cache);
 		if ((btree = table_get_value(cache, pkey))) {
 			btree_node_t node = btree_find(btree, skey, &i);
+			btree_node_t sentinel = btree_sentinel(btree);
 
-			while (node) {
+			while (node != sentinel) {
 				int n = btree_node_n(node);
 
 				for (; i < n; ++i) {
@@ -100,7 +101,7 @@ void s_command(client c) {
 					/* FIXME */
 					if (dstr_length(key) < dstr_length(skey) ||
 						memcmp(key, skey, dstr_length(skey)))
-						break;
+						goto nomatch;
 					fields = dstr_split_len(key, dstr_length(key), ",", 1, &nfield);
 					res = dstr_new(fields[0]);
 					if (nfield > 1) {
@@ -154,6 +155,8 @@ void s_command(client c) {
 				i = 0;
 			}
 		}
+
+nomatch:
 		table_unlock(cache);
 	}
 	ptrie_rwlock_wrlock(subscribers);

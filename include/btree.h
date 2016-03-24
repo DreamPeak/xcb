@@ -34,6 +34,7 @@ extern btree_t       btree_new(int t, int cmp(const void *x, const void *y),
 			void kfree(const void *key), void vfree(void *value));
 extern void          btree_free(btree_t* bp);
 extern unsigned long btree_length(btree_t btree);
+extern btree_node_t  btree_sentinel(btree_t btree);
 extern int           btree_node_n(btree_node_t node);
 extern btree_node_t  btree_node_next(btree_node_t node);
 extern const void   *btree_node_key(btree_node_t node, int i);
