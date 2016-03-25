@@ -88,7 +88,7 @@ void s_command(client c) {
 			btree_node_t node = btree_find(btree, skey, &i);
 			btree_node_t sentinel = btree_sentinel(btree);
 
-			while (node != sentinel) {
+			while (node && node != sentinel) {
 				int n = btree_node_n(node);
 
 				for (; i < n; ++i) {
