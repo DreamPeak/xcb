@@ -239,6 +239,7 @@ void btree_free(btree_t *bp) {
 			}
 		node_free(node);
 	}
+	dlist_free(&queue);
 	node_free((*bp)->sentinel);
 	FREE(*bp);
 }

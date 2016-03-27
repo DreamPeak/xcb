@@ -701,7 +701,7 @@ static int on_msgv(struct pgm_msgv_t *msgv, size_t len) {
 				/* put latest quotes into cache */
 				table_lock(cache);
 				if ((btree = table_get_value(cache, index)) == NULL) {
-					btree = btree_new(32, cmpstr, kfree, vfree);
+					btree = btree_new(128, cmpstr, kfree, vfree);
 					btree_insert(btree, ckey, cvalue);
 					table_insert(cache, dstr_new(index), btree);
 				} else {

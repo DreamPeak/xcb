@@ -379,6 +379,7 @@ ptrie_node_t ptrie_search_prefix(ptrie_node_t node, const char *key, void *value
 				x = x->next;
 			}
 		}
+		dlist_free(&queue);
 	}
 	return NULL;
 }
