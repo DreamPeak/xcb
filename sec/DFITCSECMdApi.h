@@ -2,12 +2,14 @@
  * 版权所有(C)2012-2016, 大连飞创信息技术有限公司
  * 文件名称：DFITCSECMdApi.h
  * 文件说明：定义XSpeed行情API接口
- * 当前版本：1.5.50.0
+ * 当前版本：1.6.19
  * 作者：XSpeed证券项目组
- * 发布日期：2015年12月
+ * 发布日期：2016年03月
  */
+
 #ifndef DFITCSECMDAPI_H_
 #define DFITCSECMDAPI_H_
+
 
 #include "DFITCSECApiStruct.h"
 
@@ -141,6 +143,13 @@
          */
         virtual void OnRspSopAvailableQuot(struct DFITCRspQuotQryField * pAvailableQuotInfo, struct DFITCSECRspInfoField * pRspInfo,bool flag) {}
 
+		/**
+         * 密码更新请求响应
+         * @param pMDPasswordUpdate:指针若非空,返回用户行情密码响应信息结构地址,表明密码修改成功。
+         * @param pRspInfo:指针若非空，返回错误信息地址，表明密码修改失败。
+         */
+        virtual void OnRspUserMDPasswordUpdate(struct DFITCSECRspMDPasswordUpdateField *pMDPasswordUpdate,struct DFITCSECRspInfoField * pRspInfo){}
+
     };//end of DFITCSECMdSpi
 
     class DFITCSEC_MD_API DFITCSECMdApi
@@ -256,6 +265,13 @@
          * @return 0表示成功，-1表示失败
          */ 
         virtual int ReqSopAvailableQuotQry(struct  APISTRUCT DFITCReqQuotQryField * pReqQuotQryField) = 0;
+
+		/**
+	     * 密码更新请求
+         * @param pReqMDPasswordUpdate:指向用户密码更新请求结构的地址
+         * @return 0表示请求发送成功，其他值表示请求发送失败，具体错误请对照error.xml
+         */
+        virtual int ReqUserMDPasswordUpdate(struct DFITCSECReqMDPasswordUpdateField *pReqMDPasswordUpdate) = 0;
 
     protected:
         virtual ~DFITCSECMdApi() = 0;

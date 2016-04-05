@@ -2,9 +2,9 @@
 * 版权所有(C)2012-2016, 大连飞创信息技术有限公司
 * 文件名称：DFITCSECTraderApi.h
 * 文件说明：定义接口所需的数据接口
-* 当前版本：1.5.107.0
+* 当前版本：1.6.35
 * 作者：XSpeed证券项目组
-* 发布日期：2015年12月
+* 发布日期：2016年03月
 */
 #ifndef DFITCSECTRADERAPI_H_
 #define DFITCSECTRADERAPI_H_
@@ -75,30 +75,35 @@ public:
     * STOCK-委托查询响应
     * @param pData:指针若非空,返回用户委托查询响应信息结构体的地址,表明查询请求成功
     * @param pRspInfo:指针若非空，返回错误信息结构体的地址，表明委托查询请求失败
+    * @param bIsLast:返回值表明是否是最后一笔响应信息(0-否,1-是)
     */
     virtual void OnRspStockQryEntrustOrder(DFITCStockRspQryEntrustOrderField *pData, DFITCSECRspInfoField *pRspInfo, bool bIsLast) {};
     /**
     * STOCK-实时成交查询响应
     * @param pData:指针若非空,返回用户实时成交查询响应信息结构体的地址,表明实时成交查询请求成功
     * @param pRspInfo:指针若非空，返回错误信息结构体的地址，表明实时成交查询请求失败
+    * @param bIsLast:返回值表明是否是最后一笔响应信息(0-否,1-是)
     */
     virtual void OnRspStockQryRealTimeTrade(DFITCStockRspQryRealTimeTradeField *pData, DFITCSECRspInfoField *pRspInfo, bool bIsLast) {};
     /**
     * STOCK-分笔成交查询响应
     * @param pData:指针若非空,返回用户分笔成交查询响应信息结构体的地址,表明分笔成交查询请求成功
     * @param pRspInfo:指针若非空，返回错误信息结构体的地址，表明分笔成交查询请求失败
+    * @param bIsLast:返回值表明是否是最后一笔响应信息(0-否,1-是)
     */
     virtual void OnRspStockQrySerialTrade(DFITCStockRspQrySerialTradeField *pData, DFITCSECRspInfoField *pRspInfo, bool bIsLast) {};
     /**
     * STOCK-持仓查询响应
     * @param pData:指针若非空,返回用户持仓查询响应信息结构体的地址,表明持仓查询请求成功
     * @param pRspInfo:指针若非空，返回错误信息结构体的地址，表明持仓查询请求失败
+    * @param bIsLast:返回值表明是否是最后一笔响应信息(0-否,1-是)
     */
     virtual void OnRspStockQryPosition(DFITCStockRspQryPositionField *pData, DFITCSECRspInfoField *pRspInfo, bool bIsLast) {};
     /**
     * STOCK-资金账号查询响应
     * @param pData:指针若非空,返回用户资金账号查询响应信息结构体的地址,表明资金账号查询请求成功
     * @param pRspInfo:指针若非空，返回错误信息结构体的地址，表明资金账号查询请求失败
+    * @param bIsLast:返回值表明是否是最后一笔响应信息(0-否,1-是)
     */
     virtual void OnRspStockQryCapitalAccountInfo(DFITCStockRspQryCapitalAccountField *pData, DFITCSECRspInfoField *pRspInfo, bool bIsLast) {};
     /**
@@ -111,6 +116,7 @@ public:
     * STOCK-股东号查询响应
     * @param pData:指针若非空,返回用户股东号查询响应信息结构体的地址,表明股东号查询请求成功
     * @param pRspInfo:指针若非空，返回错误信息结构体的地址，表明股东号查询请求失败
+    * @param bIsLast:返回值表明是否是最后一笔响应信息(0-否,1-是)
     */
     virtual void OnRspStockQryShareholderInfo(DFITCStockRspQryShareholderField *pData, DFITCSECRspInfoField *pRspInfo, bool bIsLast) {}; 
     /**
@@ -119,7 +125,7 @@ public:
     * @param pRspInfo:指针若非空，返回错误信息结构体的地址，表明资金调拨请求失败
     */
     virtual void OnRspStockTransferFunds(DFITCStockRspTransferFundsField *pData,DFITCSECRspInfoField *pRspInfo) {};
-    /*
+    /**
     * STOCK-批量委托响应
     * @param pData:指针若非空,返回用户批量委托响应信息结构体的地址,表明批量委托请求成功
     * @param pRspInfo:指针若非空，返回错误信息结构体的地址，表明批量委托请求失败
@@ -147,36 +153,42 @@ public:
     * STOCK-冻结资金明细查询响应
     * @param pData:指针若非空,返回用户冻结资金明细查询响应信息结构体的地址,表明冻结资金明细查询请求成功
     * @param pRspInfo:指针若非空，返回错误信息结构体的地址，表明冻结资金明细查询请求失败
+    * @param bIsLast:返回值表明是否是最后一笔响应信息(0-否,1-是)
     */
     virtual void OnRspStockQryFreezeFundsDetail(DFITCStockRspQryFreezeFundsDetailField *pData, DFITCSECRspInfoField *pRspInfo, bool bIsLast) {}; 
     /**
     * STOCK-冻结证券明细查询响应
     * @param pData:指针若非空,返回用户冻结证券明细查询响应信息结构体的地址,表明冻结证券明细查询请求成功
     * @param pRspInfo:指针若非空，返回错误信息结构体的地址，表明冻结证券明细查询请求失败
+    * @param bIsLast:返回值表明是否是最后一笔响应信息(0-否,1-是)
     */
     virtual void OnRspStockQryFreezeStockDetail(DFITCStockRspQryFreezeStockDetailField *pData, DFITCSECRspInfoField *pRspInfo, bool bIsLast) {};
     /**
     * STOCK-调拨证券明细查询响应
     * @param pData:指针若非空,返回用户调拨证券明细查询响应信息结构体的地址,表明调拨证券明细查询请求成功
     * @param pRspInfo:指针若非空，返回错误信息结构体的地址，表明调拨证券明细查询请求失败
+    * @param bIsLast:返回值表明是否是最后一笔响应信息(0-否,1-是)
     */
     virtual void OnRspStockQryTransferStockDetail(DFITCStockRspQryTransferStockDetailField *pData, DFITCSECRspInfoField *pRspInfo, bool bIsLast) {};
     /**
     * STOCK-调拨资金明细查询响应
     * @param pData:指针若非空,返回用户调拨资金明细查询响应信息结构体的地址,表明调拨资金明细查询请求成功
     * @param pRspInfo:指针若非空，返回错误信息结构体的地址，表明调拨资金明细查询请求失败
+    * @param bIsLast:返回值表明是否是最后一笔响应信息(0-否,1-是)
     */
     virtual void OnRspStockQryTransferFundsDetail(DFITCStockRspQryTransferFundsDetailField *pData, DFITCSECRspInfoField *pRspInfo, bool bIsLast) {};
     /**
     * STOCK-证券信息查询响应
     * @param pData:指针若非空,返回用户证券信息查询响应信息结构体的地址,表明证券信息查询请求成功
     * @param pRspInfo:指针若非空，返回错误信息结构体的地址，表明证券信息查询请求失败
+    * @param bIsLast:返回值表明是否是最后一笔响应信息(0-否,1-是)
     */
     virtual void OnRspStockQryStockInfo(DFITCStockRspQryStockField *pData, DFITCSECRspInfoField *pRspInfo, bool bIsLast) {};
     /**
     * STOCK-证券静态信息查询响应
     * @param pData:指针若非空,返回用户证券静态信息查询响应信息结构体的地址,表明证券静态信息查询请求成功
     * @param pRspInfo:指针若非空，返回错误信息结构体的地址，表明证券静态信息查询请求失败
+    * @param bIsLast:返回值表明是否是最后一笔响应信息(0-否,1-是)
     */
     virtual void OnRspStockQryStockStaticInfo(DFITCStockRspQryStockStaticField *pData, DFITCSECRspInfoField *pRspInfo, bool bIsLast) {};
     /**
@@ -235,12 +247,14 @@ public:
     * SOP-查询客户组合持仓明细响应
     * @param pData:指针若非空,返回用户查询客户组合持仓明细响应结构地址,表明查询客户组合持仓明细请求成功
     * @param pRspInfo:指针若非空，返回错误信息地址，表明查询客户组合持仓明细请求失败
+    * @param bIsLast:返回值表明是否是最后一笔响应信息(0-否,1-是)
     */
     virtual void OnRspSOPQryGroupPosition(DFITCSOPRspQryGroupPositionField *pData, DFITCSECRspInfoField *pRspInfo, bool bIsLast) {};
     /**
     * SOP-证券锁定解锁响应
     * @param pData:指针若非空,返回用户证券锁定解锁响应信息结构地址,表明证券锁定解锁请求成功
     * @param pRspInfo:指针若非空，返回错误信息地址，表明证券锁定解锁请求失败
+    * @param bIsLast:返回值表明是否是最后一笔响应信息(0-否,1-是)
     */
     virtual void OnRspSOPLockOUnLockStock(DFITCSOPRspLockOUnLockStockField *pData, DFITCSECRspInfoField *pRspInfo, bool bIsLast) {}; 
     /**
@@ -253,18 +267,21 @@ public:
     * SOP-委托查询响应
     * @param pData:指针若非空,返回用户委托查询响应信息结构地址,表明委托查询请求成功
     * @param pRspInfo:指针若非空，返回错误信息地址，表明委托查询请求失败
+    * @param bIsLast:返回值表明是否是最后一笔响应信息(0-否,1-是)
     */
     virtual void OnRspSOPQryEntrustOrder(DFITCSOPRspQryEntrustOrderField *pData, DFITCSECRspInfoField *pRspInfo, bool bIsLast) {};
     /**
     * SOP-分笔成交查询响应
     * @param pData:指针若非空,返回用户分笔成交查询响应信息结构地址,表明分笔成交查询请求成功
     * @param pRspInfo:指针若非空，返回错误信息地址，表明分笔成交查询请求失败
+    * @param bIsLast:返回值表明是否是最后一笔响应信息(0-否,1-是)
     */
     virtual void OnRspSOPQrySerialTrade(DFITCSOPRspQrySerialTradeField *pData, DFITCSECRspInfoField *pRspInfo, bool bIsLast) {};
     /**
     * SOP-持仓查询响应
     * @param pData:指针若非空,返回用户持仓查询响应信息结构地址,表明持仓查询请求成功
     * @param pRspInfo:指针若非空，返回错误信息地址，表明持仓查询请求失败
+    * @param bIsLast:返回值表明是否是最后一笔响应信息(0-否,1-是)
     */
     virtual void OnRspSOPQryPosition(DFITCSOPRspQryPositionField *pData, DFITCSECRspInfoField *pRspInfo, bool bIsLast) {};
     /**
@@ -278,28 +295,24 @@ public:
     * SOP-客户资金查询响应
     * @param pData:指针若非空,返回用户客户资金查询响应信息结构地址,表明客户客户资金查询请求成功
     * @param pRspInfo:指针若非空，返回错误信息地址，表明客户客户资金查询请求失败
-    * @param bIsLast:返回值表明是否是最后一笔响应信息(0-否,1-是)
     */
     virtual void OnRspSOPQryCapitalAccountInfo(DFITCSOPRspQryCapitalAccountField *pData, DFITCSECRspInfoField *pRspInfo) {};
     /**
     * SOP-客户信息查询响应
     * @param pData:指针若非空,返回用户客户信息查询响应信息结构地址,表明客户客户信息查询请求成功
     * @param pRspInfo:指针若非空，返回错误信息地址，表明客户客户信息查询请求失败
-    * @param bIsLast:返回值表明是否是最后一笔响应信息(0-否,1-是)
     */
     virtual void OnRspSOPQryAccountInfo(DFITCSOPRspQryAccountField *pData, DFITCSECRspInfoField *pRspInfo) {};
     /**
     * SOP-股东信息查询响应
     * @param pData:指针若非空,返回用户股东信息查询响应信息结构地址,表明客户股东信息查询请求成功
     * @param pRspInfo:指针若非空，返回错误信息地址，表明客户股东信息查询请求失败
-    * @param bIsLast:返回值表明是否是最后一笔响应信息(0-否,1-是)
     */
     virtual void OnRspSOPQryShareholderInfo(DFITCSOPRspQryShareholderField *pData, DFITCSECRspInfoField *pRspInfo) {}; 
     /**
     * SOP-可委托数量查询响应
     * @param pData:指针若非空,返回用户可委托数量查询响应信息结构地址,表明客户可委托数量查询请求成功
     * @param pRspInfo:指针若非空，返回错误信息地址，表明客户可委托数量查询请求失败
-    * @param bIsLast:返回值表明是否是最后一笔响应信息(0-否,1-是)
     */
     virtual void OnRspSOPCalcAbleEntrustQty(DFITCSOPRspCalcAbleEntrustQtyField *pData, DFITCSECRspInfoField *pRspInfo) {};
     /**
@@ -320,7 +333,6 @@ public:
     * SOP-执行委托响应
     * @param pData:指针若非空,返回用户执行委托响应信息结构地址,表明客户执行委托请求成功
     * @param pRspInfo:指针若非空，返回错误信息地址，表明客户执行委托请求失败
-    * @param bIsLast:返回值表明是否是最后一笔响应信息(0-否,1-是)
     */
     virtual void OnRspSOPExectueOrder(DFITCSOPRspExectueOrderField *pData, DFITCSECRspInfoField *pRspInfo) {};
     /**
@@ -334,7 +346,7 @@ public:
     * SOP-查询交易时间响应
     * @param pData:指针若非空,返回用户查询交易时间响应信息结构地址,表明客户查询交易时间请求成功
     * @param pRspInfo:指针若非空，返回错误信息地址，表明客户查询交易时间请求失败
-    * @param bIsLast:返回值表明是否是最后一笔响应信息(0-否,1-是)◆
+    * @param bIsLast:返回值表明是否是最后一笔响应信息(0-否,1-是)
     */
     virtual void OnRspSOPQryTradeTime(DFITCSOPRspQryTradeTimeField *pData, DFITCSECRspInfoField *pRspInfo, bool bIsLast) {};
     /**
@@ -364,7 +376,7 @@ public:
     * @param pRspInfo:指针若非空，返回错误信息地址，表明客户期权标的信息查询请求失败
     * @param bIsLast:返回值表明是否是最后一笔响应信息(0-否,1-是)
     */
-    virtual void OnRspSOPQryContractObjectInfo(DFITCSOPRspQryContractObjectField *pData, DFITCSECRspInfoField *pRspInfo, bool bIsLast) {}; 
+    virtual void OnRspSOPQryContractObjectInfo(DFITCSOPRspQryContractObjectField *pData, DFITCSECRspInfoField *pRspInfo, bool bIsLast) {};
     /**
     * SOP-委托回报响应
     * @param pData:返回委托回报结构体的地址
@@ -385,23 +397,20 @@ public:
     * FASL-登录响应
     * @param pData:指针若非空,返回用户融资融券登录响应信息结构地址,表明客户融资融券登录请求成功
     * @param pRspInfo:指针若非空，返回错误信息地址，表明客户融资融券登录请求失败
-    * @param bIsLast:返回值表明是否是最后一笔响应信息(0-否,1-是)
     */
     virtual void OnRspFASLUserLogin(DFITCSECRspUserLoginField *pData, DFITCSECRspInfoField *pRspInfo) {};
     /**
     * FASL-登出响应
     * @param pData:指针若非空,返回用户融资融券登出响应信息结构地址,表明客户融资融券登出请求成功
     * @param pRspInfo:指针若非空，返回错误信息地址，表明客户融资融券登出请求失败
-    * @param bIsLast:返回值表明是否是最后一笔响应信息(0-否,1-是)
     */
     virtual void OnRspFASLUserLogout(DFITCSECRspUserLogoutField *pData, DFITCSECRspInfoField *pRspInfo) {};
     /**
     * FASL-客户可融资信息响应
     * @param pData:指针若非空,返回用户客户可融资信息响应信息结构地址,表明客户客户可融资信息请求成功
     * @param pRspInfo:指针若非空，返回错误信息地址，表明客户客户可融资信息请求失败
-    * @param bIsLast:返回值表明是否是最后一笔响应信息(0-否,1-是)
     */
-    virtual void OnRspFASLQryAbleFinInfo(DFITCFASLRspAbleFinInfoField *pData, DFITCSECRspInfoField *pRspInfo, bool bIsLast) {};
+    virtual void OnRspFASLQryAbleFinInfo(DFITCFASLRspAbleFinInfoField *pData, DFITCSECRspInfoField *pRspInfo) {};
     /**
     * FASL-客户可融券信息响应
     * @param pData:指针若非空,返回用户客户可融券信息响应信息结构地址,表明客户客户可融券信息请求成功
@@ -456,25 +465,20 @@ public:
     * @param pData:指针若非空,返回用户信用合约信息响应信息结构地址,表明客户信用合约信息请求成功
     * @param pRspInfo:指针若非空，返回错误信息地址，表明客户信用合约信息请求失败
     */
-    virtual void OnRspFASLQryCrdtContract(DFITCFASLRspQryCrdtContractField *pData, DFITCSECRspInfoField *pRspInfo) {};  
+    virtual void OnRspFASLQryCrdtContract(DFITCFASLRspQryCrdtContractField *pData, DFITCSECRspInfoField *pRspInfo, bool bIsLat) {};
     /**
     * FASL-信用合约变动信息查询响应
     * @param pData:指针若非空,返回用户信用合约变动信息查询响应信息结构地址,表明客户信用合约变动信息查询请求成功
     * @param pRspInfo:指针若非空，返回错误信息地址，表明客户信用合约变动信息查询请求失败
+    * @param bIsLast:返回值表明是否是最后一笔响应信息(0-否,1-是)
     */
-    virtual void OnRspFASLQryCrdtConChangeInfo(DFITCFASLRspQryCrdtConChangeInfoField *pData, DFITCSECRspInfoField *pRspInfo) {}; 
+    virtual void OnRspFASLQryCrdtConChangeInfo(DFITCFASLRspQryCrdtConChangeInfoField *pData, DFITCSECRspInfoField *pRspInfo, bool bIsLast) {};
     /**
     * FASL-资金调转响应
     * @param pData:指针若非空,返回用户资金调转响应信息结构地址,表明客户资金调转请求成功
     * @param pRspInfo:指针若非空，返回错误信息地址，表明客户资金调转请求失败
     */
     virtual void OnRspFASLTransferFunds(DFITCStockRspTransferFundsField *pData, DFITCSECRspInfoField *pRspInfo) {};
-    /**
-    * FASL-计算可委托数量响应
-    * @param pData:指针若非空,返回用户计算可委托数量响应信息结构地址,表明客户计算可委托数量请求成功
-    * @param pRspInfo:指针若非空，返回错误信息地址，表明客户计算可委托数量请求失败
-    */
-    virtual void OnRspFASLCalcAbleEntrustQty(DFITCStockRspCalcAbleEntrustQtyField *pData, DFITCSECRspInfoField *pRspInfo) {};
     /**
     * FASL-客户信息查询响应
     * @param pData:指针若非空,返回用户客户信息查询响应信息结构地址,表明客户客户信息查询请求成功
@@ -545,6 +549,45 @@ public:
     */
     virtual void OnRspFASLQryTransferFundsDetail(DFITCStockRspQryTransferFundsDetailField *pData, DFITCSECRspInfoField *pRspInfo, bool bIsLast) {};
     /**
+    * FASL-撤单响应
+    * @param pData:指针若非空,返回用户撤单响应信息结构地址,表明撤单请求成功
+    * @param pRspInfo:指针若非空，返回错误信息地址，表明撤单请求失败
+    */
+    virtual void OnRspFASLWithdrawOrder(DFITCFASLRspWithdrawOrderField *pData, DFITCSECRspInfoField *pRspInfo) {};
+    /**
+    * FASL-当前系统时间查询请求响应
+    * @param pData:指针若非空,返回用户系统时间查询响应信息结构地址,表明系统时间查询请求成功
+    * @param pRspInfo:指针若非空，返回错误信息地址，表明系统时间查询请求失败
+    */
+    virtual void OnRspFASLQrySystemTime(DFITCFASLRspQryTradeTimeField *pData, DFITCSECRspInfoField *pRspInfo) {};
+    /**
+    * FASL-可转入担保证券查询请求响应
+    * @param pData:指针若非空,返回可转入担保证券查询响应信息结构地址,表明可转入担保证券查询请求成功
+    * @param pRspInfo:指针若非空，返回错误信息地址，表明可转入担保证券查询请求失败
+    * @param bIsLast:返回值表明是否是最后一笔响应信息(0-否,1-是)
+    */
+    virtual void OnRspFASLQryTransferredContract(DFITCFASLRspQryTransferredContractField *pData, DFITCSECRspInfoField *pRspInfo, bool bIsLast) {};
+    /**
+    * FASL-客户可取资金调出请求响应
+    * @param pData:指针若非空,返回客户可取资金调出响应信息结构地址,表明客户可取资金调出请求成功
+    * @param pRspInfo:指针若非空，返回错误信息地址，表明客户可取资金调出请求失败
+    */
+    virtual void OnRspFASLDesirableFundsOut(DFITCFASLRspDesirableFundsOutField *pData, DFITCSECRspInfoField *pRspInfo) {};
+    /**
+    * FASL-担保证券查询请求响应
+    * @param pData:指针若非空,返回担保证券查询响应信息结构地址,表明担保证券查询请求成功
+    * @param pRspInfo:指针若非空，返回错误信息地址，表明担保证券查询请求失败
+    * @param bIsLast:返回值表明是否是最后一笔响应信息(0-否,1-是)
+    */
+    virtual void OnRspFASLQryGuaranteedContract(DFITCFASLRspQryGuaranteedContractField *pData, DFITCSECRspInfoField *pRspInfo, bool bIsLast) {};
+    /**
+    * FASL-标的证券查询请求响应
+    * @param pData:指针若非空,返回标的证券查询响应信息结构地址,表明标的证券查询请求成功
+    * @param pRspInfo:指针若非空，返回错误信息地址，表明标的证券查询失败
+    * @param bIsLast:返回值表明是否是最后一笔响应信息(0-否,1-是)
+    */
+    virtual void OnRspFASLQryUnderlyingContract(DFITCFASLRspQryUnderlyingContractField *pData, DFITCSECRspInfoField *pRspInfo, bool bIsLast) {};
+    /**
     * FASL-委托回报响应
     * @param pData:返回委托回报结构体的地址
     */
@@ -569,8 +612,9 @@ public:
      /**
       * 创建DFITCSECTraderApi接口对象
       * @ pszLogAddr log所在的路径，如果pszLogAddress为NULL，则不生成log。
+	  * @ pszPriFlowDir 私有流记录所在的路径，如果pszPriFlowDir为NULL，则默认将私有流记录在当前目录下。
       */
-     static DFITCSECTraderApi *CreateDFITCSECTraderApi(const char* pszLogAddr = "");
+     static DFITCSECTraderApi *CreateDFITCSECTraderApi(const char* pszLogAddr = "", const char* pszPriFlowDir = "");
      /**
       * 释放DFITCSECTraderApi接口对象
       */
@@ -853,7 +897,7 @@ public:
      */
     virtual int ReqSOPExectueOrder(DFITCSOPReqExectueOrderField *p) = 0;
     /**
-     * SOP-行权指派信息查询请求 (暂未开放)
+     * SOP-行权指派信息查询请求
      * @param p:指向用户行权指派信息查询请求结构的地址
      * @return 0表示请求发送成功，其他值表示请求发送失败，具体错误请对照error.xml  
      */
@@ -943,6 +987,12 @@ public:
      */
     virtual int ReqFASLEntrsuctOrder(DFITCFASLReqEntrustOrderField *p) =0;
     /**
+     * FASL-撤单请求
+     * @param p:指向用户撤单请求结构的地址
+     * @return 0表示请求发送成功，其他值表示请求发送失败，具体错误请对照error.xml  
+     */
+    virtual int ReqFASLWithdrawOrder(DFITCFASLReqWithdrawOrderField *p) = 0;
+    /**
      * FASL-信用可委托数量查询请求
      * @param p:指向用户信用可委托数量查询请求结构的地址
      * @return 0表示请求发送成功，其他值表示请求发送失败，具体错误请对照error.xml  
@@ -972,12 +1022,6 @@ public:
      * @return 0表示请求发送成功，其他值表示请求发送失败，具体错误请对照error.xml  
      */
     virtual int ReqFASLTransferFunds(DFITCStockReqTransferFundsField *p) =0;
-    /**
-     * FASL-计算可委托数量请求
-     * @param p:指向用户计算可委托数量请求结构的地址
-     * @return 0表示请求发送成功，其他值表示请求发送失败，具体错误请对照error.xml  
-     */
-    virtual int ReqFASLCalcAbleEntrustQty(DFITCStockReqCalcAbleEntrustQtyField *p) =0;
     /**
      * FASL-客户信息查询请求
      * @param p:指向用户客户信息查询请求结构的地址
@@ -1039,11 +1083,35 @@ public:
      */
     virtual int ReqFASLQryTransferFundsDetail(DFITCStockReqQryTransferFundsDetailField *p) =0;
     /**
-     * FASL-撤单请求
-     * @param p:指向用户撤单请求结构的地址
-     * @return 0表示请求发送成功，其他值表示请求发送失败，具体错误请对照error.xml  
-     */
-    virtual int ReqFASLWithdrawCrdtOrder(DFITCSECReqWithdrawOrderField *p) = 0;
+      * FASL-当前系统时间查询请求
+      * @param p:指向用户交易时间查询请求结构体的地址
+      * @return : 0 表示请求发送成功，非 0 表示请求发送失败，具体错误请参考error.xml
+      */
+     virtual int ReqFASLQrySystemTime(DFITCFASLReqQryTradeTimeField *p) = 0;
+    /**
+      * FASL-可转入担保证券查询请求
+      * @param p:指向可转入担保证券查询请求结构体的地址
+      * @return : 0 表示请求发送成功，非 0 表示请求发送失败，具体错误请参考error.xml
+      */
+     virtual int ReqFASLQryTransferredContract(DFITCFASLReqQryTransferredContractField *p) = 0;
+    /**
+      * FASL-客户可取资金调出请求
+      * @param p:指向客户可取资金调出请求结构体的地址
+      * @return : 0 表示请求发送成功，非 0 表示请求发送失败，具体错误请参考error.xml
+      */
+     virtual int ReqFASLDesirableFundsOut(DFITCFASLReqDesirableFundsOutField *p) = 0;
+    /**
+      * FASL-担保证券查询请求
+      * @param p:指向担保证券查询请求结构体的地址
+      * @return : 0 表示请求发送成功，非 0 表示请求发送失败，具体错误请参考error.xml
+      */
+     virtual int ReqFASLQryGuaranteedContract(DFITCFASLReqQryGuaranteedContractField *p) = 0;
+    /**
+      * FASL-标的证券查询请求
+      * @param p:指向标的证券查询请求结构体的地址
+      * @return : 0 表示请求发送成功，非 0 表示请求发送失败，具体错误请参考error.xml
+      */
+     virtual int ReqFASLQryUnderlyingContract(DFITCFASLReqQryUnderlyingContractField *p) = 0;
 public:
     DFITCSECTraderApi();
     virtual ~DFITCSECTraderApi();

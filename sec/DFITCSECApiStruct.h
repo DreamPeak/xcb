@@ -2,9 +2,9 @@
  * 版权所有(C)2012-2016, 大连飞创信息技术有限公司
  * 文件名称：DFITCSECApiStruct.h
  * 文件说明：定义接口所需的数据接口
- * 当前版本：1.5.136
+ * 当前版本：1.6
  * 作者：XSpeed证券项目组
- * 发布日期：2015年12月
+ * 发布日期：2015年11月
  */
 #ifndef DFITCSECAPISTRUCT_H_
 #define DFITCSECAPISTRUCT_H_
@@ -80,7 +80,7 @@ struct APISTRUCT DFITCSECRspUserLogoutField
     DFITCSECMessageType                  rtnMsg;                   //返回信息
 };
 
-//SEC-更用户密码请求
+//SEC-更新用户密码请求
 struct APISTRUCT DFITCSECReqPasswordUpdateField
 {
     DFITCSECRequestIDType                requestID;                //请求ID(Y)
@@ -100,13 +100,31 @@ struct APISTRUCT DFITCSECRspPasswordUpdateField
     DFITCSECMessageType                  rtnMsg;                   //更新返回信息
 };
 
+//SEC-更新行情账户密码请求
+struct APISTRUCT DFITCSECReqMDPasswordUpdateField
+{
+    DFITCSECRequestIDType                requestID;                //请求ID(Y)
+    DFITCSECAccountIDType                accountID;                //客户号(Y)
+    DFITCSECPasswordType                 oldPassword;              //旧密码(Y)
+    DFITCSECPasswordType                 newPassword;              //新密码(Y)
+};
+
+//SEC-更新行情账户密码响应
+struct APISTRUCT DFITCSECRspMDPasswordUpdateField
+{
+    DFITCSECRequestIDType                requestID;                //请求ID
+    DFITCSECAccountIDType                accountID;                //客户号
+    DFITCSECErrorIDType                  result;                   //更新结果
+    DFITCSECMessageType                  rtnMsg;                   //更新返回信息
+};
+
 //SEC-撤单请求
 struct APISTRUCT DFITCSECReqWithdrawOrderField
 {
     DFITCSECRequestIDType                requestID;                //请求ID(Y)
     DFITCSECAccountIDType                accountID;                //客户号(Y)
-    DFITCSECSpdOrderIDType               spdOrderID;               //柜台委托号(Y)
-    DFITCSECLocalOrderIDType             localOrderID;             //本地委托号
+    DFITCSECSpdOrderIDType               spdOrderID;               //柜台委托号(N)
+    DFITCSECLocalOrderIDType             localOrderID;             //本地委托号(N)(柜台委托号和本地委托号二选一)
 };
 
 //SEC-撤单响应
@@ -161,7 +179,7 @@ struct APISTRUCT DFITCStockReqQryEntrustOrderField
     DFITCSECEntrustBatchIDType           entrustBatchID;           //委托批次号(N)
     DFITCSECEntrustQryFlagType           entrustQryFlag;           //查询标志(N)
     DFITCSECWithdrawFlagType             withdrawFlag;             //撤销标志(N)
-    DFITCSECIncQryIndexType              incQryIndex;              //增量查询索引值(N)
+    DFITCSECIncQryIndexType              incQryIndex;              //增量查询索引值(N)(不能超过int最大值)
 };
 
 //STOCK-委托查询响应
@@ -250,8 +268,8 @@ struct APISTRUCT DFITCStockReqQrySerialTradeField
 {
     DFITCSECRequestIDType                requestID;                //请求ID(Y)
     DFITCSECExchangeIDType               exchangeID;               //交易所代码(N)
-    DFITCSECAccountIDType                accountID;                //客户号(N)
-    DFITCSECSpdOrderIDType               spdOrderID;               //柜台委托号(Y)
+    DFITCSECAccountIDType                accountID;                //客户号(Y)
+    DFITCSECSpdOrderIDType               spdOrderID;               //柜台委托号(N)
     DFITCSECEntrustDirectionType         entrustDirection;         //委托类别(N)
     DFITCSECSecurityIDType               securityID;               //证券代码(N)
     DFITCSECEntrustBatchIDType           entrustBatchID;           //委托批次号(N)
@@ -357,7 +375,7 @@ struct APISTRUCT DFITCStockReqQryCapitalAccountField
 {
     DFITCSECRequestIDType                requestID;                //请求ID(Y)
     DFITCSECAccountIDType                accountID;                //客户号(Y)
-    DFITCSECFundsQryFlagType             FundsQryFlag;             //查询标志(N)( 1增加返回总市值和总资产)
+    DFITCSECFundsQryFlagType             FundsQryFlag;             //查询标志(N)
 };
 
 //STOCK-客户资金查询响应
@@ -374,8 +392,8 @@ struct APISTRUCT DFITCStockRspQryCapitalAccountField
     DFITCSECFundsType                    freezeFunds;              //冻结资金
     DFITCSECFundsType                    t2FreezeFunds;            //T+2冻结资金
     DFITCSECBranchIDType                 branchID;                 //机构代码
-    DFITCSECFundsType                    totalFunds;               //总资金（查询标志为1时会返回值）
-    DFITCSECFundsType                    totalMarket;              //总市值（查询标志为1时会返回值）
+    DFITCSECFundsType                    totalFunds;               //总资金(查询标志为1时会返回值
+    DFITCSECFundsType                    totalMarket;              //总市值(查询标志为1时会返回值)
 };
 
 //STOCK-客户信息查询请求
@@ -656,7 +674,7 @@ struct APISTRUCT DFITCStockRspQryStockField
 {
     DFITCSECRequestIDType                requestID;                //请求ID
     DFITCSECAccountIDType                accountID;                //客户号
-    DFITCSECBidTradeFlagType             stopFlag;                 //停牌标志
+    DFITCSECStockTradeFlagType           stopFlag;                 //停牌标志
     DFITCSECPriceType                    latestPrice;              //最新价
     DFITCSECPriceType                    preClosePrice;            //昨收盘价
     DFITCSECPriceType                    openPrice;                //开盘价
@@ -798,7 +816,7 @@ struct APISTRUCT DFITCSOPReqEntrustOrderField
     DFITCSECAccountIDType                accountID;                //客户号(Y)
     DFITCSECExchangeIDType               exchangeID;               //交易所代码(Y)
     DFITCSECSecurityIDType               securityID;               //证劵代码(Y)
-    DFITCSECSubAccountIDType             subAccountID;             //子账户编码(N)预留字段
+    DFITCSECSubAccountIDType             subAccountID;             //子账户编码(N)(预留字段)
     DFITCSECQuantityType                 entrustQty;               //委托数量(Y)
     DFITCSECPriceType                    entrustPrice;             //委托价格(N)
     DFITCSECEntrustDirectionType         entrustDirection;         //委托类别(Y)
@@ -807,7 +825,7 @@ struct APISTRUCT DFITCSOPReqEntrustOrderField
     DFITCSECOrderTypeType                orderType;                //订单类型(Y)
     DFITCSECOrderExpiryDateType          orderExpiryDate;          //订单时效限制(N)
     DFITCSECOrderCategoryType            orderCategory;            //委托单类别(Y)
-    DFITCSECSerialIDType                 serialID;                 //扩展流水号(N)预留字段
+    DFITCSECSerialIDType                 serialID;                 //扩展流水号(N)(预留字段)
     DFITCSECTDevIDType                   devID;                    //厂商ID(N)
     DFITCSECTDevDecInfoType              devDecInfo;               //用户自定义字段(N)
 };
@@ -938,8 +956,8 @@ struct APISTRUCT DFITCSOPReqQrySerialTradeField
     DFITCSECSpdOrderIDType               spdOrderID;               //委托号(N)
     DFITCSECIncQryIndexType              incQryIndex;              //增量查询索引值(N)(预留字段)
     DFITCSECEntrustDirectionType         entrustDirection;         //委托类别(N)
-    DFITCSECEntrustBatchIDType           entrustBatchID;           //委托批次号(N)
-    DFITCSECTradeQryFlagType             tradeQryFlag;             //查询标志(N)
+    DFITCSECEntrustBatchIDType           entrustBatchID;           //委托批次号(N)(预留字段)
+    DFITCSECTradeQryFlagType             tradeQryFlag;             //查询标志(N)(预留字段)
     DFITCSECCurrencyType                 currency;                 //币种(N)
     DFITCSECQuantityType                 rowIndex;                 //分页索引值(N)
     DFITCSECQuantityType                 rowCount;                 //每页查询笔数(N)
@@ -1042,8 +1060,8 @@ struct APISTRUCT DFITCSOPReqQryPositionField
     DFITCSECAccountIDType                accountID;                //客户号(Y)
     DFITCSECExchangeIDType               exchangeID;               //交易所代码(N)
     DFITCSECSecurityIDType               securityOptionID;         //期权代码(N)
-	DFITCSECQuantityType                 rowIndex;                 //分页索引值(N)
-	DFITCSECQuantityType                 rowCount;                 //每页查询笔数(N)
+    DFITCSECQuantityType                 rowIndex;                 //分页索引值(N)
+    DFITCSECQuantityType                 rowCount;                 //每页查询笔数(N)
 };
 
 //SOP-持仓查询响应
@@ -1085,8 +1103,8 @@ struct APISTRUCT DFITCSOPRspQryPositionField
     DFITCSECFundsType                    tradeCost;                //本日交易成本(实时更新)
     DFITCSECFundsType                    realizeProfitLoss;        //实现盈亏(预留字段)
     DFITCSECFundsType                    profitLoss;               //盈亏金额(预留字段)
-	DFITCSECContractAdjustRemindType     adjustRemind;             //合约调整提醒标志
-	DFITCSECContraceExpireRemindType     expireRemind;             //合约即将到期提醒标志
+    DFITCSECContractAdjustRemindType     adjustRemind;             //合约调整提醒标志
+    DFITCSECContraceExpireRemindType     expireRemind;             //合约即将到期提醒标志
 };
 
 //SOP-客户担保持仓查询请求
@@ -1114,8 +1132,8 @@ struct APISTRUCT DFITCSOPReqQryCapitalAccountField
 {
     DFITCSECRequestIDType                requestID;                //请求ID(Y)
     DFITCSECAccountIDType                accountID;                //客户号(Y)
-    DFITCSECCurrencyType                 currency;                 //币种(N)
-    DFITCSECFundsQryFlagType             FundsQryFlag;             //查询标志(N)
+    DFITCSECCurrencyType                 currency;                 //币种(N)(当前只支持人民币)
+    DFITCSECFundsQryFlagType             FundsQryFlag;             //查询标志(预留字段)
 };
 
 //SOP-客户资金查询响应
@@ -1159,7 +1177,7 @@ struct APISTRUCT  DFITCSOPRspQryAccountField
     DFITCSECPhoneIDType                  mobile;                   //移动电话
     DFITCSECAccountTypeType              accountType;              //投资者分类
     DFITCSECAccountPropType              accountProp;              //客户属性
-    DFITCSECTradePermissionsType         tradePermissions;         //交易权限(预留字段，目前MDB不处理此字段)
+    DFITCSECTradePermissionsType         tradePermissions;         //交易权限(预留字段)
     DFITCSECEntrustTypeType              entrustType;              //委托方式
     DFITCSECAccountStatusType            accountStatus;            //客户状态
     DFITCSECPasswdSyncFlagType           pwdSynFlag;               //密码同步标志
@@ -1251,7 +1269,7 @@ struct APISTRUCT DFITCSOPRspQryAbleLockStockField
     DFITCSECQuantityType                 buyUnSettleQty;           //买入未交收持仓量(预留字段)
     DFITCSECQuantityType                 sellUnSettleQty;          //卖出未交收持仓量(预留字段)
     DFITCSECQuantityType                 openEntrustSellQty;       //今开仓委托卖出量(预留字段)
-    DFITCSECQuantityType                 ableLockQty;              //可锁定数量(预留字段)
+    DFITCSECQuantityType                 ableLockQty;              //可锁定数量
 };
 
 //SOP-客户行权指派信息查询请求
@@ -1305,8 +1323,8 @@ struct APISTRUCT DFITCSOPReqQryContactField
     DFITCSECSecurityIDType               securityID;               //标的代码(N)
     DFITCSECContractObjectTypeType       contractObjectType;       //标的类型(N)
     DFITCSECOptionTypeType               optType;                  //期权类型(N)
-    DFITCSECSecurityIDType               rowIndex;                 //分页索引值(N)
-    DFITCSECQuantityType                 rowCount;                 //每页查询笔数(N)
+    DFITCSECSecurityIDType               rowIndex;                 //分页索引值(预留字段)(N)
+    DFITCSECQuantityType                 rowCount;                 //每页查询笔数(预留字段)(N)
 };
 
 //SOP-期权合约代码查询响应
@@ -1316,12 +1334,12 @@ struct APISTRUCT DFITCSOPRspQryContactField
     DFITCSECAccountIDType               accountID;                 //客户号
     DFITCSECExchangeIDType              exchangeID;                //交易所
     DFITCSECSecurityIDType              securityOptionID;          //期权交易代码(10000031)
-    DFITCSECContractIDType              contractID;                //期权标识代码(600104C1406M01200  )
-    DFITCSECContractNameType            contractName;              //期权名称(上汽集团购6月1200  )
+    DFITCSECContractIDType              contractID;                //期权标识代码(600104C1406M01200)
+    DFITCSECContractNameType            contractName;              //期权名称(上汽集团购6月1200)
     DFITCSECSecurityIDType              securityID;                //标的代码(600104)
     DFITCSECContractObjectTypeType      contractObjectType;        //标的类型
     DFITCSECExecuteTypeType             execType;                  //行权方式
-    DFITCSECDeliveryTypeType            deliType;                  //交割方式
+    DFITCSECDeliveryTypeType            deliType;                  //交割方式(预留字段)
     DFITCSECOptionTypeType              optType;                   //期权类型
     DFITCSECContractUnitType            contactUnit;               //合约单位
     DFITCSECFundsType                   latestPrice;               //最新价
@@ -1480,13 +1498,14 @@ struct APISTRUCT DFITCSOPRspQryExchangeInfoField
 struct APISTRUCT DFITCSOPReqQryCommissionField
 {
     DFITCSECRequestIDType                requestID;                //请求ID(Y)
-    DFITCSECAccountIDType                accountID;                //客户号(N)
+    DFITCSECAccountIDType                accountID;                //客户号(Y)
     DFITCSECExchangeIDType               exchangeID;               //交易所代码(N)
     DFITCSECReferenceTypeType            refType;                  //参数类别(N)
     DFITCSECContractObjectTypeType       contractObjectType;       //标的类型(N)
     DFITCSECSecurityIDType               securityID;               //分类代码(N)
     DFITCSECOpenCloseFlagType            openCloseFlag;            //开平标志(N)
     DFITCSECLvelType                     level;                    //级别(Y)
+    DFITCSECEntrustDirectionType         entrustDirection;         //委托类别(N)
 };
 
 //SOP-查询手续费参数响应
@@ -1499,6 +1518,7 @@ struct APISTRUCT DFITCSOPRspQryCommissionField
     DFITCSECContractObjectTypeType       contractObjectType;       //标的类型
     DFITCSECSecurityIDType               securityID;               //分类代码
     DFITCSECOpenCloseFlagType            openCloseFlag;            //开平标志
+    DFITCSECEntrustDirectionType         entrustDirection;         //委托类别
     DFITCSECLvelType                     level;                    //级别
     DFITCSECFundsType                    costRatio1;               //费用比例1
     DFITCSECFundsType                    unitCost1;                //单位费用1
@@ -1601,12 +1621,13 @@ struct APISTRUCT DFITCFASLRspAbleSloInfoField
 //FASL-担保物划转请求
 struct APISTRUCT DFITCFASLReqTransferCollateralField
 {
-    DFITCSECRequestIDType                requestID;                //请求ID
-    DFITCSECAccountIDType                accountID;                //客户号
-    DFITCSECEntrustDirectionType         entrustDirection;         //委托类别
-    DFITCSECExchangeIDType               exchangeID;               //交易所代码
-    DFITCSECSecurityIDType               securityID;               //证劵代码
-    DFITCSECQuantityType                 transferQty;              //划转数量
+    DFITCSECRequestIDType                requestID;                //请求ID(Y)
+    DFITCSECAccountIDType                accountID;                //客户号(Y)
+    DFITCSECLocalOrderIDType             localOrderID;             //本地委托号(Y)
+    DFITCSECEntrustDirectionType         entrustDirection;         //委托类别(Y)
+    DFITCSECExchangeIDType               exchangeID;               //交易所代码(Y)
+    DFITCSECSecurityIDType               securityID;               //证劵代码(Y)
+    DFITCSECQuantityType                 transferQty;              //划转数量(Y)
 };
 
 //FASL-担保物划转响应
@@ -1615,16 +1636,17 @@ struct APISTRUCT DFITCFASLRspTransferCollateralField
     DFITCSECRequestIDType                requestID;                //请求ID
     DFITCSECAccountIDType                accountID;                //客户号
     DFITCSECSpdOrderIDType               spdOrderID;               //柜台委托号
+    DFITCSECLocalOrderIDType             localOrderID;             //本地委托号
 };
 
 //FASL-直接还款请求
 struct APISTRUCT DFITCFASLReqDirectRepaymentField
 {
-    DFITCSECRequestIDType                requestID;                //请求ID
-    DFITCSECAccountIDType                accountID;                //客户号
-    DFITCSECAccountIDType                capitalID;                //资金账号
-    DFITCSECContractNOType               contractNO;               //指定合约编号
-    DFITCSECFundsType                    repayFunds;               //偿还金额
+    DFITCSECRequestIDType                requestID;                //请求ID(Y)
+    DFITCSECAccountIDType                accountID;                //客户号(Y)
+    DFITCSECAccountIDType                capitalID;                //资金账号(N)
+    DFITCSECContractNOType               contractNO;               //指定合约编号(N)
+    DFITCSECFundsType                    repayFunds;               //偿还金额(Y)
 };
 
 //FASL-直接还款响应
@@ -1638,12 +1660,13 @@ struct APISTRUCT DFITCFASLRspDirectRepaymentField
 //FASL-还券划转请求
 struct APISTRUCT DFITCFASLReqRepayStockTransferField
 {
-    DFITCSECRequestIDType                requestID;                 //请求ID
-    DFITCSECAccountIDType                accountID;                 //客户号
-    DFITCSECExchangeIDType               exchangeID;                //交易所代码
-    DFITCSECQuantityType                 repayQty;                  //还券数量
-    DFITCSECSecurityIDType               securityID;                //证劵代码
-    DFITCSECContractNOType               contractNO;                //指定合约编号
+    DFITCSECRequestIDType                requestID;                 //请求ID(Y)
+    DFITCSECAccountIDType                accountID;                 //客户号(Y)
+    DFITCSECLocalOrderIDType             localOrderID;              //本地委托号(Y)
+    DFITCSECExchangeIDType               exchangeID;                //交易所代码(Y)
+    DFITCSECQuantityType                 repayQty;                  //还券数量(Y)
+    DFITCSECSecurityIDType               securityID;                //证劵代码(Y)
+    DFITCSECContractNOType               contractNO;                //指定合约编号(N)
 };
 
 //FASL-还券划转响应
@@ -1652,20 +1675,22 @@ struct APISTRUCT DFITCFASLRspRepayStockTransferField
     DFITCSECRequestIDType                requestID;                 //请求ID
     DFITCSECAccountIDType                accountID;                 //客户号
     DFITCSECSpdOrderIDType               spdOrderID;                //柜台委托号
+    DFITCSECLocalOrderIDType             localOrderID;              //本地委托号
 };
 
 //FASL-信用交易请求
 struct APISTRUCT DFITCFASLReqEntrustCrdtOrderField
 {
-    DFITCSECRequestIDType                requestID;                 //请求ID
-    DFITCSECAccountIDType                accountID;                 //客户号
-    DFITCSECEntrustDirectionType         entrustDirection;          //委托类别
-    DFITCSECExchangeIDType               exchangeID;                //交易所代码
-    DFITCSECContractNOType               contractNO;                //指定合约编号
-    DFITCSECSecurityIDType               securityID;                //证劵代码
-    DFITCSECOrderTypeType                orderType;                 //订单类型
-    DFITCSECQuantityType                 entrustQty;                //委托数量
-    DFITCSECPriceType                    entrustPrice;              //委托价格
+    DFITCSECRequestIDType                requestID;                 //请求ID(Y)
+    DFITCSECAccountIDType                accountID;                 //客户号(Y)
+    DFITCSECLocalOrderIDType             localOrderID;              //本地委托号(Y)
+    DFITCSECEntrustDirectionType         entrustDirection;          //委托类别(Y)
+    DFITCSECExchangeIDType               exchangeID;                //交易所代码(Y)
+    DFITCSECContractNOType               contractNO;                //指定合约编号(N)
+    DFITCSECSecurityIDType               securityID;                //证劵代码(Y)
+    DFITCSECOrderTypeType                orderType;                 //订单类型(Y)
+    DFITCSECQuantityType                 entrustQty;                //委托数量(Y)
+    DFITCSECPriceType                    entrustPrice;              //委托价格(Y)
 };
 
 //FASL-信用交易响应
@@ -1674,19 +1699,42 @@ struct APISTRUCT DFITCFASLRspEntrustCrdtOrderField
     DFITCSECRequestIDType                requestID;                 //请求ID
     DFITCSECAccountIDType                accountID;                 //客户号
     DFITCSECSpdOrderIDType               spdOrderID;                //柜台委托号
+    DFITCSECLocalOrderIDType             localOrderID;              //本地委托号
 };
+
+
+//FASL-信用委托撤单请求
+struct APISTRUCT DFITCFASLReqWithdrawOrderField
+{
+    DFITCSECRequestIDType                requestID;                //请求ID(Y)
+    DFITCSECAccountIDType                accountID;                //客户号(Y)
+    DFITCSECExchangeIDType               exchangeID;               //交易所代码(Y)
+    DFITCSECSpdOrderIDType               spdOrderID;               //柜台委托号(N)
+    DFITCSECLocalOrderIDType             localOrderID;             //本地委托号(N)(柜台委托号和本地委托号二选一)
+};
+
+//FASL-信用委托撤单响应
+struct APISTRUCT DFITCFASLRspWithdrawOrderField
+{
+    DFITCSECRequestIDType                requestID;                //请求ID
+    DFITCSECAccountIDType                accountID;                //客户号
+    DFITCSECLocalOrderIDType             localOrderID;             //本地委托号
+    DFITCSECSpdOrderIDType               spdOrderID;               //柜台委托号
+};
+
 
 //FASL-融资融券交易请求
 struct APISTRUCT DFITCFASLReqEntrustOrderField
 {
-    DFITCSECRequestIDType                requestID;                 //请求ID
-    DFITCSECAccountIDType                accountID;                 //客户号
-    DFITCSECEntrustDirectionType         entrustDirection;          //委托类别
-    DFITCSECExchangeIDType               exchangeID;                //交易所代码
-    DFITCSECSecurityIDType               securityID;                //证劵代码
-    DFITCSECOrderTypeType                orderType;                 //订单类型
-    DFITCSECQuantityType                 entrustQty;                //委托数量
-    DFITCSECPriceType                    entrustPrice;              //委托价格
+    DFITCSECRequestIDType                requestID;                 //请求ID(Y)
+    DFITCSECLocalOrderIDType             localOrderID;              //本地委托号(Y)
+    DFITCSECAccountIDType                accountID;                 //客户号(Y)
+    DFITCSECEntrustDirectionType         entrustDirection;          //委托类别(Y)
+    DFITCSECExchangeIDType               exchangeID;                //交易所代码(Y)
+    DFITCSECSecurityIDType               securityID;                //证劵代码(Y)
+    DFITCSECOrderTypeType                orderType;                 //订单类型(Y)
+    DFITCSECQuantityType                 entrustQty;                //委托数量(Y)
+    DFITCSECPriceType                    entrustPrice;              //委托价格(Y)
 };
 
 //FASL-融资融券交易响应
@@ -1694,20 +1742,21 @@ struct APISTRUCT DFITCFASLRspEntrustOrderField
 {
     DFITCSECRequestIDType                requestID;                 //请求ID
     DFITCSECAccountIDType                accountID;                 //客户号
+    DFITCSECLocalOrderIDType             localOrderID;              //本地委托号
     DFITCSECSpdOrderIDType               spdOrderID;                //柜台委托号
 };
 
 //FASL-信用可委托数量查询请求
 struct APISTRUCT DFITCFASLReqCalcAbleEntrustCrdtQtyField
 {
-    DFITCSECRequestIDType                requestID;                 //请求ID
-    DFITCSECAccountIDType                accountID;                 //客户号
-    DFITCSECEntrustDirectionType         entrustDirection;          //委托类别
-    DFITCSECExchangeIDType               exchangeID;                //交易所代码
-    DFITCSECContractNOType               contractNO;                //指定合约编号
-    DFITCSECSecurityIDType               securityID;                //证劵代码
-    DFITCSECOrderTypeType                orderType;                 //订单类型
-    DFITCSECPriceType                    entrustPrice;              //委托价格
+    DFITCSECRequestIDType                requestID;                 //请求ID(Y)
+    DFITCSECAccountIDType                accountID;                 //客户号(Y)
+    DFITCSECEntrustDirectionType         entrustDirection;          //委托类别(Y)
+    DFITCSECExchangeIDType               exchangeID;                //交易所代码(Y)
+    DFITCSECContractNOType               contractNO;                //指定合约编号(N)
+    DFITCSECSecurityIDType               securityID;                //证劵代码(Y)
+    DFITCSECOrderTypeType                orderType;                 //订单类型(Y)
+    DFITCSECPriceType                    entrustPrice;              //委托价格(Y)
 };
 
 //FASL-信用可委托数量查询响应
@@ -1722,9 +1771,9 @@ struct APISTRUCT DFITCFASLRspCalcAbleEntrustCrdtQtyField
 //FASL-查询信用资金请求
 struct APISTRUCT DFITCFASLReqQryCrdtFundsField
 {
-    DFITCSECRequestIDType                requestID;                 //请求ID
-    DFITCSECAccountIDType                accountID;                 //客户号
-    DFITCSECAccountIDType                capitalID;                 //资金账号
+    DFITCSECRequestIDType                requestID;                 //请求ID(Y)
+    DFITCSECAccountIDType                accountID;                 //客户号(Y)
+    DFITCSECAccountIDType                capitalID;                 //资金账号(N)
 };
 
 //FASL-查询信用资金响应
@@ -1783,9 +1832,9 @@ struct APISTRUCT DFITCFASLRspQryCrdtFundsField
     DFITCSECFundsType                    ableBuyCollateralFunds;    //可买担保品资
     DFITCSECFundsType                    ableRepayFunds;            //可还款金额
     DFITCSECFundsType                    sloAvailableFunds;         //融券可用资金
-    DFITCSECFundsType                    cashAssets;                //现金资产（所有资产、包括融券卖出）
-    DFITCSECFundsType                    totalStockMarket;          //所有证券市值（包含融资买入、非担保品）
-    DFITCSECFundsType                    finContractFunds;          //融资合约金额（不包含费用）
+    DFITCSECFundsType                    cashAssets;                //现金资产(所有资产、包括融券卖出)
+    DFITCSECFundsType                    totalStockMarket;          //所有证券市值(包含融资买入、非担保品)
+    DFITCSECFundsType                    finContractFunds;          //融资合约金额(不包含费用)
     DFITCSECFundsType                    contractObjectMarket;      //标的证券市值
     DFITCSECFundsType                    otherCharges;              //其他费用
     DFITCSECFundsType                    sloCurMarket;              //融券当前市值
@@ -1794,17 +1843,17 @@ struct APISTRUCT DFITCFASLRspQryCrdtFundsField
 //FASL-信用合约信息请求
 struct APISTRUCT DFITCFASLReqQryCrdtContractField
 {
-    DFITCSECRequestIDType                requestID;                 //请求ID
-    DFITCSECAccountIDType                accountID;                 //客户号
-    DFITCSECDateType                     openBeginDate;             //开仓起始日期
-    DFITCSECDateType                     openEndDate;               //开仓结束日期
-    DFITCSECCrdtContractQryFlagType      crdtConQryFlag;            //查询标志
-    DFITCSECAccountIDType                capitalID;                 //资金账号
-    DFITCSECEntrustDirectionType         entrustDirection;          //委托类别
-    DFITCSECExchangeIDType               exchangeID;                //交易所代码
-    DFITCSECContractNOType               contractNO;                //指定合约编号
-    DFITCSECSecurityIDType               securityID;                //证劵代码
-    DFITCSECSerialIDType                 conSerialID;               //合约流水号
+    DFITCSECRequestIDType                requestID;                 //请求ID(Y)
+    DFITCSECAccountIDType                accountID;                 //客户号(Y)
+    DFITCSECDateType                     openBeginDate;             //开仓起始日期(N)
+    DFITCSECDateType                     openEndDate;               //开仓结束日期(N)
+    DFITCSECCrdtContractQryFlagType      crdtConQryFlag;            //查询标志(N)
+    DFITCSECAccountIDType                capitalID;                 //资金账号(N)
+    DFITCSECEntrustDirectionType         entrustDirection;          //委托类别(N)
+    DFITCSECExchangeIDType               exchangeID;                //交易所代码(N)
+    DFITCSECContractNOType               contractNO;                //指定合约编号(N)
+    DFITCSECSecurityIDType               securityID;                //证劵代码(N)
+    DFITCSECSerialIDType                 conSerialID;               //合约流水号(N)
 };
 
 //FASL-信用合约信息响应
@@ -1872,13 +1921,14 @@ struct APISTRUCT DFITCFASLRspQryCrdtContractField
 //FASL-信用合约变动信息查询请求
 struct APISTRUCT DFITCFASLReqQryCrdtConChangeInfoField
 {
-    DFITCSECRequestIDType                requestID;                 //请求ID
-    DFITCSECAccountIDType                accountID;                 //客户号
-    DFITCSECAccountIDType                capitalID;                 //资金账号
-    DFITCSECEntrustDirectionType         entrustDirection;          //委托类别
-    DFITCSECExchangeIDType               exchangeID;                //交易所代码
-    DFITCSECSecurityIDType               securityID;                //证劵代码
-    DFITCSECSerialIDType                 conSerialNO;               //合约流水号
+    DFITCSECRequestIDType                requestID;                 //请求ID(Y)
+    DFITCSECAccountIDType                accountID;                 //客户号(Y)
+    DFITCSECAccountIDType                capitalID;                 //资金账号(N)
+    DFITCSECWithdrawFlagType             withdrawFlag;              //撤销标志(N)
+    DFITCSECEntrustDirectionType         entrustDirection;          //委托类别(N)
+    DFITCSECExchangeIDType               exchangeID;                //交易所代码(N)
+    DFITCSECSecurityIDType               securityID;                //证劵代码(N)
+    DFITCSECSerialIDType                 conSerialNO;               //合约流水号(N)
 };
 
 //FASL-信用合约变动信息查询响应
@@ -1909,6 +1959,107 @@ struct APISTRUCT DFITCFASLRspQryCrdtConChangeInfoField
     DFITCSECShareholderIDType            shareholderID;             //股东号
 };
 
+//FASL-查询系统时间请求
+struct APISTRUCT DFITCFASLReqQryTradeTimeField
+{
+    DFITCSECRequestIDType                requestID;                //请求ID(Y)
+    DFITCSECAccountIDType                accountID;                //客户号(Y)
+    DFITCSECSystemQryFlagType            flag;                     //高精度返回标志(N)
+};
+
+//FASL-查询系统时间响应
+struct APISTRUCT DFITCFASLRspQryTradeTimeField
+{
+    DFITCSECRequestIDType                requestID;                //请求ID
+    DFITCSECAccountIDType                accountID;                //客户号
+    DFITCSECDateType                     sysTradingDay;            //系统当前日期
+    DFITCSECTimeType                     sysTime;                  //系统当前时间
+    DFITCSECWeekType                     sysWeek;                  //系统当前星期(flag为1时才返回)
+    DFITCSECMillisecondType              sysMillisecond;           //系统当前毫秒(flag为1时才返回)
+};
+
+//FASL-可转入担保证券查询
+struct APISTRUCT DFITCFASLReqQryTransferredContractField
+{
+    DFITCSECRequestIDType                requestID;                //请求ID(Y)
+    DFITCSECAccountIDType                accountID;                //客户号(Y)
+    DFITCSECSecurityIDType               securityID;               //证券代码(N)
+    DFITCSECExchangeIDType               exchangeID;               //交易所代码(N)
+};
+
+//FASL-可转入担保证券查询响应
+struct APISTRUCT DFITCFASLRspQryTransferredContractField
+{
+    DFITCSECRequestIDType                requestID;                //请求ID
+    DFITCSECAccountIDType                accountID;                //客户号
+    DFITCSECAccountIDType                capitalID;                //资金账号
+    DFITCSECSecurityIDType               securityID;               //证券代码
+    DFITCSECExchangeIDType               exchangeID;               //交易所代码
+    DFITCSECQuantityType                 ableSellQty;              //可卖出(转出)数量
+};
+
+//FASL-客户可取资金调出
+struct APISTRUCT DFITCFASLReqDesirableFundsOutField
+{
+    DFITCSECRequestIDType                requestID;                //请求ID(Y)
+    DFITCSECAccountIDType                accountID;                //客户号(Y)
+    DFITCSECCurrencyType                 currency;                 //币种(Y)
+    DFITCSECAccountIDType                capitalID;                //资金账号(N)
+    DFITCSECFundsType                    operateFunds;             //发生金额(Y)
+    DFITCSECMessageType                  summaryMsg;               //摘要(N)
+};
+
+//FASL-客户可取资金调出响应
+struct APISTRUCT DFITCFASLRspDesirableFundsOutField
+{
+    DFITCSECRequestIDType                requestID;                //请求ID
+    DFITCSECAccountIDType                accountID;                //客户号
+    DFITCSECSerialIDType                 serialID;                 //流水号
+    DFITCSECFundsType                    accountBanlance;          //账户余额
+};
+
+//FASL-担保证券查询
+struct APISTRUCT DFITCFASLReqQryGuaranteedContractField
+{
+    DFITCSECRequestIDType                requestID;                //请求ID(Y)
+    DFITCSECAccountIDType                accountID;                //客户号(Y)
+};
+
+//FASL-担保证券查询响应
+struct APISTRUCT DFITCFASLRspQryGuaranteedContractField
+{
+    DFITCSECRequestIDType                requestID;                //请求ID
+    DFITCSECAccountIDType                accountID;                //客户号
+    DFITCSECExchangeIDType               exchangeID;               //交易所代码
+    DFITCSECSecurityIDType               securityID;               //证券代码
+    DFITCSECSecurityNameType             securityName;             //证券名称
+    DFITCSECFundsType                    exchangRate;              //折算率
+    DFITCSECTradeStatusType              status;                   //状态
+    DFITCSECAccountType                  accountType;              //类型
+};
+
+//FASL-标的证券查询
+struct APISTRUCT DFITCFASLReqQryUnderlyingContractField
+{
+    DFITCSECRequestIDType                requestID;                //请求ID(Y)
+    DFITCSECAccountIDType                accountID;                //客户号(Y)
+};
+
+//FASL-标的证券查询响应
+struct APISTRUCT DFITCFASLRspQryUnderlyingContractField
+{
+    DFITCSECRequestIDType                requestID;                //请求ID
+    DFITCSECAccountIDType                accountID;                //客户号
+    DFITCSECExchangeIDType               exchangeID;               //交易所代码
+    DFITCSECSecurityIDType               securityID;               //证券代码
+    DFITCSECSecurityNameType             securityName;             //证券名称
+    DFITCSECFundsType                    financeDepositRatio;      //融资保证金比例
+    DFITCSECFundsType                    securityDepositRatio;     //融券保证金比例
+    DFITCSECTradeStatusType              status;                   //状态
+    DFITCSECAccountType                  accountType;              //类型
+};
+
+
 //QUOTE-指定的合约
 struct APISTRUCT DFITCSECSpecificInstrumentField
 {
@@ -1924,8 +2075,8 @@ struct APISTRUCT DFITCSOPSpecificDataField
     DFITCSECFundsType                    execPrice;                //行权价格
     DFITCSECFundsType                    preSettlePrice;           //昨结算价
     DFITCSECFundsType                    settlePrice;              //结算价
-    DFITCSECLargeQuantityType			 positionQty;              //持仓数量
-    DFITCSECFundsType					 AuctionPrice;			   //动态参考价格
+    DFITCSECLargeQuantityType            positionQty;              //持仓数量
+    DFITCSECFundsType                    AuctionPrice;             //动态参考价格
 };
 
 //stock 特有的
@@ -1934,11 +2085,12 @@ struct APISTRUCT DFITCStockSpecificDataField
     DFITCSECFundsType                    peRadio1;                 //市盈率1
     DFITCSECFundsType                    peRadio2;                 //市盈率2
 };
+
 //共有静态的
 struct APISTRUCT DFITCStaticDataField
 {
-    DFITCSECSecurityIDType               securityID;               //证券代码(600104)
-    DFITCSECSecurityNameType             securityName;             //证券名称(上汽集团)
+    DFITCSECSecurityIDType               securityID;               //证券代码
+    DFITCSECSecurityNameType             securityName;             //证券名称
     DFITCSECDateType                     tradingDay;               //交易日
     DFITCSECExchangeIDType               exchangeID;               //交易所代码
     DFITCSECFundsType                    preClosePrice;            //昨收盘
@@ -1947,10 +2099,10 @@ struct APISTRUCT DFITCStaticDataField
     DFITCSECFundsType                    lowerLimitPrice;          //跌停板价
 
 };
+
 //共有动态的
 struct APISTRUCT DFITCSharedDataField
-{   
-
+{
     DFITCSECFundsType                    latestPrice;              //最新价
     DFITCSECFundsType                    turnover;                 //成交金额
     DFITCSECFundsType                    highestPrice;             //最高价
@@ -1977,21 +2129,21 @@ struct APISTRUCT DFITCSharedDataField
     DFITCSECLargeQuantityType            bidQty5;                  //申买量五
     DFITCSECFundsType                    askPrice5;                //申卖价五
     DFITCSECLargeQuantityType            askQty5;                  //申卖量五
-	DFITCSECTradingPhaseCodeType         TradingPhaseCode;         //产品实时阶段及标志
+    DFITCSECTradingPhaseCodeType         TradingPhaseCode;         //产品实时阶段及标志
 };
 
 struct APISTRUCT DFITCSOPDepthMarketDataField
 {
-    struct DFITCSOPSpecificDataField            specificDataField;        //特有的
-    struct DFITCStaticDataField                 staticDataField;          //共有的静态
-    struct DFITCSharedDataField					sharedDataField;         //公有的动态 
+    struct DFITCSOPSpecificDataField     specificDataField;        //特有的
+    struct DFITCStaticDataField          staticDataField;          //共有的静态
+    struct DFITCSharedDataField          sharedDataField;          //公有的动态 
 };
 
 struct APISTRUCT DFITCStockDepthMarketDataField
 {
-    struct DFITCSharedDataField                 sharedDataField;         //公有的动态 
-    struct DFITCStockSpecificDataField          specificDataField;       //特有的
-    struct DFITCStaticDataField                 staticDataField;         //共有的静态
+    struct DFITCSharedDataField          sharedDataField ;         //公有的动态 
+    struct DFITCStockSpecificDataField   specificDataField;        //特有的
+    struct DFITCStaticDataField          staticDataField;          //共有的静态
 };
 
 //STOCK-证券静态信息查询请求
@@ -2007,7 +2159,7 @@ struct APISTRUCT DFITCStockRspQryStockStaticField
 {
     DFITCSECRequestIDType                requestID;                //请求ID
     DFITCSECAccountIDType                accountID;                //客户号
-    DFITCSECBidTradeFlagType             stopFlag;                 //停牌标志
+    DFITCSECStockTradeFlagType           stopFlag;                 //停牌标志
     DFITCSECPriceType                    preClosePrice;            //昨收盘价
     DFITCSECPriceType                    openPrice;                //今开盘价
     DFITCSECExchangeIDType               exchangeID;               //交易所代码
@@ -2022,7 +2174,7 @@ struct APISTRUCT DFITCStockRspQryStockStaticField
     DFITCSECPriceType                    upperLimitPrice;          //涨停板价
     DFITCSECPriceType                    lowerLimitPrice;          //跌停板价
     DFITCSECCurrencyType                 currency;                 //币种
-    DFITCSECMessageType                  orderLimits;              //订单类型限制
+    DFITCSECOrderTypeLimitType           orderLimits;              //订单类型限制
 };
 
 //SOP-交易所持仓组合拆分委托请求
@@ -2033,17 +2185,17 @@ struct APISTRUCT DFITCSOPReqGroupSplitField
     DFITCSECLocalOrderIDType             localOrderID;             //本地委托号(Y)
     DFITCSECExchangeIDType               exchangeID;               //交易所代码(Y)
     DFITCSECSecurityIDType               securityOptionID;         //期权代码(Y)
-    DFITCSECSubAccountIDType             subAccountID;             //子账户编码(N)预留字段
+    DFITCSECSubAccountIDType             subAccountID;             //子账户编码(N)(预留字段)
     DFITCSECOpenCloseFlagType            openCloseFlag;            //开平标志(Y)
     DFITCSECExchangeGroupTypeType        groupType;                //组合类型(Y)
     DFITCSECGroupCodeType                groupCode;                //组合编码(Y)
     DFITCSECSecurityIDType               securityOptionID1;        //期权代码1腿(Y)
     DFITCSECSecurityIDType               securityOptionID2;        //期权代码2腿(Y)
-    DFITCSECSecurityIDType               securityOptionID3;        //期权代码3腿(N)预留字段
-    DFITCSECSecurityIDType               securityOptionID4;        //期权代码4腿(N)预留字段
+    DFITCSECSecurityIDType               securityOptionID3;        //期权代码3腿(N)(预留字段)
+    DFITCSECSecurityIDType               securityOptionID4;        //期权代码4腿(N)(预留字段)
     DFITCSECQuantityType                 entrustQty;               //委托数量(Y)
-    DFITCSECTDevIDType                   devID;                    //厂商ID(N)预留字段
-    DFITCSECTDevDecInfoType              devDecInfo;               //用户自定义字段(N)预留字段
+    DFITCSECTDevIDType                   devID;                    //厂商ID(N)(预留字段)
+    DFITCSECTDevDecInfoType              devDecInfo;               //用户自定义字段(N)(预留字段)
 };
 
 //SOP-查询客户组合持仓明细请求
