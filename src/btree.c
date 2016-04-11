@@ -323,11 +323,18 @@ btree_node_t btree_find(btree_t btree, const void *key, int *ip) {
 	}
 	i = -1, k = 1;
 	BSEARCH(node, key, i, k);
-	if (k <= 0) {
-		*ip = i;
-		return node;
+	if (i < 0)
+		return NULL;
+	if (k > 0) {
+		if (i == node->n - 1) {
+			if ((node = node->u.pn.next) == btree->sentinel)
+				return NULL;
+			i = 0;
+		} else
+			++i;
 	}
-	return NULL;
+	*ip = i;
+	return node;
 }
 
 /* FIXME */
