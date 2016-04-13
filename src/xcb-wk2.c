@@ -538,10 +538,12 @@ static int on_msgv(struct pgm_msgv_t *msgv, size_t len) {
 						break;
 				}
 				dlist_iter_free(&iter);
+				if (node == NULL) {
+					pthread_mutex_unlock(&filter_lock);
+					continue;
+				}
 			}
 			pthread_mutex_unlock(&filter_lock);
-			if (node == NULL)
-				continue;
 			if (NEW0(msg) == NULL)
 				continue;
 			if ((msg->data = ALLOC(sizeof *quote)) == NULL) {

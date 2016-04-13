@@ -737,12 +737,13 @@ void process_quote(void *data) {
 					break;
 			}
 			dlist_iter_free(&iter);
+			if (node == NULL) {
+				pthread_mutex_unlock(&filter_lock);
+				FREE(data);
+				return;
+			}
 		}
 		pthread_mutex_unlock(&filter_lock);
-		if (node == NULL) {
-			FREE(data);
-			return;
-		}
 		/* FIXME */
 		if (quote->thyquote.m_nTime == 999999999) {
 			FREE(data);
