@@ -40,6 +40,7 @@ start() {
 	echo "8388608	16777216	67108864" >/proc/sys/net/ipv4/tcp_wmem
 	echo "5"  >/proc/sys/vm/dirty_background_ratio
 	echo "10" >/proc/sys/vm/dirty_ratio
+	#daemon chrt -f 98 $DAEMON $XCB_CONFIG/$PROC_NAME.conf
 	daemon $DAEMON $XCB_CONFIG/$PROC_NAME.conf
 	RETVAL=$?
 	echo

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013-2016, Dalian Futures Information Technology Co., Ltd.
  *
- * Gaohang Wu
+ * Gaohang Wu  <wugaohang at dce dot com dot cn>
  * Bo Wang
  * Xiaoye Meng <mengxiaoye at dce dot com dot cn>
  *
@@ -621,7 +621,7 @@ static int on_msgv(struct pgm_msgv_t *msgv, size_t len) {
 		xcb_log(XCB_LOG_DEBUG, "Data '%s' received", msg->data);
 		fields = dstr_split_len(pskb->data, pskb->len, "|", 1, &nfield);
 		/* indices */
-		if (pskb->len >= 7 && !memcmp(pskb->data, "INDICES", 7)) {
+		if (unlikely(pskb->len >= 7 && !memcmp(pskb->data, "INDICES", 7))) {
 			if (nfield == 3) {
 				dstr network, apps, prev;
 
@@ -644,7 +644,7 @@ static int on_msgv(struct pgm_msgv_t *msgv, size_t len) {
 				table_unlock(indices);
 			}
 		/* index */
-		} else if (pskb->len >= 5 && !memcmp(pskb->data, "INDEX", 5)) {
+		} else if (unlikely(pskb->len >= 5 && !memcmp(pskb->data, "INDEX", 5))) {
 			if (nfield == 3) {
 				dstr index, format, prev;
 

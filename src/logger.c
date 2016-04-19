@@ -192,7 +192,7 @@ void xcb_log(int level, const char *file, int line, const char *function, const 
 
 	if (level < loglevel)
 		return;
-	if (NEW(msg) == NULL)
+	if (unlikely(NEW(msg) == NULL))
 		return;
 	/* FIXME: looks funky */
 	msg->next  = NULL;

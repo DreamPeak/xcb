@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013-2016, Dalian Futures Information Technology Co., Ltd.
  *
- * Gaohang Wu
+ * Gaohang Wu  <wugaohang at dce dot com dot cn>
  * Bo Wang
  * Xiaoye Meng <mengxiaoye at dce dot com dot cn>
  *
@@ -27,6 +27,7 @@
 #include <string.h>
 #include <strings.h>
 #include <time.h>
+#include "macros.h"
 #include "mem.h"
 #include "dlist.h"
 #include "table.h"
@@ -69,7 +70,7 @@ void s_command(client c) {
 	int i;
 	dlist_t dlist;
 
-	if (dstr_length(c->argv[0]) == 1) {
+	if (unlikely(dstr_length(c->argv[0]) == 1)) {
 		add_reply_error(c, "index can't be empty\r\n");
 		return;
 	}
@@ -215,7 +216,7 @@ void u_command(client c) {
 	dstr pkey, skey;
 	dlist_t dlist;
 
-	if (dstr_length(c->argv[0]) == 1) {
+	if (unlikely(dstr_length(c->argv[0]) == 1)) {
 		add_reply_error(c, "index can't be empty\r\n");
 		return;
 	}
@@ -380,7 +381,7 @@ void q_command(client c) {
 		add_reply_error(c, "database not open\r\n");
 		return;
 	}
-	if (dstr_length(c->argv[0]) == 1) {
+	if (unlikely(dstr_length(c->argv[0]) == 1)) {
 		add_reply_error(c, "index can't be empty\r\n");
 		return;
 	}

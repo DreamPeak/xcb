@@ -35,6 +35,7 @@
 #include <pthread.h>
 #include <time.h>
 #include <sys/time.h>
+#include "macros.h"
 #include "mem.h"
 #include "heap.h"
 #include "event.h"
@@ -121,7 +122,7 @@ event_loop create_event_loop(int size) {
 	event_loop el;
 	int i;
 
-	if (NEW(el) == NULL)
+	if (unlikely(NEW(el) == NULL))
 		return NULL;
 	el->size     = size;
 	el->maxfd    = -1;
@@ -173,7 +174,7 @@ int create_file_event(event_loop el, int fd, int mask, file_proc *proc, void *da
 	file_event fe;
 
 	/* FIXME */
-	if (el == NULL)
+	if (unlikely(el == NULL))
 		return -1;
 	if (fd >= el->size) {
 		errno = ERANGE;
@@ -196,7 +197,7 @@ int create_file_event(event_loop el, int fd, int mask, file_proc *proc, void *da
 void delete_file_event(event_loop el, int fd, int mask) {
 	file_event fe;
 
-	if (el == NULL)
+	if (unlikely(el == NULL))
 		return;
 	if (fd >= el->size)
 		return;
@@ -219,7 +220,7 @@ void delete_file_event(event_loop el, int fd, int mask) {
 unsigned long create_time_event(event_loop el, long long ms, time_proc *proc, finalizer *f, void *data) {
 	time_event te;
 
-	if (el == NULL)
+	if (unlikely(el == NULL))
 		return -1;
 	if (NEW(te) == NULL)
 		return -1;
@@ -243,7 +244,7 @@ unsigned long create_time_event(event_loop el, long long ms, time_proc *proc, fi
 int delete_time_event(event_loop el, unsigned long id) {
 	time_event te;
 
-	if (el == NULL)
+	if (unlikely(el == NULL))
 		return -1;
 	if (el->safe)
 		heap_lock(el->tevent);
@@ -264,7 +265,7 @@ int process_events(event_loop el, int flags) {
 	struct timeval tv;
 	int processed = 0;
 
-	if (el == NULL)
+	if (unlikely(el == NULL))
 		return 0;
 	if (!(flags & FILE_EVENTS) && !(flags & TIME_EVENTS))
 		return 0;
@@ -353,7 +354,7 @@ int process_events(event_loop el, int flags) {
 }
 
 void start_event_loop(event_loop el, int flags) {
-	if (el == NULL)
+	if (unlikely(el == NULL))
 		return;
 	el->stop = 0;
 	while (!el->stop)
@@ -361,7 +362,7 @@ void start_event_loop(event_loop el, int flags) {
 }
 
 void stop_event_loop(event_loop el) {
-	if (el == NULL)
+	if (unlikely(el == NULL))
 		return;
 	el->stop = 1;
 }

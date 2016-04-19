@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013-2016, Dalian Futures Information Technology Co., Ltd.
  *
- * Gaohang Wu
+ * Gaohang Wu  <wugaohang at dce dot com dot cn>
  * Bo Wang
  * Xiaoye Meng <mengxiaoye at dce dot com dot cn>
  *

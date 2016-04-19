@@ -20,6 +20,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include "macros.h"
 #include "mem.h"
 #include "logger.h"
 #include "config.h"
@@ -114,7 +115,7 @@ static void variables_destroy(struct variable *var) {
 static struct category *category_new(const char *name, const char *file, int lineno) {
 	struct category *cat;
 
-	if (NEW0(cat) == NULL)
+	if (unlikely(NEW0(cat) == NULL))
 		return NULL;
 	if ((cat->file = mem_strdup(file)) == NULL) {
 		FREE(cat);
@@ -153,7 +154,7 @@ static struct config *config_new(void) {
 static struct config_include *config_include_new(struct config *cfg, const char *included_file) {
 	struct config_include *include;
 
-	if (NEW(include) == NULL)
+	if (unlikely(NEW(include) == NULL))
 		return NULL;
 	if ((include->included_file = mem_strdup(included_file)) == NULL) {
 		FREE(include);
@@ -310,7 +311,7 @@ static struct config *config_internal_load(const char *path, struct config *cfg)
 struct config *config_load(const char *path) {
 	struct config *cfg, *result;
 
-	if ((cfg = config_new()) == NULL)
+	if (unlikely((cfg = config_new()) == NULL))
 		return NULL;
 	if ((result = config_internal_load(path, cfg)) == NULL)
 		config_destroy(cfg);
@@ -320,7 +321,7 @@ struct config *config_load(const char *path) {
 void config_destroy(struct config *cfg) {
 	struct category *cat;
 
-	if (cfg == NULL)
+	if (unlikely(cfg == NULL))
 		return;
 	config_includes_destroy(cfg->includes);
 	cat = cfg->first;
@@ -336,7 +337,7 @@ void config_destroy(struct config *cfg) {
 char *category_browse(struct config *cfg, const char *prev) {
 	struct category *cat;
 
-	if (cfg == NULL)
+	if (unlikely(cfg == NULL))
 		return NULL;
 	if (prev == NULL)
 		cat = cfg->first;
@@ -362,7 +363,7 @@ char *category_browse(struct config *cfg, const char *prev) {
 struct variable *variable_browse(struct config *cfg, const char *category) {
 	struct category *cat;
 
-	if (cfg == NULL || category == NULL)
+	if (unlikely(cfg == NULL || category == NULL))
 		return NULL;
 	if (cfg->last_browse && cfg->last_browse->name == category)
 		cat = cfg->last_browse;
@@ -374,7 +375,7 @@ struct variable *variable_browse(struct config *cfg, const char *category) {
 const char *variable_retrieve(struct config *cfg, const char *category, const char *variable) {
 	struct variable *var;
 
-	if (cfg == NULL)
+	if (unlikely(cfg == NULL))
 		return NULL;
 	if (category) {
 		for (var = variable_browse(cfg, category); var; var = var->next)
@@ -394,7 +395,7 @@ const char *variable_retrieve(struct config *cfg, const char *category, const ch
 struct category *category_get(struct config *cfg, const char *category) {
 	struct category *cat;
 
-	if (cfg == NULL)
+	if (unlikely(cfg == NULL))
 		return NULL;
 	for (cat = cfg->first; cat; cat = cat->next)
 		if (cat->name == category)
@@ -408,7 +409,7 @@ struct category *category_get(struct config *cfg, const char *category) {
 int variable_update(struct category *cat, const char *variable, const char *value) {
 	struct variable *curr, *prev = NULL, *var;
 
-	if (cat == NULL)
+	if (unlikely(cat == NULL))
 		return -1;
 	for (curr = cat->first; curr; prev = curr, curr = curr->next) {
 		if (strcasecmp(curr->name, variable))

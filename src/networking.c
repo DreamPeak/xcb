@@ -59,7 +59,7 @@ inline void client_incr(client c) {
 void client_decr(client c) {
 	int ret, val;
 
-	if (c == NULL)
+	if (unlikely(c == NULL))
 		return;
 	ret = __sync_fetch_and_add(&c->refcount, -1);
 	if ((val = ret - 1) < 0)

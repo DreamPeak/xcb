@@ -18,6 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "macros.h"
 #include "mem.h"
 #include "logger.h"
 #include "basics.h"
@@ -26,7 +27,7 @@
 void msg_ref(struct msg *msg, int delta) {
 	int ret, val;
 
-	if (msg == NULL || delta == 0)
+	if (unlikely(msg == NULL || delta == 0))
 		return;
 	ret = __sync_fetch_and_add(&msg->refcount, delta);
 	val = ret + delta;
