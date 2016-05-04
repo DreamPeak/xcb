@@ -32,7 +32,8 @@ xcb_sim_CPPFLAGS = -I$(top_srcdir)/include
 xcb_sim_CFLAGS = -Wall -pthread
 xcb_sim_LDFLAGS = -ltcmalloc
 
-lib_LTLIBRARIES = app_test.la app_pd.la app_kline.la libxcbclient.la
+lib_LTLIBRARIES = app_test.la app_pd.la app_kline.la app_status.la             \
+libxcbclient.la
 app_test_la_SOURCES = app_test.c
 app_test_la_CPPFLAGS = -I$(top_srcdir)/include
 app_test_la_CFLAGS = -fPIC -Wall
@@ -45,6 +46,10 @@ app_kline_la_SOURCES = app_kline.c
 app_kline_la_CPPFLAGS = -I$(top_srcdir)/include
 app_kline_la_CFLAGS = -fPIC -Wall -pthread
 app_kline_la_LDFLAGS = -module -avoid-version -ltcmalloc
+app_status_la_SOURCES = ctp.cpp app_status.c
+app_status_la_CPPFLAGS = -I$(top_srcdir)/include -I$(top_srcdir)/ctp
+app_status_la_CFLAGS = -fPIC -Wall -pthread
+app_status_la_LDFLAGS = -module -avoid-version -L$(top_srcdir)/ctp -lthosttraderapi -ltcmalloc
 libxcbclient_la_SOURCES = mem.c dstr.c net.c xcb-client.c
 libxcbclient_la_CPPFLAGS = -I$(top_srcdir)/include
 libxcbclient_la_CFLAGS = -fPIC -Wall -pthread

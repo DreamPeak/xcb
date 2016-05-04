@@ -140,7 +140,7 @@ typedef void (*ctp_on_query_instrument)(struct CThostFtdcInstrumentField *instru
 		struct CThostFtdcRspInfoField *rspinfo, int rid, int islast);
 typedef void (*ctp_on_query_deep_market_data)(struct CThostFtdcDepthMarketDataField *deepmd,
 		struct CThostFtdcRspInfoField *rspinfo, int rid, int islast);
-typedef void (*ctp_on_query_notice)(CThostFtdcNoticeField *notice,
+typedef void (*ctp_on_query_notice)(struct CThostFtdcNoticeField *notice,
 		struct CThostFtdcRspInfoField *rspinfo, int rid, int islast);
 typedef void (*ctp_on_query_trading_notice)(struct CThostFtdcTradingNoticeField *notice,
 		struct CThostFtdcRspInfoField *rspinfo, int rid, int islast);
@@ -163,8 +163,8 @@ extern void         ctp_tdapi_register_name_server(ctp_tdapi_t *tdapi, char *nsa
 extern void         ctp_tdapi_register_fens_user(ctp_tdapi_t *tdapi,
 			struct CThostFtdcFensUserInfoField *fensuser);
 extern void         ctp_tdapi_register_spi(ctp_tdapi_t *tdapi, ctp_tdspi_t *tdspi);
-extern void         ctp_tdapi_subscribe_private(ctp_tdapi_t *tdapi, THOST_TE_RESUME_TYPE resumetype);
-extern void         ctp_tdapi_subscribe_public(ctp_tdapi_t *tdapi, THOST_TE_RESUME_TYPE resumetype);
+extern void         ctp_tdapi_subscribe_private(ctp_tdapi_t *tdapi, enum THOST_TE_RESUME_TYPE resumetype);
+extern void         ctp_tdapi_subscribe_public(ctp_tdapi_t *tdapi, enum THOST_TE_RESUME_TYPE resumetype);
 extern void         ctp_tdapi_init(ctp_tdapi_t *tdapi);
 extern int          ctp_tdapi_join(ctp_tdapi_t *tdapi);
 extern int          ctp_tdapi_authenticate(ctp_tdapi_t *tdapi,

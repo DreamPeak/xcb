@@ -187,6 +187,7 @@ static void on_deep_market_data(struct CUstpFtdcDepthMarketDataField *deepmd) {
 
 static int femas_exec(void *data, void *data2) {
 	RAII_VAR(struct msg *, msg, (struct msg *)data, msg_decr);
+	NOT_USED(data2);
 
 	/* do nothing */
 	return 0;

@@ -292,6 +292,7 @@ static void on_sop_deep_market_data(struct DFITCSOPDepthMarketDataField *deepmd)
 
 static int sec_exec(void *data, void *data2) {
 	RAII_VAR(struct msg *, msg, (struct msg *)data, msg_decr);
+	NOT_USED(data2);
 
 	/* do nothing */
 	return 0;

@@ -197,6 +197,7 @@ static void on_best_and_deep(struct MDBestAndDeep *deepmd) {
 
 static int xspeed2_exec(void *data, void *data2) {
 	RAII_VAR(struct msg *, msg, (struct msg *)data, msg_decr);
+	NOT_USED(data2);
 
 	/* do nothing */
 	return 0;
