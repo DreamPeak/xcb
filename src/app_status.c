@@ -154,7 +154,7 @@ static int load_module(void) {
 	/* FIXME */
 	snprintf(front, sizeof front, "tcp://%s:%s", front_ip, front_port);
 	ctp_tdapi_register_front(tdapi, front);
-	ctp_tdapi_subscribe_public(tdapi, THOST_TERT_RESUME);
+	ctp_tdapi_subscribe_public(tdapi, THOST_TERT_RESTART);
 	ctp_tdapi_init(tdapi);
 	return register_application(app, status_exec, desc, NULL, mod_info->self);
 }
