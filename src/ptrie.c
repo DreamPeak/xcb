@@ -285,13 +285,14 @@ int ptrie_insert(ptrie_node_t node, const char *key, void *value) {
 ptrie_node_t ptrie_find(ptrie_node_t node, const char *key) {
 	char *newkey = (char *)key;
 	ptrie_node_t x = node;
-	unsigned nmatches;
+	unsigned nmatches, len;
 
 	if (unlikely(node == NULL || key == NULL))
 		return NULL;
 	nmatches = get_nmatches(newkey, x->key);
 	STEP_DOWN(nmatches, newkey, x);
-	return nmatches == strlen(x->key) ? x : (nmatches < strlen(x->key) ? x->parent : NULL);
+	len = strlen(x->key);
+	return nmatches == len ? x : (nmatches < len ? x->parent : NULL);
 }
 
 /* Return 0 if success, otherwise -1 is returned */
