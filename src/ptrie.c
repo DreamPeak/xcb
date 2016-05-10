@@ -291,7 +291,7 @@ ptrie_node_t ptrie_find(ptrie_node_t node, const char *key) {
 		return NULL;
 	nmatches = get_nmatches(newkey, x->key);
 	STEP_DOWN(nmatches, newkey, x);
-	return nmatches == strlen(x->key) ? x : NULL;
+	return nmatches == strlen(x->key) ? x : (nmatches < strlen(x->key) ? x->parent : NULL);
 }
 
 /* Return 0 if success, otherwise -1 is returned */
