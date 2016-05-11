@@ -49,14 +49,18 @@ static int hello_exec(void *data, void *data2) {
 }
 
 static int load_module(void) {
+	if (msgs_hook(&default_msgs, hello_exec, NULL) == -1)
+		return MODULE_LOAD_FAILURE;
 	return register_application(app, hello_exec, desc, fmt, mod_info->self);
 }
 
 static int unload_module(void) {
+	msgs_unhook(&default_msgs, hello_exec);
 	return unregister_application(app);
 }
 
 static int reload_module(void) {
+	/* FIXME */
 	return MODULE_LOAD_SUCCESS;
 }
 
