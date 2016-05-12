@@ -2,9 +2,9 @@
 * 版权所有(C)2012-2016, 大连飞创信息技术有限公司
 * 文件名称：DFITCSECTraderApi.h
 * 文件说明：定义接口所需的数据接口
-* 当前版本：1.6.35
+* 当前版本：1.6.38
 * 作者：XSpeed证券项目组
-* 发布日期：2016年03月
+* 发布日期：2016年04月
 */
 #ifndef DFITCSECTRADERAPI_H_
 #define DFITCSECTRADERAPI_H_

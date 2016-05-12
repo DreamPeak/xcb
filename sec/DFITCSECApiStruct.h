@@ -48,6 +48,7 @@ struct APISTRUCT DFITCSECReqUserLoginField
     DFITCSECRequestIDType                requestID;                //请求ID(Y)
     DFITCSECAccountIDType                accountID;                //客户号(Y)
     DFITCSECPasswordType                 password;                 //密码(Y)
+    DFITCSECMDCompressFalgType           compressflag;             //行情压缩标志(N)(只有登录行情账户的时候该字段有效)
 };
 
 //SEC-登录响应

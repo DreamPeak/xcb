@@ -1095,4 +1095,15 @@ typedef char   DFITCSECOrderTypeLimitType[128];
 /////////////////////////////////////////////////////////////////////////
 typedef double   DFITCSECMiniPriceChangeType;
 
+
+
+//////////////////////////////////////////////////////////////////////////
+///DFITCSECMDCompressFalgType 行情压缩标志类型
+//////////////////////////////////////////////////////////////////////////
+typedef int    DFITCSECMDCompressFalgType;
+///不要求行情前置压缩行情
+#define DFITCSEC_COMPRESS_FALSE                                      0
+///要求行情前置压缩行情
+#define DFITCSEC_COMPRESS_TRUE                                       1
+
 #endif//DFITCStockAPIDATATYPE_H
