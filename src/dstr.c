@@ -306,7 +306,7 @@ void dstr_clear(dstr ds) {
 }
 
 dstr *dstr_split_len(const char *str, size_t length, const char *sep, size_t seplength, int *count) {
-	int slots = 5, i, nelems = 0, start = 0;
+	int slots = 64, i, nelems = 0, start = 0;
 	dstr *tokens;
 
 	/* FIXME */

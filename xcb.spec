@@ -2,7 +2,7 @@
 
 Name:		xcb
 Version:	1.0.3
-Release:	3%{?dist}
+Release:	5%{?dist}
 Summary:	Reliable Multicast Computing
 Group:		Applications/Internet
 License:	GPLv2
