@@ -201,7 +201,7 @@ static void *recv_thread(void *data) {
 			if ((len = newline - inbuf) == 0) {
 				const char one = '1';
 
-				if (execute && write(proceed_pipe[1], &one, sizeof(one)) == -1) {
+				if (execute && write(proceed_pipe[1], &one, sizeof one) == -1) {
 					fprintf(stderr, "Error writing: %s", strerror(errno));
 					exit(1);
 				}
