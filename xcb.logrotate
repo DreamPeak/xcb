@@ -8,7 +8,7 @@
 	create 640 root root
 	sharedscripts
 	postrotate
-		kill -HUP `pgrep -f xcb` >/dev/null 2>&1
+		/usr/bin/pkill -HUP xcb 2>/dev/null || true
 	endscript
 }
 
