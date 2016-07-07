@@ -11,7 +11,6 @@
 #!/bin/bash
 USAGE="`basename $0` [-w|--warning]<percent free> [-c|--critical]<percent free>"
 THRESHOLD_USAGE="WARNING threshold must be greater than CRITICAL: `basename $0` $*"
-calc=/tmp/memcalc
 percent_free=/tmp/mempercent
 critical=""
 warning=""
@@ -65,18 +64,10 @@ free=`free -m | head -2 |tail -1 |gawk '{print $4+$6+$7}'`
 #echo "$total"MB total
 #echo "$used"MB used
 #echo "$free"MB free
+
 # make it into % percent free = ((free mem / total mem) * 100)
-echo "5" > $calc # decimal accuracy
-echo "k" >> $calc # commit
-echo "100" >> $calc # multiply
-echo "$free" >> $calc # division integer
-echo "$total" >> $calc # division integer
-echo "/" >> $calc # division sign
-echo "*" >> $calc # multiplication sign
-echo "p" >> $calc # print
-percent=`/usr/bin/dc $calc|/bin/sed 's/^\./0./'|/usr/bin/tr "." " "|/usr/bin/gawk {'print $1'}`
-#percent1=`/usr/bin/dc $calc`
-#echo "$percent1"
+percent=$[ free * 100 / total]
+
 if [[ "$percent" -le  $critical ]]
         then
                 echo "CRITICAL - $free MB ($percent%) Free Memory"
