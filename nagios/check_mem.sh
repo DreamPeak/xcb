@@ -74,7 +74,7 @@ free=` free -m | head -2 | tail -1 | gawk '{print $4 + $6 + $7}'`
 #echo "*"      >> $calc # multiplication sign
 #echo "p"      >> $calc # print
 #percent=`dc $calc | sed 's/^\./0./' | tr "." " " | gawk {'print $1'}`
-percent=$[100 * free / total]
+percent=$((100 * free / total))
 #percent1=`dc $calc`
 #echo "$percent1"
 if [[ "$percent" -le  $critical ]]

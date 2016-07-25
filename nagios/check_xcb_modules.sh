@@ -6,7 +6,6 @@ then
     exit 1
 fi
 num=`echo "$modules" | wc -l`
-((num -= 1))
 echo "OK - $num modules loaded"
 exit 0
 
