@@ -33,11 +33,11 @@ start() {
 	fi
 	# Start daemon.
 	echo -n $"Starting $PROC_NAME: "
-	echo "67108864" >/proc/sys/net/core/rmem_max
-	echo "67108864" >/proc/sys/net/core/rmem_default
-	echo "67108864" >/proc/sys/net/core/wmem_max
-	echo "67108864" >/proc/sys/net/core/wmem_default
-	echo "8388608	16777216	67108864" >/proc/sys/net/ipv4/tcp_wmem
+	echo "134217728" >/proc/sys/net/core/rmem_max
+	echo "134217728" >/proc/sys/net/core/rmem_default
+	echo "134217728" >/proc/sys/net/core/wmem_max
+	echo "134217728" >/proc/sys/net/core/wmem_default
+	echo "16777216	33554432	134217728" >/proc/sys/net/ipv4/tcp_wmem
 	echo "5"  >/proc/sys/vm/dirty_background_ratio
 	echo "10" >/proc/sys/vm/dirty_ratio
 	#daemon chrt -f 98 $DAEMON $XCB_CONFIG/$PROC_NAME.conf
