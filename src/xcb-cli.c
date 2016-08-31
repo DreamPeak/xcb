@@ -134,16 +134,16 @@ static void usage(void) {
 }
 
 static void *recv_thread(void *data) {
+	struct pollfd rfd[1];
 	NOT_USED(data);
 
+	rfd[0].fd     = tcpsock;
+	rfd[0].events = POLLIN;
 	while (loop) {
-		struct pollfd rfd[1];
 		char buf[256];
 		int nread;
 
-		rfd[0].fd     = tcpsock;
-		rfd[0].events = POLLIN;
-		if (poll(rfd, 1, -1) == -1) {
+		if (poll(rfd, 1, 1) == -1) {
 			if (execute) {
 				fprintf(stderr, "Reading from server: %s\n", strerror(errno));
 				exit(1);

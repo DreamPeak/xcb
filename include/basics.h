@@ -38,41 +38,41 @@ typedef struct tagHYQuote {
 	char		m_cJYS[3];	/* exchange */
 	char		m_cHYDM[30];	/* instrument */
 	bool		m_bTPBZ;	/* FIXME */
-	float		m_dZJSJ;	/* pre settlement price */
-	float		m_dJJSJ;	/* settlement price */
-	float		m_dCJJJ;	/* average price */
-	float		m_dZSP;		/* pre close price */
-	float		m_dJSP;		/* close price */
-	float		m_dJKP;		/* open price */
+	double		m_dZJSJ;	/* pre settlement price */
+	double		m_dJJSJ;	/* settlement price */
+	double		m_dCJJJ;	/* average price */
+	double		m_dZSP;		/* pre close price */
+	double		m_dJSP;		/* close price */
+	double		m_dJKP;		/* open price */
 	int32_t		m_nZCCL;	/* pre open interest */
 	int32_t		m_nCCL;		/* open interest */
-	float		m_dZXJ;		/* last price */
+	double		m_dZXJ;		/* last price */
 	int32_t		m_nCJSL;	/* volume */
 	double		m_dCJJE;	/* turnover */
-	float		m_dZGBJ;	/* upper limit price */
-	float		m_dZDBJ;	/* lower limit price */
-	float		m_dZGJ;		/* highest price */
-	float		m_dZDJ;		/* lowest price */
-	float		m_dZXSD;	/* pre delta */
-	float		m_dJXSD;	/* delta */
-	float		m_dMRJG1;	/* bid price 1 */
-	float		m_dMCJG1;	/* ask price 1 */
+	double		m_dZGBJ;	/* upper limit price */
+	double		m_dZDBJ;	/* lower limit price */
+	double		m_dZGJ;		/* highest price */
+	double		m_dZDJ;		/* lowest price */
+	double		m_dZXSD;	/* pre delta */
+	double		m_dJXSD;	/* delta */
+	double		m_dMRJG1;	/* bid price 1 */
+	double		m_dMCJG1;	/* ask price 1 */
 	int32_t		m_nMRSL1;	/* bid volume 1 */
 	int32_t		m_nMCSL1;	/* ask volume 2 */
-	float		m_dMRJG2;
-	float		m_dMCJG2;
+	double		m_dMRJG2;
+	double		m_dMCJG2;
 	int32_t		m_nMRSL2;
 	int32_t		m_nMCSL2;
-	float		m_dMRJG3;
-	float		m_dMCJG3;
+	double		m_dMRJG3;
+	double		m_dMCJG3;
 	int32_t		m_nMRSL3;
 	int32_t		m_nMCSL3;
-	float		m_dMRJG4;
-	float		m_dMCJG4;
+	double		m_dMRJG4;
+	double		m_dMCJG4;
 	int32_t		m_nMRSL4;
 	int32_t		m_nMCSL4;
-	float		m_dMRJG5;
-	float		m_dMCJG5;
+	double		m_dMRJG5;
+	double		m_dMCJG5;
 	int32_t		m_nMRSL5;
 	int32_t		m_nMCSL5;
 } tHYQuote;

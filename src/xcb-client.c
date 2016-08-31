@@ -96,7 +96,7 @@ static void *read_thread(void *data) {
 	for (;;) {
 		int nread;
 
-		if (poll(rfd, 1, -1) == -1) {
+		if (poll(rfd, 1, 1) == -1) {
 			xcb_set_error_from_errno(c, XCB_ERR_IO, "poll(2)");
 			break;
 		}

@@ -292,7 +292,7 @@ inline int net_udp_nonblock_connect(const char *addr, int port, char *err, size_
 	return net_udp_generic_connect(addr, port, NET_NONBLOCK, err, errlen);
 }
 
-int net_read(int fd, char *buf, int count, int flags) {
+int net_read(int fd, void *buf, int count, int flags) {
 	int len = 0, nread;
 
 	while (len != count) {
@@ -311,7 +311,7 @@ int net_read(int fd, char *buf, int count, int flags) {
 	return len;
 }
 
-int net_write(int fd, const char *buf, int count, int flags) {
+int net_write(int fd, const void *buf, int count, int flags) {
 	int len = 0, nwrite;
 
 	while (len != count) {
@@ -330,7 +330,7 @@ int net_write(int fd, const char *buf, int count, int flags) {
 	return len;
 }
 
-int net_try_read(int fd, char *buf, int count, int maxtry, int flags) {
+int net_try_read(int fd, void *buf, int count, int maxtry, int flags) {
 	int len = 0, nread, try = 0;
 
 	while (len != count) {
@@ -350,7 +350,7 @@ int net_try_read(int fd, char *buf, int count, int maxtry, int flags) {
 	return len;
 }
 
-int net_try_write(int fd, const char *buf, int count, int maxtry, int flags) {
+int net_try_write(int fd, const void *buf, int count, int maxtry, int flags) {
 	int len = 0, nwrite, try = 0;
 
 	while (len != count) {

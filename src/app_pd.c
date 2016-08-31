@@ -37,7 +37,7 @@
 /* FIXME */
 struct cpl {
 	const char		*contract1, *contract2;
-	float			price1, price2, prevpd;
+	double			price1, price2, prevpd;
 	pthread_spinlock_t	lock;
 };
 
@@ -129,7 +129,7 @@ static int pd_exec(void *data, void *data2) {
 			else
 				cpl->price2 = quote->thyquote.m_dZXJ;
 			if (cpl->price1 > 0.0 && cpl->price2 > 0.0) {
-				float pd = fabs(cpl->price1 - cpl->price2);
+				double pd = fabs(cpl->price1 - cpl->price2);
 
 				/* If the price diff changes, we output it. */
 				if (fabs(pd - cpl->prevpd) > 0.000001) {

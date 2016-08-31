@@ -41,7 +41,7 @@
 struct ohlc {
 	int			time, ms;
 	char			*contract;
-	float			prehigh, prelow, open, high, low, close;
+	double			prehigh, prelow, open, high, low, close;
 	int			prevolume, preopenint, volume, openint;
 	unsigned long		id;
 	pthread_spinlock_t	lock;
