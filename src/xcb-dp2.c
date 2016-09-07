@@ -788,13 +788,15 @@ static int process_command(client c) {
 }
 
 void process_inbuf(client c) {
+	char *start = c->inbuf;
+
 	while (c->inpos > 0) {
 		char *newline;
 		size_t len;
 
 		if (c->flags & CLIENT_CLOSE_AFTER_REPLY)
 			break;
-		if ((newline = strstr(c->inbuf, "\r\n")) == NULL) {
+		if ((newline = strstr(start, "\r\n")) == NULL) {
 			if (c->inpos == sizeof c->inbuf - 1) {
 				add_reply_error(c, "protocol error: too big request\r\n");
 				c->flags |= CLIENT_CLOSE_AFTER_REPLY;
@@ -802,18 +804,20 @@ void process_inbuf(client c) {
 			}
 			break;
 		}
-		len = newline - c->inbuf;
+		len = newline - start;
 		if (c->argv)
 			FREE(c->argv);
 		/* FIXME */
 		*newline = '\0';
-		xcb_log(XCB_LOG_INFO, "Client '%s:%d' issued command '%s'", c->ip, c->port, c->inbuf);
-		c->argv = dstr_split_args(c->inbuf, &c->argc);
-		memmove(c->inbuf, c->inbuf + len + 2, sizeof c->inbuf - len - 2);
+		xcb_log(XCB_LOG_INFO, "Client '%s:%d' issued command '%s'", c->ip, c->port, start);
+		c->argv = dstr_split_args(start, &c->argc);
+		start    += len + 2;
 		c->inpos -= len + 2;
 		if (c->argc == 0 || process_command(c) == 0)
 			client_reset(c);
 	}
+	if (start != c->inbuf && c->inpos > 0)
+		memmove(c->inbuf, start, c->inpos);
 }
 
 static client client_new(int fd, int sock, char *ip, int port) {

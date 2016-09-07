@@ -75,7 +75,7 @@ static int loop = 1;
 static const char *prompt = "xcb*CLI> ";
 static int rl_inited = 0;
 static int inpos = 0;
-static char inbuf[4 * 1024 * 1024];
+static char inbuf[8 * 1024 * 1024];
 
 static int com_help(char *arg);
 static int com_quit(char *arg);
@@ -142,6 +142,7 @@ static void *recv_thread(void *data) {
 	while (loop) {
 		char buf[256];
 		int nread;
+		char *start = inbuf;
 
 		if (poll(rfd, 1, 1) == -1) {
 			if (execute) {
@@ -185,7 +186,7 @@ static void *recv_thread(void *data) {
 			char *newline;
 			size_t len;
 
-			if ((newline = strstr(inbuf, "\r\n")) == NULL) {
+			if ((newline = strstr(start, "\r\n")) == NULL) {
 				if (inpos == sizeof inbuf - 1) {
 					if (execute) {
 						fprintf(stderr, "Server error: too big reply\n");
@@ -198,7 +199,7 @@ static void *recv_thread(void *data) {
 				}
 				break;
 			}
-			if ((len = newline - inbuf) == 0) {
+			if ((len = newline - start) == 0) {
 				const char one = '1';
 
 				if (execute && write(proceed_pipe[1], &one, sizeof one) == -1) {
@@ -220,26 +221,28 @@ static void *recv_thread(void *data) {
 					snprintf(datestr + off, sizeof datestr - off, "%06d]",
 						(int)tv.tv_usec);
 					res = dstr_new(datestr);
-					res = dstr_cat(res, inbuf);
+					res = dstr_cat(res, start);
 					if (execute) {
-						if (strncasecmp(inbuf, "HEARTBEAT", 9) &&
-							strncasecmp(inbuf, "INDICES", 7))
+						if (strncasecmp(start, "HEARTBEAT", 9) &&
+							strncasecmp(start, "INDICES", 7))
 							fprintf(stdout, "%s\n", res);
 					} else
 						CLIPRINT(res);
 					dstr_free(res);
 				} else {
 					if (execute) {
-						if (strncasecmp(inbuf, "HEARTBEAT", 9) &&
-							strncasecmp(inbuf, "INDICES", 7))
-							fprintf(stdout, "%s\n", inbuf);
+						if (strncasecmp(start, "HEARTBEAT", 9) &&
+							strncasecmp(start, "INDICES", 7))
+							fprintf(stdout, "%s\n", start);
 					} else
-						CLIPRINT(inbuf);
+						CLIPRINT(start);
 				}
 			}
-			memmove(inbuf, inbuf + len + 2, sizeof inbuf - len - 2);
+			start += len + 2;
 			inpos -= len + 2;
 		}
+		if (start != inbuf && inpos > 0)
+			memmove(inbuf, start, inpos);
 	}
 	close(tcpsock);
 	tcpsock = -1;

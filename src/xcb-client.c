@@ -95,6 +95,7 @@ static void *read_thread(void *data) {
 	rfd[0].events = POLLIN;
 	for (;;) {
 		int nread;
+		char *start = c->inbuf;
 
 		if (poll(rfd, 1, 1) == -1) {
 			xcb_set_error_from_errno(c, XCB_ERR_IO, "poll(2)");
@@ -126,33 +127,35 @@ static void *read_thread(void *data) {
 			dstr *fields = NULL;
 			int nfield = 0;
 
-			if ((newline = strstr(c->inbuf, "\r\n")) == NULL) {
+			if ((newline = strstr(start, "\r\n")) == NULL) {
 				if (c->inpos == sizeof c->inbuf - 1) {
 					xcb_set_error(c, XCB_ERR_PROTOCOL, "Too big reply");
 					goto end;
 				}
 				break;
 			}
-			len = newline - c->inbuf;
-			fields = dstr_split_len(c->inbuf, len, ",", 1, &nfield);
+			len = newline - start;
+			fields = dstr_split_len(start, len, ",", 1, &nfield);
 			if (nfield > 1) {
 				/* FIXME */
 				if (!strcasecmp(fields[1], "indices")) {
 					if (c->xcb_callback_indices)
-						c->xcb_callback_indices(c->inbuf);
+						c->xcb_callback_indices(start);
 				} else if (!strcasecmp(fields[1], "timestamp")) {
 					if (c->xcb_callback_index)
-						c->xcb_callback_index(c->inbuf);
+						c->xcb_callback_index(start);
 				} else if (!strcmp(fields[1], "0") || !strcmp(fields[1], "1")) {
 					if (c->xcb_callback_query)
-						c->xcb_callback_query(c->inbuf);
+						c->xcb_callback_query(start);
 				} else if (c->xcb_callback_subscribe)
-					c->xcb_callback_subscribe(c->inbuf);
+					c->xcb_callback_subscribe(start);
 			}
 			dstr_free_tokens(fields, nfield);
-			memmove(c->inbuf, c->inbuf + len + 2, sizeof c->inbuf - len - 2);
+			start    += len + 2;
 			c->inpos -= len + 2;
 		}
+		if (start != c->inbuf && c->inpos > 0)
+			memmove(c->inbuf, start, c->inpos);
 	}
 
 end:
