@@ -53,7 +53,7 @@ struct xcb_context_t {
 	char				errstr[128];
 	int				fd;
 	int				inpos;
-	char				inbuf[4 * 1024 * 1024];
+	char				inbuf[8 * 1024 * 1024];
 	xcb_callback_connect_t		xcb_callback_connect;
 	xcb_callback_subscribe_t	xcb_callback_subscribe;
 	xcb_callback_query_t		xcb_callback_query;

@@ -38,8 +38,6 @@ extern unsigned hashmurmur2(const void *key);
 extern unsigned intlen(int32_t i);
 extern dstr     getipv4(void);
 extern int      makedir(const char *path, mode_t mode);
-extern int      diffday(int startday, int endday);
-extern int      diffnow(int endday);
 
 #ifdef __cplusplus
 }

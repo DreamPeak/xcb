@@ -24,7 +24,6 @@
 #include <ifaddrs.h>
 #include <netdb.h>
 #include <string.h>
-#include <time.h>
 #include "utils.h"
 
 /* FIXME */
@@ -143,37 +142,5 @@ int makedir(const char *path, mode_t mode) {
 			return errno;
 	}
 	return 0;
-}
-
-/* FIXME */
-int diffday(int startday, int endday) {
-	time_t t = time(NULL);
-	struct tm ls, le;
-	int res, rem;
-
-	localtime_r(&t, &ls);
-	localtime_r(&t, &le);
-	ls.tm_mday = startday % 100;
-	ls.tm_mon  = startday / 100 % 100 - 1;
-	ls.tm_year = startday / 10000 - 1900;
-	le.tm_mday = endday   % 100;
-	le.tm_mon  = endday   / 100 % 100 - 1;
-	le.tm_year = endday   / 10000 - 1900;
-	res = difftime(mktime(&le), mktime(&ls)) / (24 * 60 * 60);
-	return res / 7 * 5 + ((rem = res % 7) == 6 ? 5 : rem) + 1;
-}
-
-/* FIXME */
-int diffnow(int endday) {
-	time_t t = time(NULL);
-	struct tm le;
-	int res, rem;
-
-	localtime_r(&t, &le);
-	le.tm_mday = endday % 100;
-	le.tm_mon  = endday / 100 % 100 - 1;
-	le.tm_year = endday / 10000 - 1900;
-	res = difftime(mktime(&le), t) / (24 * 60 * 60);
-	return res / 7 * 5 + ((rem = res % 7) == 6 ? 5 : rem) + 1;
 }
 
