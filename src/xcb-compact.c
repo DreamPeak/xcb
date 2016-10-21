@@ -755,7 +755,7 @@ void process_quote(void *data) {
 
 			if (quote->thyquote.m_cHYDM[0] == 'S' && quote->thyquote.m_cHYDM[1] == 'P')
 				quote->thyquote.m_nTime *= 1000;
-			else if (hour != 0 && (tlen == 6 || tlen == 7))
+			else if ((tlen == 6 || tlen == 7) && quote->thyquote.m_nTime / 100000 != 0)
 				quote->thyquote.m_nTime *= 100;
 			hour = quote->thyquote.m_nTime / 10000000;
 			min  = quote->thyquote.m_nTime % 10000000 / 100000;
