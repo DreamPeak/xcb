@@ -470,6 +470,10 @@ void process_quote(void *data) {
 			int hour, min;
 			struct tm lt;
 
+			if (quote->thyquote.m_cHYDM[0] == 'S' && quote->thyquote.m_cHYDM[1] == 'P')
+				quote->thyquote.m_nTime *= 1000;
+			else if (hour != 0 && (tlen == 6 || tlen == 7))
+				quote->thyquote.m_nTime *= 100;
 			hour = quote->thyquote.m_nTime / 10000000;
 			min  = quote->thyquote.m_nTime % 10000000 / 100000;
 			if (tv.tv_sec == 0 || (hour == 8 && min == 59) || hour == 9 ||
@@ -479,10 +483,6 @@ void process_quote(void *data) {
 				tv.tv_sec += 24 * 60 * 60;
 			prev_hour = hour;
 			localtime_r(&tv.tv_sec, &lt);
-			if (quote->thyquote.m_cHYDM[0] == 'S' && quote->thyquote.m_cHYDM[1] == 'P')
-				quote->thyquote.m_nTime *= 1000;
-			else if (hour != 0 && (tlen == 6 || tlen == 7))
-				quote->thyquote.m_nTime *= 100;
 			lt.tm_sec  = quote->thyquote.m_nTime % 100000 / 1000;
 			lt.tm_min  = min;
 			lt.tm_hour = hour;
