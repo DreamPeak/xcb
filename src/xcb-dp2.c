@@ -467,11 +467,13 @@ void process_quote(void *data) {
 			return;
 		/* idiosyncrasy of different timestamps */
 		} else if ((tlen = intlen(quote->thyquote.m_nTime)) < 10) {
-			int hour;
+			int hour, min;
 			struct tm lt;
 
 			hour = quote->thyquote.m_nTime / 10000000;
-			if (tv.tv_sec == 0 || hour == 9 || hour == 21)
+			min  = quote->thyquote.m_nTime % 10000000 / 100000;
+			if (tv.tv_sec == 0 || (hour == 8 && min == 59) || hour == 9 ||
+				(hour == 20 && min == 59) || hour == 21)
 				gettimeofday(&tv, NULL);
 			if (prev_hour == 23 && hour == 0)
 				tv.tv_sec += 24 * 60 * 60;
@@ -481,8 +483,8 @@ void process_quote(void *data) {
 				quote->thyquote.m_nTime *= 1000;
 			else if (hour != 0 && (tlen == 6 || tlen == 7))
 				quote->thyquote.m_nTime *= 100;
-			lt.tm_sec  = quote->thyquote.m_nTime % 100000   / 1000;
-			lt.tm_min  = quote->thyquote.m_nTime % 10000000 / 100000;
+			lt.tm_sec  = quote->thyquote.m_nTime % 100000 / 1000;
+			lt.tm_min  = min;
 			lt.tm_hour = hour;
 			quote->m_nMSec = quote->thyquote.m_nTime % 1000;
 			quote->thyquote.m_nTime = mktime(&lt);
