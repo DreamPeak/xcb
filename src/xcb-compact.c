@@ -1294,6 +1294,8 @@ int main(int argc, char **argv) {
 		if ((tmp = variable_retrieve(cfg, "database", "cp_time")) && strcmp(tmp, ""))
 			if (atoi(tmp) >= 0 && atoi(tmp) <= 23)
 				cp_time = atoi(tmp);
+		if ((tmp = variable_retrieve(cfg, "database", "rotate")) && strcmp(tmp, ""))
+			rotate = atoi(tmp);
 		gettimeofday(&tv, NULL);
 		localtime_r(&tv.tv_sec, &lt);
 		if (lt.tm_hour >= cp_time)
