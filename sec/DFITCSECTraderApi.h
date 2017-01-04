@@ -2,9 +2,9 @@
 * 版权所有(C)2012-2016, 大连飞创信息技术有限公司
 * 文件名称：DFITCSECTraderApi.h
 * 文件说明：定义接口所需的数据接口
-* 当前版本：1.6.38
+* 当前版本：1.6.73
 * 作者：XSpeed证券项目组
-* 发布日期：2016年04月
+* 发布日期：2016年09月
 */
 #ifndef DFITCSECTRADERAPI_H_
 #define DFITCSECTRADERAPI_H_
@@ -35,7 +35,11 @@ public:
     /**
      * SEC-网络连接不正常响应
      */
-    virtual void OnFrontDisconnected(int nReason) {};  
+    virtual void OnFrontDisconnected(int nReason) {};
+    /**
+     * SEC-消息通知
+     */
+    virtual void OnRtnNotice(DFITCSECRspNoticeField *pNotice) {};
     /**
     * ERR-错误应答
     * @param pRspInfo:指针若非空，返回错误信息结构地址
@@ -612,7 +616,7 @@ public:
      /**
       * 创建DFITCSECTraderApi接口对象
       * @ pszLogAddr log所在的路径，如果pszLogAddress为NULL，则不生成log。
-	  * @ pszPriFlowDir 私有流记录所在的路径，如果pszPriFlowDir为NULL，则默认将私有流记录在当前目录下。
+      * @ pszPriFlowDir 私有流记录所在的路径，如果pszPriFlowDir为NULL，则默认将私有流记录在当前目录下。
       */
      static DFITCSECTraderApi *CreateDFITCSECTraderApi(const char* pszLogAddr = "", const char* pszPriFlowDir = "");
      /**
@@ -636,8 +640,9 @@ public:
       *         TERT_RESUME:从上次收到的续传
       *         TERT_QUICK:只传送登录后私有流的内容
       * @remark 该方法要在UserLogin方法前调用。若不调用则不会收到私有流的数据。
+      * @return : 0 表示请求发送成功，非 0 表示请求发送失败，具体错误请参考error.xml
       */
-     virtual void SubscribePrivateTopic(RESUME_TYPE nResumeType) = 0; 
+     virtual int SubscribePrivateTopic(RESUME_TYPE nResumeType) = 0; 
      /**
       * STOCK-登录请求
       * @param p:指向用户登录请求结构体的地址
@@ -967,25 +972,25 @@ public:
      * @param p:指向用户直接还款请求结构的地址
      * @return 0表示请求发送成功，其他值表示请求发送失败，具体错误请对照error.xml  
      */
-    virtual int ReqFASLDirectRepayment(DFITCFASLReqDirectRepaymentField *p) =0;
+    virtual int ReqFASLDirectRepayment(DFITCFASLReqDirectRepaymentField *p) = 0;
     /**
      * FASL-还券划转请求
      * @param p:指向用户还券划转请求结构的地址
      * @return 0表示请求发送成功，其他值表示请求发送失败，具体错误请对照error.xml  
      */
-    virtual int ReqFASLRepayStockTransfer(DFITCFASLReqRepayStockTransferField *p) =0;
+    virtual int ReqFASLRepayStockTransfer(DFITCFASLReqRepayStockTransferField *p) = 0;
     /**
      * FASL-信用交易请求
      * @param p:指向用户信用交易请求结构的地址
      * @return 0表示请求发送成功，其他值表示请求发送失败，具体错误请对照error.xml  
      */
-    virtual int ReqFASLEntrustCrdtOrder(DFITCFASLReqEntrustCrdtOrderField *p) =0;
+    virtual int ReqFASLEntrustCrdtOrder(DFITCFASLReqEntrustCrdtOrderField *p) = 0;
     /**
      * FASL-融资融券交易请求
      * @param p:指向用户融资融券交易请求结构的地址
      * @return 0表示请求发送成功，其他值表示请求发送失败，具体错误请对照error.xml  
      */
-    virtual int ReqFASLEntrsuctOrder(DFITCFASLReqEntrustOrderField *p) =0;
+    virtual int ReqFASLEntrsuctOrder(DFITCFASLReqEntrustOrderField *p) = 0;
     /**
      * FASL-撤单请求
      * @param p:指向用户撤单请求结构的地址
@@ -997,13 +1002,13 @@ public:
      * @param p:指向用户信用可委托数量查询请求结构的地址
      * @return 0表示请求发送成功，其他值表示请求发送失败，具体错误请对照error.xml  
      */
-    virtual int ReqFASLCalcAbleEntrustCrdtQty(DFITCFASLReqCalcAbleEntrustCrdtQtyField *p) =0;
+    virtual int ReqFASLCalcAbleEntrustCrdtQty(DFITCFASLReqCalcAbleEntrustCrdtQtyField *p) = 0;
     /**
      * FASL-查询信用资金请求
      * @param p:指向用户查询信用资金请求结构的地址
      * @return 0表示请求发送成功，其他值表示请求发送失败，具体错误请对照error.xml  
      */
-    virtual int ReqFASLQryCrdtFunds(DFITCFASLReqQryCrdtFundsField *p) =0;
+    virtual int ReqFASLQryCrdtFunds(DFITCFASLReqQryCrdtFundsField *p) = 0;
     /**
      * FASL-信用合约信息请求
      * @param p:指向用户信用合约信息请求结构的地址
@@ -1015,73 +1020,73 @@ public:
      * @param p:指向用户信用合约变动信息查询请求结构的地址
      * @return 0表示请求发送成功，其他值表示请求发送失败，具体错误请对照error.xml  
      */
-    virtual int ReqFASLQryCrdtConChangeInfo(DFITCFASLReqQryCrdtConChangeInfoField *p) =0;
+    virtual int ReqFASLQryCrdtConChangeInfo(DFITCFASLReqQryCrdtConChangeInfoField *p) = 0;
     /**
      * FASL-资金调转请求
      * @param p:指向用户资金调转请求结构的地址
      * @return 0表示请求发送成功，其他值表示请求发送失败，具体错误请对照error.xml  
      */
-    virtual int ReqFASLTransferFunds(DFITCStockReqTransferFundsField *p) =0;
+    virtual int ReqFASLTransferFunds(DFITCStockReqTransferFundsField *p) = 0;
     /**
      * FASL-客户信息查询请求
      * @param p:指向用户客户信息查询请求结构的地址
      * @return 0表示请求发送成功，其他值表示请求发送失败，具体错误请对照error.xml  
      */
-    virtual int ReqFASLQryAccountInfo(DFITCStockReqQryAccountField *p) =0;
+    virtual int ReqFASLQryAccountInfo(DFITCStockReqQryAccountField *p) = 0;
     /**
      * FASL-客户资金查询请求
      * @param p:指向用户客户资金查询请求结构的地址
      * @return 0表示请求发送成功，其他值表示请求发送失败，具体错误请对照error.xml  
      */
-    virtual int ReqFASLQryCapitalAccountInfo(DFITCStockReqQryCapitalAccountField *p) =0;
+    virtual int ReqFASLQryCapitalAccountInfo(DFITCStockReqQryCapitalAccountField *p) = 0;
     /**
      * FASL-股东信息查询请求
      * @param p:指向用户股东信息查询请求结构的地址
      * @return 0表示请求发送成功，其他值表示请求发送失败，具体错误请对照error.xml  
      */
-    virtual int ReqFASLQryShareholderInfo(DFITCStockReqQryShareholderField *p) =0;
+    virtual int ReqFASLQryShareholderInfo(DFITCStockReqQryShareholderField *p) = 0;
     /**
      * FASL-持仓查询请求
      * @param p:指向用户持仓查询请求结构的地址
      * @return 0表示请求发送成功，其他值表示请求发送失败，具体错误请对照error.xml  
      */
-    virtual int ReqFASLQryPosition(DFITCStockReqQryPositionField *p) =0;
+    virtual int ReqFASLQryPosition(DFITCStockReqQryPositionField *p) = 0;
     /**
      * FASL-委托查询请求
      * @param p:指向用户委托查询请求结构的地址
      * @return 0表示请求发送成功，其他值表示请求发送失败，具体错误请对照error.xml  
      */
-    virtual int ReqFASLQryEntrustOrder(DFITCStockReqQryEntrustOrderField *p) =0;
+    virtual int ReqFASLQryEntrustOrder(DFITCStockReqQryEntrustOrderField *p) = 0;
     /**
      * FASL-分笔成交查询请求
      * @param p:指向用户分笔成交查询请求结构的地址
      * @return 0表示请求发送成功，其他值表示请求发送失败，具体错误请对照error.xml  
      */
-    virtual int ReqFASLQrySerialTrade(DFITCStockReqQrySerialTradeField *p) =0;
+    virtual int ReqFASLQrySerialTrade(DFITCStockReqQrySerialTradeField *p) = 0;
     /**
      * FASL-实时成交查询请求
      * @param p:指向用户实时成交查询请求结构的地址
      * @return 0表示请求发送成功，其他值表示请求发送失败，具体错误请对照error.xml  
      */
-    virtual int ReqFASLQryRealTimeTrade(DFITCStockReqQryRealTimeTradeField *p) =0;
+    virtual int ReqFASLQryRealTimeTrade(DFITCStockReqQryRealTimeTradeField *p) = 0;
     /**
      * FASL-资金冻结明细查询请求
      * @param p:指向用户资金冻结明细查询请求结构的地址
      * @return 0表示请求发送成功，其他值表示请求发送失败，具体错误请对照error.xml  
      */
-    virtual int ReqFASLQryFreezeFundsDetail(DFITCStockReqQryFreezeFundsDetailField *p) =0;
+    virtual int ReqFASLQryFreezeFundsDetail(DFITCStockReqQryFreezeFundsDetailField *p) = 0;
     /**
      * FASL-证券冻结明细查询请求
      * @param p:指向用户证券冻结明细查询请求结构的地址
      * @return 0表示请求发送成功，其他值表示请求发送失败，具体错误请对照error.xml  
      */
-    virtual int ReqFASLQryFreezeStockDetail(DFITCStockReqQryFreezeStockDetailField *p) =0;
+    virtual int ReqFASLQryFreezeStockDetail(DFITCStockReqQryFreezeStockDetailField *p) = 0;
     /**
      * FASL-查询资金调拨明细请求
      * @param p:指向用户查询资金调拨明细请求结构的地址
      * @return 0表示请求发送成功，其他值表示请求发送失败，具体错误请对照error.xml  
      */
-    virtual int ReqFASLQryTransferFundsDetail(DFITCStockReqQryTransferFundsDetailField *p) =0;
+    virtual int ReqFASLQryTransferFundsDetail(DFITCStockReqQryTransferFundsDetailField *p) = 0;
     /**
       * FASL-当前系统时间查询请求
       * @param p:指向用户交易时间查询请求结构体的地址

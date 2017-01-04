@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2016, Dalian Futures Information Technology Co., Ltd.
+ * Copyright (c) 2013-2017, Dalian Futures Information Technology Co., Ltd.
  *
  * Xiaoye Meng <mengxiaoye at dce dot com dot cn>
  *
@@ -368,7 +368,7 @@ int main(int argc, char **argv) {
 			}
 		}
 	} else {
-		fprintf(stdout, "XCUBE CLI, Copyright (c) 2013-2016, "
+		fprintf(stdout, "XCUBE CLI, Copyright (c) 2013-2017, "
 			"Dalian Futures Information Technology Co., Ltd.\n");
 		fprintf(stdout, "Type 'help' or '?' for help.\n");
 		init_readline();

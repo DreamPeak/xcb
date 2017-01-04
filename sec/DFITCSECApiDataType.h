@@ -4,7 +4,7 @@
  * 文件说明：定义接口所需的数据类型的头文件
  * 当前版本：1.6
  * 作者：XSpeed证券项目组
- * 发布日期：2015年08月
+ * 发布日期：2016年08月
  */
 
 #ifndef DFITCSECAPIDATATYPE_H
@@ -13,7 +13,7 @@
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECBusinessTypeType 是一个业务类别类型
 /////////////////////////////////////////////////////////////////////////
-typedef int   DFITCSECBusinessTypeType;
+typedef int    DFITCSECBusinessTypeType;
 ///股票
 #define DFITCSEC_BT_Stock                                         0
 ///ETF期权
@@ -104,6 +104,15 @@ typedef double DFITCSECPriceType;
 typedef double DFITCSECFundsType;
 
 /////////////////////////////////////////////////////////////////////////
+///DFITCSECPositionSourceType 是一个头寸来源类型
+/////////////////////////////////////////////////////////////////////////
+typedef int    DFITCSECPositionSourceType;
+///普通头寸
+#define DFITCSEC_PS_General                                       0
+///专项头寸
+#define DFITCSEC_PS_Special                                       1
+
+/////////////////////////////////////////////////////////////////////////
 ///DFITCSECEntrustDirectionType 是一个委托类别类型
 /////////////////////////////////////////////////////////////////////////
 typedef int    DFITCSECEntrustDirectionType;
@@ -111,20 +120,50 @@ typedef int    DFITCSECEntrustDirectionType;
 #define DFITCSEC_ED_Buy                                           1
 ///卖
 #define DFITCSEC_ED_Sell                                          2
+///配股缴款
+#define DFITCSEC_ED_RightsIssueContribution                       3
+///回购融资
+#define DFITCSEC_ED_RepurchaseFinancing                           4
+///回购融券
+#define DFITCSEC_ED_RepurchaseSecurities                          5
+///深圳转托管
+#define DFITCSEC_ED_CustodyTransfer                               7
+///上海指定交易
+#define DFITCSEC_ED_DesignateTrading                              9
+///上海撤指交易
+#define DFITCSEC_ED_RevocationDesignateTrading                    10
+///债转股
+#define DFITCSEC_ED_DebtToEquity                                  11
+///转债回售
+#define DFITCSEC_ED_BondsSoldBack                                 12
+///配售申购
+#define DFITCSEC_ED_PlacingPurchase                               14
+///投票
+#define DFITCSEC_ED_Vote                                          23
 ///ETF申购
 #define DFITCSEC_ED_Purchase                                      29
 ///ETF赎回
 #define DFITCSEC_ED_Redemp                                        30
+///质押券入库
+#define DFITCSEC_ED_PledgeVoucherIn                               37
+///质押券出库
+#define DFITCSEC_ED_PledgeVoucherOut                              38
 ///基金认购
 #define DFITCSEC_ED_FundSubscribe                                 41
 ///基金申购
 #define DFITCSEC_ED_FundPurchase                                  42
 ///基金赎回
 #define DFITCSEC_ED_FundRedemption                                43
+///基金分红设置
+#define DFITCSEC_ED_FundBonusSetting                              44
+///基金转换
+#define DFITCSEC_ED_FundConversion                                46
 ///基金分拆
 #define DFITCSEC_ED_FundSplit                                     47
 ///基金合并
 #define DFITCSEC_ED_FundMerge                                     48
+///权证行权
+#define DFITCSEC_ED_WarrantExercise                               50
 ///融资买入
 #define DFITCSEC_ED_FinancingToBuy                                61
 ///卖券还款
@@ -141,19 +180,23 @@ typedef int    DFITCSECEntrustDirectionType;
 #define DFITCSEC_ED_FinancingForceSelling                         71
 ///融券强平
 #define DFITCSEC_ED_SecuritiesForceSelling                        72
+///预受要约
+#define DFITCSEC_ED_AcceptOffer                                   76
+///解除预受要约
+#define DFITCSEC_ED_GiveUpAcceptOffer                             77
 
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECQuantityType 是一个数量类型
 /////////////////////////////////////////////////////////////////////////
-typedef  int   DFITCSECQuantityType;
+typedef int    DFITCSECQuantityType;
 
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECLargeQuantityType 是一个大数量类型
 /////////////////////////////////////////////////////////////////////////
 #ifdef WIN32
-typedef  __int64   DFITCSECLargeQuantityType;
+typedef __int64 DFITCSECLargeQuantityType;
 #else
-typedef  long   DFITCSECLargeQuantityType;
+typedef long   DFITCSECLargeQuantityType;
 #endif
 
 /////////////////////////////////////////////////////////////////////////
@@ -206,7 +249,7 @@ typedef int    DFITCSECEntrustBatchIDType;
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECSeatIDType 是一个席位号类型
 /////////////////////////////////////////////////////////////////////////
-typedef char    DFITCSECSeatIDType[9];
+typedef char   DFITCSECSeatIDType[9];
 
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECExchangeType 是一个交易所代码类型
@@ -239,7 +282,7 @@ typedef char   DFITCSECWithdrawFlagType[2];
 #define DFITCSEC_CF_EntrustSucc                                 "O"
 ///撤单
 #define DFITCSEC_CF_WithdrawSuc                                 "W"
-//FASL信用合约变动信息查询专用
+////FASL信用合约变动信息查询专用
 ///撤销
 #define DFITCSEC_CF_Withdraw                                    "-1"
 ///正常
@@ -272,9 +315,9 @@ typedef int    DFITCSECPositionQryFlagType;
 ///DFITCSECFundsQryFlagType 是一个资金查询标志类型
 ////////////////////////////////////////////////////////////
 typedef int    DFITCSECFundsQryFlagType;
-//返回基本信息
+///返回基本信息
 #define DFITCSEC_FQF_Normal                                     0
-//扩展字段，暂不使用
+///扩展字段，暂不使用
 #define DFITCSEC_FQF_Extend                                     1
 
 ////////////////////////////////////////////////////////////
@@ -302,9 +345,9 @@ typedef char   DFITCSECCurrencyType[4];
 ////////////////////////////////////////////////////////////
 typedef int    DFITCSECFundsTransferFlagType;
 ///转入
-#define DFITCSEC_FTF_In                                         0
+#define DFITCSEC_FTF_In                                         1
 ///转出 
-#define DFITCSEC_FTF_Out                                        1
+#define DFITCSEC_FTF_Out                                        2
 
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECEntrustBatchOrderDetailType 是一个批量委托明细类型
@@ -322,8 +365,8 @@ typedef char   DFITCSECOrderIDRangeType[1024];
 typedef int    DFITCSECFundsFreezeTypeType;
 ///委托冻结
 #define DFITCSEC_FFT_EntrustFreeze                             1
-///实时成交冻结
-#define DFITCSEC_FFT_RealtimeTradeFreeze                       2
+///实时成交解冻
+#define DFITCSEC_FFT_RealtimeTradeUnFreeze                     2
 ///手工冻结
 #define DFITCSEC_FFT_ManualFreeze                              3
 ///手工解冻
@@ -332,7 +375,7 @@ typedef int    DFITCSECFundsFreezeTypeType;
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECTransFundsFreezeTypeType 是一个调拨资金冻结类别类型
 /////////////////////////////////////////////////////////////////////////
-typedef int		DFITCSECTransFundsFreezeTypeType;
+typedef int    DFITCSECTransFundsFreezeTypeType;
 ///初始化资金
 #define DFITCSEC_FFT_InitFunds                                 50
 ///盘中资金调入
@@ -379,12 +422,12 @@ typedef int    DFITCSECStockFreezeTypeType;
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECShareholderIDType 是一个股东号类型
 /////////////////////////////////////////////////////////////////////////
-typedef char  DFITCSECShareholderIDType[11];
+typedef char   DFITCSECShareholderIDType[11];
 
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECEntrustTypeType 是一个委托方式类型
 /////////////////////////////////////////////////////////////////////////
-typedef int   DFITCSECEntrustTypeType;
+typedef int    DFITCSECEntrustTypeType;
 ///电话
 #define DFITCSEC_ET_Phone                                    1
 ///磁卡
@@ -403,12 +446,12 @@ typedef int   DFITCSECEntrustTypeType;
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECSecurityNameType 是一个证券名称类型
 /////////////////////////////////////////////////////////////////////////
-typedef char  DFITCSECSecurityNameType[21];
+typedef char   DFITCSECSecurityNameType[21];
 
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECDeclareResultType 是一个申报结果类型
 /////////////////////////////////////////////////////////////////////////
-typedef int   DFITCSECDeclareResultType;
+typedef int    DFITCSECDeclareResultType;
 ///未申报
 #define DFITCSEC_DR_UnDeclare                                0
 ///正在申报
@@ -417,8 +460,8 @@ typedef int   DFITCSECDeclareResultType;
 #define DFITCSEC_DR_UnTrade                                  2
 ///非法委托/废单
 #define DFITCSEC_DR_EntrustFail                              3
-///申请资金授权中
-#define DFITCSEC_DR_AppFundsAuthing                          4
+///交易所已确认
+#define DFITCSEC_DR_Confirm                                  4
 ///部分成交
 #define DFITCSEC_DR_PartTrade                                5
 ///全部成交
@@ -435,87 +478,89 @@ typedef int   DFITCSECDeclareResultType;
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECBatchDeclareResultType 是一个批量申报结果类型
 /////////////////////////////////////////////////////////////////////////
-typedef int   DFITCSECBatchDeclareResultType;
+typedef int    DFITCSECBatchDeclareResultType;
 ///已申报
 #define DFITCSEC_BDR_Declared                                1
 
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECDeclareOrderIDType 是申报委托号类型
 /////////////////////////////////////////////////////////////////////////
-typedef char  DFITCSECDeclareOrderIDType[11];
+typedef char   DFITCSECDeclareOrderIDType[11];
 
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECIPAddressType 是一个ip地址类型
 /////////////////////////////////////////////////////////////////////////
-typedef char  DFITCSECIPAddressType[32];
+typedef char   DFITCSECIPAddressType[32];
 
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECMacAddressType 是一个mac地址类型
 /////////////////////////////////////////////////////////////////////////
-typedef char  DFITCSECMacAddressType[32];
+typedef char   DFITCSECMacAddressType[32];
 
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECTradeIDType 是一个成交编号类型
 /////////////////////////////////////////////////////////////////////////
-typedef char  DFITCSECTradeIDType[17];
+typedef char   DFITCSECTradeIDType[17];
 
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECSecurityTypeType 是一个证券类别类型
 /////////////////////////////////////////////////////////////////////////
-typedef char  DFITCSECSecurityTypeType[3];
+typedef char   DFITCSECSecurityTypeType[3];
 
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECAccountStatusType 是一个状态标志类型
 /////////////////////////////////////////////////////////////////////////
-typedef int   DFITCSECAccountStatusType;
-//正常
+typedef int    DFITCSECAccountStatusType;
+///正常
 #define DFITCSEC_AS_Normal                                    0
-//冻结
+///冻结
 #define DFITCSEC_AS_Freeze                                    1
-//客户卡挂失
+///客户卡挂失
 #define DFITCSEC_AS_LossReporting                             2
-//销户
+///销户
 #define DFITCSEC_AS_CloseAccount                              3
-//小额休眠
+///小额休眠
 #define DFITCSEC_AS_MicroDormancy                             6
-//不合格
+///不合格
 #define DFITCSEC_AS_UnQualified                               7
-//公司不合格
+///公司不合格
 #define DFITCSEC_AS_CompUnQualified                           9
 
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECTradeStatusType 是一个状态标志类型
 /////////////////////////////////////////////////////////////////////////
-typedef int   DFITCSECTradeStatusType;
-//正常
+typedef int    DFITCSECTradeStatusType;
+///正常
 #define DFITCSEC_TS_Normal                                    0
-//调出
+///暂停
+#define DFITCSEC_TS_Suspend                                   2
+///调出
 #define DFITCSEC_TS_CallOut                                   4
 
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECBranchIDType 是一个机构代码类型
 /////////////////////////////////////////////////////////////////////////
-typedef char  DFITCSECBranchIDType[5];
+typedef char   DFITCSECBranchIDType[5];
 
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECPhoneIDType 是一个联系电话类型
 /////////////////////////////////////////////////////////////////////////
-typedef char  DFITCSECPhoneIDType[21];
+typedef char   DFITCSECPhoneIDType[21];
 
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECAccountNameType 是一个客户名称类型
 /////////////////////////////////////////////////////////////////////////
-typedef char  DFITCSECAccountNameType[81];
+typedef char   DFITCSECAccountNameType[81];
 
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECAccountIdentityIDType 是一个证件编号类型
 /////////////////////////////////////////////////////////////////////////
-typedef char  DFITCSECAccountIdentityIDType[31];
+typedef char   DFITCSECAccountIdentityIDType[31];
 
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECAccountIdentityTypeType 是一个证件标示类型
 /////////////////////////////////////////////////////////////////////////
-typedef int   DFITCSECAccountIdentityTypeType;
+typedef int    DFITCSECAccountIdentityTypeType;
 ///身份证
 #define DFITCSEC_AI_IDcard                                   0
 ///护照
@@ -556,12 +601,12 @@ typedef int   DFITCSECAccountIdentityTypeType;
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSBranchTypeType 是一个机构标志类型
 /////////////////////////////////////////////////////////////////////////
-typedef int   DFITCSBranchTypeType;
+typedef int    DFITCSBranchTypeType;
 
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECPasswdSyncFlagType 是一个密码同步标志类型
 /////////////////////////////////////////////////////////////////////////
-typedef int   DFITCSECPasswdSyncFlagType;
+typedef int    DFITCSECPasswdSyncFlagType;
 ///不同步
 #define DFITCSEC_PSF_Sync                                     0
 ///同步
@@ -581,7 +626,7 @@ typedef int   DFITCSECShareholderSpecPropType;
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECTradePermissionsType 是一个交易权限类型
 /////////////////////////////////////////////////////////////////////////
-typedef int   DFITCSECTradePermissionsType;
+typedef int    DFITCSECTradePermissionsType;
 ///基本交易权限
 #define DFITCSEC_TP_BasicTrade                                 1
 ///回购融资
@@ -600,7 +645,7 @@ typedef int   DFITCSECTradePermissionsType;
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECShareholderStatusType 是一个股东状态类型
 /////////////////////////////////////////////////////////////////////////
-typedef int   DFITCSECShareholderStatusType;
+typedef int    DFITCSECShareholderStatusType;
 ///正常
 #define DFITCSEC_SHS_Normal                                    0
 ///股东冻结
@@ -625,7 +670,7 @@ typedef int   DFITCSECShareholderStatusType;
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECMainAccountFlagType 是一个主账户标志类型
 /////////////////////////////////////////////////////////////////////////
-typedef int   DFITCSECMainAccountFlagType;
+typedef int    DFITCSECMainAccountFlagType;
 ///辅助帐号
 #define DFITCSEC_MA_Auxiliary                                  0
 ///主帐号
@@ -634,7 +679,7 @@ typedef int   DFITCSECMainAccountFlagType;
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECShareholderCtlPropType 是一个股东控制属性类型
 /////////////////////////////////////////////////////////////////////////
-typedef int   DFITCSECShareholderCtlPropType;
+typedef int    DFITCSECShareholderCtlPropType;
 ///正常
 #define DFITCSEC_SHC_Normal                                    0
 ///禁止买入
@@ -649,12 +694,12 @@ typedef int   DFITCSECShareholderCtlPropType;
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECOrderRangeID 是一个委托号范围类型
 /////////////////////////////////////////////////////////////////////////
-typedef char  DFITCSECOrderRangeID[1024];
+typedef char   DFITCSECOrderRangeID[1024];
 
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECBidTradeFlagType 是一个竞价交易标志类型
 /////////////////////////////////////////////////////////////////////////
-typedef int   DFITCSECBidTradeFlagType;
+typedef int    DFITCSECBidTradeFlagType;
 ///不允许集合竞价期间交易 
 #define DFITCSEC_BTF_UnBidTrade                           0
 ///允许集合竞价期间交易
@@ -669,22 +714,22 @@ typedef int   DFITCSECTradeUnitType;
 ///DFITCSECBusinessLimitType 是一个买卖限制类型
 /////////////////////////////////////////////////////////////////////////
 typedef int   DFITCSECBusinessLimitType;
-//T+0交易	
-#define DFITCSEC_T0_Transaction							1
-//席位托管	
-#define DFITCSEC_Seat_Hosting							2
-//计算市值	
-#define DFITCSEC_Computing_Market_Value					8
+///T+0交易
+#define DFITCSEC_T0_Transaction                          1
+///席位托管
+#define DFITCSEC_Seat_Hosting                            2
+///计算市值
+#define DFITCSEC_Computing_Market_Value                  8
 
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECSubAccountIDType 是子账户编码类型
 /////////////////////////////////////////////////////////////////////////
-typedef char  DFITCSECSubAccountIDType[7];
+typedef char   DFITCSECSubAccountIDType[7];
 
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECOpenCloseFlagType 是一个开平标志类型
 /////////////////////////////////////////////////////////////////////////
-typedef int   DFITCSECOpenCloseFlagType;
+typedef int    DFITCSECOpenCloseFlagType;
 ///开仓
 #define DFITCSEC_OCF_Open                                1
 ///平仓
@@ -713,7 +758,7 @@ typedef int   DFITCSECOpenCloseFlagType;
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECCoveredFlagType 是一个备兑标志类型
 /////////////////////////////////////////////////////////////////////////
-typedef int   DFITCSECCoveredFlagType;
+typedef int    DFITCSECCoveredFlagType;
 ///非备兑
 #define DFITCSEC_CF_UnCovered                            0
 ///备兑
@@ -724,7 +769,7 @@ typedef int   DFITCSECCoveredFlagType;
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECOrderExpiryDateType 是一个订单时效限制类型
 /////////////////////////////////////////////////////////////////////////
-typedef int   DFITCSECOrderExpiryDateType;
+typedef int    DFITCSECOrderExpiryDateType;
 ///当日有效
 #define DFITCSEC_OE_NONE                                 0
 ///立即成交剩余指令自动撤销指令 FAK(IOC)
@@ -735,7 +780,7 @@ typedef int   DFITCSECOrderExpiryDateType;
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECOrderCategoryType 是一个委托单类别类型
 /////////////////////////////////////////////////////////////////////////
-typedef int   DFITCSECOrderCategoryType;
+typedef int    DFITCSECOrderCategoryType;
 ///普通委托
 #define DFITCSEC_OC_GeneralOrder                         0
 ///手动强平单
@@ -748,17 +793,17 @@ typedef int   DFITCSECOrderCategoryType;
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECTDevIDType 是一个第三方开发商代码类型
 /////////////////////////////////////////////////////////////////////////
-typedef char  DFITCSECTDevIDType[13];
+typedef char   DFITCSECTDevIDType[13];
 
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECTDevDecInfoType 是一个第三方开发商申报信息类型
 /////////////////////////////////////////////////////////////////////////
-typedef char  DFITCSECTDevDecInfoType[101];
+typedef char   DFITCSECTDevDecInfoType[101];
 
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECOptionTypeType 是一个期权类别类型
 /////////////////////////////////////////////////////////////////////////
-typedef int   DFITCSECOptionTypeType;
+typedef int    DFITCSECOptionTypeType;
 ///认购期权
 #define DFITCSEC_OT_CALL                                1
 ///认沽期权
@@ -767,7 +812,7 @@ typedef int   DFITCSECOptionTypeType;
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECContractObjectTypeType 是一个标的类型类型
 /////////////////////////////////////////////////////////////////////////
-typedef int   DFITCSECContractObjectTypeType;
+typedef int    DFITCSECContractObjectTypeType;
 ///A股
 #define DFITCSEC_COT_STOCK                              1
 ///ETF
@@ -776,23 +821,23 @@ typedef int   DFITCSECContractObjectTypeType;
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECContractUnitType 是一个期权合约单位类型
 /////////////////////////////////////////////////////////////////////////
-typedef int   DFITCSECContractUnitType;
+typedef int    DFITCSECContractUnitType;
 
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECContractIDType 是一个期权合约编码类型
 /////////////////////////////////////////////////////////////////////////
-typedef char  DFITCSECContractIDType[20];
+typedef char   DFITCSECContractIDType[20];
 
 
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECContractIDType 是一个产品实时阶段及标志类型
 /////////////////////////////////////////////////////////////////////////
-typedef char  DFITCSECTradingPhaseCodeType[9];
+typedef char   DFITCSECTradingPhaseCodeType[9];
 
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECAccountTypeType 是一个投资者类别类型
 /////////////////////////////////////////////////////////////////////////
-typedef int   DFITCSECAccountTypeType;
+typedef int    DFITCSECAccountTypeType;
 ///个人
 #define DFITCSEC_AT_Personal                           1
 ///机构
@@ -807,7 +852,7 @@ typedef int   DFITCSECAccountTypeType;
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECAccountPropType 是一个客户属性类型
 /////////////////////////////////////////////////////////////////////////
-typedef int   DFITCSECAccountPropType;
+typedef int    DFITCSECAccountPropType;
 ///禁止存款
 #define DFITCSEC_AP_PrhbtDeposit                       1
 ///禁止取款
@@ -830,12 +875,12 @@ typedef int   DFITCSECAccountPropType;
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECAccountNodeIDType 是一个客户节点编号类型
 /////////////////////////////////////////////////////////////////////////
-typedef int   DFITCSECAccountNodeIDType;
+typedef int    DFITCSECAccountNodeIDType;
 
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECCheckUpLimitFlagType 是一个检查委托上限标志类型
 /////////////////////////////////////////////////////////////////////////
-typedef int   DFITCSECCheckUpLimitFlagType;
+typedef int    DFITCSECCheckUpLimitFlagType;
 ///检查
 #define DFITCSEC_CULF_Check                           0
 ///不检查
@@ -849,7 +894,7 @@ typedef char   DFITCSECContractNameType[32];
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECExecuteTypeType 是一个行权方式类型
 /////////////////////////////////////////////////////////////////////////
-typedef int   DFITCSECExecuteTypeType;
+typedef int    DFITCSECExecuteTypeType;
 ///美式
 #define DFITCSEC_ET_US                                0
 ///欧式
@@ -858,16 +903,16 @@ typedef int   DFITCSECExecuteTypeType;
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECDeliveryTypeType 是一个交割方式类型
 /////////////////////////////////////////////////////////////////////////
-typedef int   DFITCSECDeliveryTypeType;
-//实物交割
+typedef int    DFITCSECDeliveryTypeType;
+///实物交割
 #define DFITCSEC_DT_Real                              1
-//现金交割
+///现金交割
 #define DFITCSEC_DT_Cash                              2
 
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECOpenLimitsType 是一个开仓限制类型
 /////////////////////////////////////////////////////////////////////////
-typedef int   DFITCSECOpenLimitsType;
+typedef int    DFITCSECOpenLimitsType;
 ///允许开仓
 #define DFITCSEC_OL_Permit                            0
 ///限制开仓
@@ -876,7 +921,7 @@ typedef int   DFITCSECOpenLimitsType;
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECStockTradeFlagType 是一个股票交易标志类型
 /////////////////////////////////////////////////////////////////////////
-typedef int   DFITCSECStockTradeFlagType;
+typedef int    DFITCSECStockTradeFlagType;
 ///为"停牌标志"时, 取值如下
 ///正常
 #define DFITCSEC_STF_Normal                           0
@@ -897,17 +942,17 @@ typedef int   DFITCSECStockTradeFlagType;
 ////////////////////////////////////////////////////////////////////////
 ///DFITCSECApproachExpireFlagType 是一个临近到期日标志类型
 ////////////////////////////////////////////////////////////////////////
-typedef int   DFITCSECApproachExpireFlagType;
+typedef int    DFITCSECApproachExpireFlagType;
 
 ////////////////////////////////////////////////////////////////////////
 ///DFITCSECTempAdjuestFlagType 是一个调整标志类型
 ////////////////////////////////////////////////////////////////////////
-typedef int   DFITCSECTempAdjuestFlagType;
+typedef int    DFITCSECTempAdjuestFlagType;
 
 ////////////////////////////////////////////////////////////////////////
 ///DFITCSECStockListFlagType 是一个挂牌标志类型
 ////////////////////////////////////////////////////////////////////////
-typedef char  DFITCSECStockListFlagType[2];
+typedef char   DFITCSECStockListFlagType[2];
 ///当日新挂牌合约
 #define DFITCSEC_SLF_A                               'A'
 ///存续的合约
@@ -916,9 +961,9 @@ typedef char  DFITCSECStockListFlagType[2];
 #define DFITCSEC_SLF_D                               'D'
 
 ////////////////////////////////////////////////////////////////////////
-// DFITCSECContractObjectStatusType 是一个标的证券状态类型
+///DFITCSECContractObjectStatusType 是一个标的证券状态类型
 ////////////////////////////////////////////////////////////////////////
-typedef int  DFITCSECContractObjectStatusType;
+typedef int    DFITCSECContractObjectStatusType;
 ///正常
 #define DFITCSEC_COS_Normal                          0
 ///暂停
@@ -929,22 +974,22 @@ typedef int  DFITCSECContractObjectStatusType;
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECExchangeNameType 是一个交易所代码类型
 /////////////////////////////////////////////////////////////////////////
-typedef char  DFITCSECExchangeNameType[11];
+typedef char   DFITCSECExchangeNameType[11];
 
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECNightTradingFlagType 是一个夜市交易标志类型
 /////////////////////////////////////////////////////////////////////////
-typedef int   DFITCSECNightTradingFlagType;
+typedef int    DFITCSECNightTradingFlagType;
 
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECTradingDayFlagType 是一个交易日标志类型
 /////////////////////////////////////////////////////////////////////////
-typedef int   DFITCSECTradingDayFlagType;
+typedef int    DFITCSECTradingDayFlagType;
 
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECLvelCategoryType 是一个级别类型
 /////////////////////////////////////////////////////////////////////////
-typedef int   DFITCSECLvelType;
+typedef int    DFITCSECLvelType;
 ///交易所
 #define DFITCSEC_L_EXCHANGE                         1
 ///公司
@@ -955,7 +1000,7 @@ typedef int   DFITCSECLvelType;
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECReferenceTypeType 是一个费率参数类别类型
 /////////////////////////////////////////////////////////////////////////
-typedef int   DFITCSECReferenceTypeType;
+typedef int    DFITCSECReferenceTypeType;
 ///按标的类型
 #define DFITCSEC_RT_ObjectType                      1
 ///按标的代码
@@ -966,33 +1011,44 @@ typedef int   DFITCSECReferenceTypeType;
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECCalcTypeType 是一个计算方式类型
 /////////////////////////////////////////////////////////////////////////
-typedef int   DFITCSECCalcTypeType;
+typedef int    DFITCSECCalcTypeType;
 
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECContractNOType 是一个指定合约编号类型
 /////////////////////////////////////////////////////////////////////////
-typedef char  DFITCSECContractNOType[33];
+typedef char   DFITCSECContractNOType[33];
 
 /////////////////////////////////////////////////////////////////////////
-///DFITCSECCrdtContractQryFlagType 是一个合约状态类型
+///DFITCSECCrdtContractQryFlagType 是一个查询标志类型
 /////////////////////////////////////////////////////////////////////////
-typedef int   DFITCSECCrdtContractQryFlagType;
+typedef int    DFITCSECCrdtContractQryFlagType;
+///查询所有
+#define DFITCSEC_CCQF_Queryall                      0
+///当日了结
+#define DFITCSEC_CCQF_Endoftheday                   1
 ///未了结
-#define DFITCSEC_CCQF_UnSettle                      0
+#define DFITCSEC_CCQF_Unfinished                    2
+
+/////////////////////////////////////////////////////////////////////////
+///DFITCSECCrdtContractStatusType 是一个合约状态类型
+/////////////////////////////////////////////////////////////////////////
+typedef int    DFITCSECCrdtContractStatusType;
+///未了结
+#define DFITCSEC_CCS_UnSettle                      0
 ///已了结未清算
-#define DFITCSEC_CCQF_UnClear                       1
+#define DFITCSEC_CCS_UnClear                       1
 ///已了结
-#define DFITCSEC_CCQF_Settle                        2
+#define DFITCSEC_CCS_Settle                        3
 
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECPositionNOType 是一个头寸编号类型
 /////////////////////////////////////////////////////////////////////////
-typedef int   DFITCSECPositionNOType;
+typedef int    DFITCSECPositionNOType;
 
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECClearFlagType 是一个清算标志类型
 /////////////////////////////////////////////////////////////////////////
-typedef int   DFITCSECClearFlagType;
+typedef int    DFITCSECClearFlagType;
 ///成交引起
 #define DFITCSEC_CF_TradeCause                     1
 ///清算引起
@@ -1003,12 +1059,12 @@ typedef int   DFITCSECClearFlagType;
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECShareholderTypeType 是一个股东类别类型
 /////////////////////////////////////////////////////////////////////////
-typedef int DFITCSECShareholderTypeType;
+typedef int    DFITCSECShareholderTypeType;
 
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECHKEntrustLimitType 是一个港股交易限制类型
 /////////////////////////////////////////////////////////////////////////
-typedef int DFITCSECHKEntrustLimitType;
+typedef int    DFITCSECHKEntrustLimitType;
 ///普通股票
 #define DFITCSEC_HKEL_NormalStolk                  0
 ///竞价
@@ -1021,7 +1077,7 @@ typedef int DFITCSECHKEntrustLimitType;
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECHKOrderTypeType 是一个港股订单属性类型
 /////////////////////////////////////////////////////////////////////////
-typedef int DFITCSECHKOrderTypeType;
+typedef int    DFITCSECHKOrderTypeType;
 ///当日有效
 #define DFITCSEC_HKOT_GFT                          0
 ///全额即时
@@ -1030,7 +1086,7 @@ typedef int DFITCSECHKOrderTypeType;
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECOrderConfirmFlagType 是一个委托确认类型
 /////////////////////////////////////////////////////////////////////////
-typedef int   DFITCSECOrderConfirmFlagType;
+typedef int    DFITCSECOrderConfirmFlagType;
 ///委托成功
 #define DFITCSEC_ORDER_SUCCESS                     0
 ///委托失败
@@ -1039,7 +1095,7 @@ typedef int   DFITCSECOrderConfirmFlagType;
 //////////////////////////////////////////////////////////////////////////
 ///DFITCSECExchangeGroupTypeType 是一个交易所组合类型
 //////////////////////////////////////////////////////////////////////////
-typedef int DFITCSECExchangeGroupTypeType;
+typedef int    DFITCSECExchangeGroupTypeType;
 ///转备兑
 #define DFITCSEC_EGT_ToPrepare                     1
 ///认购牛市价差策略
@@ -1054,18 +1110,18 @@ typedef int DFITCSECExchangeGroupTypeType;
 #define DFITCSEC_EGT_ShortStraddle                 6
 ///宽跨式空头
 #define DFITCSEC_EGT_WideStraddle                  7
-//备兑转现金
+///备兑转现金
 #define DFITCSEC_EGT_CoveredToCash                 8
 
 //////////////////////////////////////////////////////////////////////////
 ///DFITCSECGroupCodeType 是一个组合编码类型
 //////////////////////////////////////////////////////////////////////////
-typedef char DFITCSECGroupCodeType[21];
+typedef char   DFITCSECGroupCodeType[21];
 
 //////////////////////////////////////////////////////////////////////////
 ///DFITCSECContractAdjustRemindType 是一个合约调整提醒类型
 //////////////////////////////////////////////////////////////////////////
-typedef int DFITCSECContractAdjustRemindType;
+typedef int    DFITCSECContractAdjustRemindType;
 ///未调整
 #define DFITCSEC_CAR_NotAdj                        0
 ///已调整
@@ -1074,7 +1130,7 @@ typedef int DFITCSECContractAdjustRemindType;
 //////////////////////////////////////////////////////////////////////////
 ///DFITCSECContraceExpireRemindType 是一个合约即将到期提醒类型
 //////////////////////////////////////////////////////////////////////////
-typedef int DFITCSECContraceExpireRemindType;
+typedef int    DFITCSECContraceExpireRemindType;
 ///未到期
 #define DFITCSEC_CER_NotExpire                     0
 ///距离到期日不足10个交易日
@@ -1083,7 +1139,7 @@ typedef int DFITCSECContraceExpireRemindType;
 //////////////////////////////////////////////////////////////////////////
 ///DFITCSESecurityOptionIndexType 是一个股票期权索引值类型
 //////////////////////////////////////////////////////////////////////////
-typedef char DFITCSESecurityOptionIndexType[21];
+typedef char   DFITCSESecurityOptionIndexType[21];
 
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECOrderTypeLimitType 是一个订单类型限制类型
@@ -1093,7 +1149,7 @@ typedef char   DFITCSECOrderTypeLimitType[128];
 /////////////////////////////////////////////////////////////////////////
 ///DFITCSECMiniPriceChangeType 是一个最小变动价位类型
 /////////////////////////////////////////////////////////////////////////
-typedef double   DFITCSECMiniPriceChangeType;
+typedef double DFITCSECMiniPriceChangeType;
 
 
 

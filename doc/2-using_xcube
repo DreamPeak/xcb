@@ -27,7 +27,7 @@ You can start the command line interface to play with it.
       -?            Output this help and exit
 By default, the command line interface connects to localhost on port 33330.
     xcb-cli<Enter>
-    XCUBE CLI, Copyright (c) 2013-2016, Dalian Futures Information Technology Co., Ltd.
+    XCUBE CLI, Copyright (c) 2013-2017, Dalian Futures Information Technology Co., Ltd.
     Type 'help' or '?' for help.
     xcb*CLI> help<Enter>
                     help  Display this text
