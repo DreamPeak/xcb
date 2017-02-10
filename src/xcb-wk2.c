@@ -392,7 +392,7 @@ static void *wk_thread(void *data) {
 	for (;;) {
 		if (next == NULL) {
 			pthread_mutex_lock(&msgs->lock);
-			pthread_cleanup_push(pthread_mutex_unlock, &msgs->lock);
+			pthread_cleanup_push((void *)pthread_mutex_unlock, &msgs->lock);
 			if (msgs->first == NULL) {
 				if (shut_down)
 					break;
