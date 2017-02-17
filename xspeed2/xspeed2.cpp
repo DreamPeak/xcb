@@ -19,6 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <stddef.h>
 #include "DFITCL2Api.h"
 #include "xspeed2.h"
 
@@ -29,17 +30,15 @@ struct xspeed_l2api_t {
 	DFITCL2Api				*rep;
 };
 struct xspeed_l2spi_t : public DFITCL2Spi {
-	xspeed_on_front_connected		on_front_connected_;
-	xspeed_on_front_disconnected		on_front_disconnected_;
-	xspeed_on_user_login			on_user_login_;
-	xspeed_on_user_logout			on_user_logout_;
-	xspeed_on_subscribe_market_data		on_subscribe_market_data_;
-	xspeed_on_unsubscribe_market_data	on_unsubscribe_market_data_;
-	xspeed_on_subscribe_all			on_subscribe_all_;
-	xspeed_on_unsubscribe_all		on_unsubscribe_all_;
-	xspeed_on_best_and_deep			on_best_and_deep_;
-	/* make gcc happy */
-	virtual ~xspeed_l2spi_t() {};
+	xspeed_on_front_connected		on_front_connected_		= NULL;
+	xspeed_on_front_disconnected		on_front_disconnected_		= NULL;
+	xspeed_on_user_login			on_user_login_			= NULL;
+	xspeed_on_user_logout			on_user_logout_			= NULL;
+	xspeed_on_subscribe_market_data		on_subscribe_market_data_	= NULL;
+	xspeed_on_unsubscribe_market_data	on_unsubscribe_market_data_	= NULL;
+	xspeed_on_subscribe_all			on_subscribe_all_		= NULL;
+	xspeed_on_unsubscribe_all		on_unsubscribe_all_		= NULL;
+	xspeed_on_best_and_deep			on_best_and_deep_		= NULL;
 	void OnConnected() {
 		if (on_front_connected_)
 			(*on_front_connected_)();

@@ -30,21 +30,19 @@ struct femas_mdapi_t {
 	CUstpFtdcMduserApi			*rep;
 };
 struct femas_mdspi_t : public CUstpFtdcMduserSpi {
-	femas_on_front_connected		on_front_connected_;
-	femas_on_front_disconnected		on_front_disconnected_;
-	femas_on_heartbeat_warning		on_heartbeat_warning_;
-	femas_on_package_start			on_package_start_;
-	femas_on_package_end			on_package_end_;
-	femas_on_error				on_error_;
-	femas_on_user_login			on_user_login_;
-	femas_on_user_logout			on_user_logout_;
-	femas_on_subscribe_topic		on_subscribe_topic_;
-	femas_on_query_topic			on_query_topic_;
-	femas_on_deep_market_data		on_deep_market_data_;
-	femas_on_subscribe_market_data		on_subscribe_market_data_;
-	femas_on_unsubscribe_market_data	on_unsubscribe_market_data_;
-	/* make gcc happy */
-	virtual ~femas_mdspi_t() {};
+	femas_on_front_connected		on_front_connected_		= NULL;
+	femas_on_front_disconnected		on_front_disconnected_		= NULL;
+	femas_on_heartbeat_warning		on_heartbeat_warning_		= NULL;
+	femas_on_package_start			on_package_start_		= NULL;
+	femas_on_package_end			on_package_end_			= NULL;
+	femas_on_error				on_error_			= NULL;
+	femas_on_user_login			on_user_login_			= NULL;
+	femas_on_user_logout			on_user_logout_			= NULL;
+	femas_on_subscribe_topic		on_subscribe_topic_		= NULL;
+	femas_on_query_topic			on_query_topic_			= NULL;
+	femas_on_deep_market_data		on_deep_market_data_		= NULL;
+	femas_on_subscribe_market_data		on_subscribe_market_data_	= NULL;
+	femas_on_unsubscribe_market_data	on_unsubscribe_market_data_	= NULL;
 	void OnFrontConnected() {
 		if (on_front_connected_)
 			(*on_front_connected_)();

@@ -102,8 +102,6 @@ struct ctp_tdspi_t : public CThostFtdcTraderSpi {
 	ctp_on_query_transfer_bank				on_query_transfer_bank_;
 	ctp_on_query_contract_bank				on_query_contract_bank_;
 	ctp_on_query_transfer_serial				on_query_transfer_serial_;
-	/* make gcc happy */
-	virtual ~ctp_tdspi_t() {};
 	void OnFrontConnected() {
 		if (on_front_connected_)
 			(*on_front_connected_)();
@@ -860,7 +858,82 @@ int ctp_tdapi_query_transfer_serial(ctp_tdapi_t *tdapi,
 }
 
 ctp_tdspi_t *ctp_tdspi_create() {
-	return new ctp_tdspi_t;
+	ctp_tdspi_t *tdspi = new ctp_tdspi_t;
+
+	tdspi->on_front_connected_                            = NULL;
+	tdspi->on_front_disconnected_                         = NULL;
+	tdspi->on_heartbeat_warning_                          = NULL;
+	tdspi->on_error_                                      = NULL;
+	tdspi->on_authenticate_                               = NULL;
+	tdspi->on_user_login_                                 = NULL;
+	tdspi->on_user_logout_                                = NULL;
+	tdspi->on_update_user_password_                       = NULL;
+	tdspi->on_update_account_password_                    = NULL;
+	tdspi->on_query_max_order_volume_                     = NULL;
+	tdspi->on_confirm_settlement_                         = NULL;
+	tdspi->on_insert_order_                               = NULL;
+	tdspi->on_order_action_                               = NULL;
+	tdspi->on_order_                                      = NULL;
+	tdspi->on_trade_                                      = NULL;
+	tdspi->on_err_insert_order_                           = NULL;
+	tdspi->on_err_order_action_                           = NULL;
+	tdspi->on_err_conditional_order_                      = NULL;
+	tdspi->on_insert_parked_order_                        = NULL;
+	tdspi->on_parked_order_action_                        = NULL;
+	tdspi->on_remove_parked_order_                        = NULL;
+	tdspi->on_remove_parked_order_action_                 = NULL;
+	tdspi->on_bank_to_future_                             = NULL;
+	tdspi->on_future_to_bank_                             = NULL;
+	tdspi->on_bank_to_future_by_bank_                     = NULL;
+	tdspi->on_future_to_bank_by_bank_                     = NULL;
+	tdspi->on_repeal_bank_to_future_by_bank_              = NULL;
+	tdspi->on_repeal_future_to_bank_by_bank_              = NULL;
+	tdspi->on_bank_to_future_by_future_                   = NULL;
+	tdspi->on_future_to_bank_by_future_                   = NULL;
+	tdspi->on_err_bank_to_future_by_future_               = NULL;
+	tdspi->on_err_future_to_bank_by_future_               = NULL;
+	tdspi->on_repeal_bank_to_future_by_future_            = NULL;
+	tdspi->on_repeal_future_to_bank_by_future_            = NULL;
+	tdspi->on_repeal_bank_to_future_by_future_manual_     = NULL;
+	tdspi->on_repeal_future_to_bank_by_future_manual_     = NULL;
+	tdspi->on_err_repeal_bank_to_future_by_future_manual_ = NULL;
+	tdspi->on_err_repeal_future_to_bank_by_future_manual_ = NULL;
+	tdspi->on_query_bank_account_                         = NULL;
+	tdspi->on_query_bank_account_by_future_               = NULL;
+	tdspi->on_err_query_bank_account_by_future_           = NULL;
+	tdspi->on_open_account_by_bank_                       = NULL;
+	tdspi->on_cancel_account_by_bank_                     = NULL;
+	tdspi->on_change_account_by_bank_                     = NULL;
+	tdspi->on_query_settlement_                           = NULL;
+	tdspi->on_query_settlement_confirm_                   = NULL;
+	tdspi->on_query_cfmmc_account_key_                    = NULL;
+	tdspi->on_query_order_                                = NULL;
+	tdspi->on_query_trade_                                = NULL;
+	tdspi->on_query_parked_order_                         = NULL;
+	tdspi->on_query_parked_order_action_                  = NULL;
+	tdspi->on_query_investor_                             = NULL;
+	tdspi->on_query_position_                             = NULL;
+	tdspi->on_query_position_detail_                      = NULL;
+	tdspi->on_query_position_combine_                     = NULL;
+	tdspi->on_query_account_                              = NULL;
+	tdspi->on_query_code_                                 = NULL;
+	tdspi->on_query_margin_rate_                          = NULL;
+	tdspi->on_query_commission_rate_                      = NULL;
+	tdspi->on_query_ewarrant_offset_                      = NULL;
+	tdspi->on_query_broker_params_                        = NULL;
+	tdspi->on_query_broker_algos_                         = NULL;
+	tdspi->on_query_exchange_                             = NULL;
+	tdspi->on_query_instrument_                           = NULL;
+	tdspi->on_query_deep_market_data_                     = NULL;
+	tdspi->on_query_notice_                               = NULL;
+	tdspi->on_query_trading_notice_                       = NULL;
+	tdspi->on_trading_notice_                             = NULL;
+	tdspi->on_instrument_status_                          = NULL;
+	tdspi->on_query_account_register_                     = NULL;
+	tdspi->on_query_transfer_bank_                        = NULL;
+	tdspi->on_query_contract_bank_                        = NULL;
+	tdspi->on_query_transfer_serial_                      = NULL;
+	return tdspi;
 }
 
 void ctp_tdspi_destroy(ctp_tdspi_t *tdspi) {

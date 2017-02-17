@@ -29,20 +29,20 @@ struct tap_mdapi_t {
 	ITapQuoteAPI			*rep;
 };
 struct tap_mdspi_t : public ITapQuoteAPINotify {
-	tap_on_login			on_login_;
-	tap_on_api_ready		on_api_ready_;
-	tap_on_disconnect		on_disconnect_;
-	tap_on_change_passwd		on_change_passwd_;
-	tap_on_query_exchange		on_query_exchange_;
-	tap_on_query_commodity		on_query_commodity_;
-	tap_on_query_time_bucket	on_query_time_bucket_;
-	tap_on_time_bucket		on_time_bucket_;
-	tap_on_query_contract		on_query_contract_;
-	tap_on_contract			on_contract_;
-	tap_on_subscribe_quote		on_subscribe_quote_;
-	tap_on_unsubscribe_quote	on_unsubscribe_quote_;
-	tap_on_quote			on_quote_;
-	tap_on_query_hisquote		on_query_hisquote_;
+	tap_on_login			on_login_		= NULL;
+	tap_on_api_ready		on_api_ready_		= NULL;
+	tap_on_disconnect		on_disconnect_		= NULL;
+	tap_on_change_passwd		on_change_passwd_	= NULL;
+	tap_on_query_exchange		on_query_exchange_	= NULL;
+	tap_on_query_commodity		on_query_commodity_	= NULL;
+	tap_on_query_time_bucket	on_query_time_bucket_	= NULL;
+	tap_on_time_bucket		on_time_bucket_		= NULL;
+	tap_on_query_contract		on_query_contract_	= NULL;
+	tap_on_contract			on_contract_		= NULL;
+	tap_on_subscribe_quote		on_subscribe_quote_	= NULL;
+	tap_on_unsubscribe_quote	on_unsubscribe_quote_	= NULL;
+	tap_on_quote			on_quote_		= NULL;
+	tap_on_query_hisquote		on_query_hisquote_	= NULL;
 	void OnRspLogin(TAPIINT32 error, const TapAPIQuotLoginRspInfo *info) {
 		if (on_login_)
 			(*on_login_)(error, info);

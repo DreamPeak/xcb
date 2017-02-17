@@ -29,20 +29,18 @@ struct ctp_mdapi_t {
 	CThostFtdcMdApi				*rep;
 };
 struct ctp_mdspi_t : public CThostFtdcMdSpi {
-	ctp_on_front_connected			on_front_connected_;
-	ctp_on_front_disconnected		on_front_disconnected_;
-	ctp_on_heartbeat_warning		on_heartbeat_warning_;
-	ctp_on_error				on_error_;
-	ctp_on_user_login			on_user_login_;
-	ctp_on_user_logout			on_user_logout_;
-	ctp_on_subscribe_market_data		on_subscribe_market_data_;
-	ctp_on_unsubscribe_market_data		on_unsubscribe_market_data_;
-	ctp_on_subscribe_quote_response		on_subscribe_quote_response_;
-	ctp_on_unsubscribe_quote_response	on_unsubscribe_quote_response_;
-	ctp_on_deep_market_data			on_deep_market_data_;
-	ctp_on_quote_response			on_quote_response_;
-	/* make gcc happy */
-	virtual ~ctp_mdspi_t() {};
+	ctp_on_front_connected			on_front_connected_		= NULL;
+	ctp_on_front_disconnected		on_front_disconnected_		= NULL;
+	ctp_on_heartbeat_warning		on_heartbeat_warning_		= NULL;
+	ctp_on_error				on_error_			= NULL;
+	ctp_on_user_login			on_user_login_			= NULL;
+	ctp_on_user_logout			on_user_logout_			= NULL;
+	ctp_on_subscribe_market_data		on_subscribe_market_data_	= NULL;
+	ctp_on_unsubscribe_market_data		on_unsubscribe_market_data_	= NULL;
+	ctp_on_subscribe_quote_response		on_subscribe_quote_response_	= NULL;
+	ctp_on_unsubscribe_quote_response	on_unsubscribe_quote_response_	= NULL;
+	ctp_on_deep_market_data			on_deep_market_data_		= NULL;
+	ctp_on_quote_response			on_quote_response_		= NULL;
 	void OnFrontConnected() {
 		if (on_front_connected_)
 			(*on_front_connected_)();

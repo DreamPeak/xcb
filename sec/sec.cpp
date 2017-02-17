@@ -30,21 +30,19 @@ struct sec_mdapi_t {
 	DFITCSECMdApi				*rep;
 };
 struct sec_mdspi_t : public DFITCSECMdSpi {
-	sec_on_front_connected			on_front_connected_;
-	sec_on_front_disconnected		on_front_disconnected_;
-	sec_on_error				on_error_;
-	sec_on_stk_user_login			on_stk_user_login_;
-	sec_on_stk_user_logout			on_stk_user_logout_;
-	sec_on_stk_subscribe_market_data	on_stk_subscribe_market_data_;
-	sec_on_stk_unsubscribe_market_data	on_stk_unsubscribe_market_data_;
-	sec_on_stk_deep_market_data		on_stk_deep_market_data_;
-	sec_on_sop_user_login			on_sop_user_login_;
-	sec_on_sop_user_logout			on_sop_user_logout_;
-	sec_on_sop_subscribe_market_data	on_sop_subscribe_market_data_;
-	sec_on_sop_unsubscribe_market_data	on_sop_unsubscribe_market_data_;
-	sec_on_sop_deep_market_data		on_sop_deep_market_data_;
-	/* make gcc happy */
-	virtual ~sec_mdspi_t() {};
+	sec_on_front_connected			on_front_connected_		= NULL;
+	sec_on_front_disconnected		on_front_disconnected_		= NULL;
+	sec_on_error				on_error_			= NULL;
+	sec_on_stk_user_login			on_stk_user_login_		= NULL;
+	sec_on_stk_user_logout			on_stk_user_logout_		= NULL;
+	sec_on_stk_subscribe_market_data	on_stk_subscribe_market_data_	= NULL;
+	sec_on_stk_unsubscribe_market_data	on_stk_unsubscribe_market_data_	= NULL;
+	sec_on_stk_deep_market_data		on_stk_deep_market_data_	= NULL;
+	sec_on_sop_user_login			on_sop_user_login_		= NULL;
+	sec_on_sop_user_logout			on_sop_user_logout_		= NULL;
+	sec_on_sop_subscribe_market_data	on_sop_subscribe_market_data_	= NULL;
+	sec_on_sop_unsubscribe_market_data	on_sop_unsubscribe_market_data_	= NULL;
+	sec_on_sop_deep_market_data		on_sop_deep_market_data_	= NULL;
 	void OnFrontConnected() {
 		if (on_front_connected_)
 			(*on_front_connected_)();

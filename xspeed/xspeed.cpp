@@ -19,6 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <stddef.h>
 #include "DFITCMdApi.h"
 #include "xspeed.h"
 
@@ -29,20 +30,18 @@ struct xspeed_mdapi_t {
 	DFITCXSPEEDMDAPI::DFITCMdApi		*rep;
 };
 struct xspeed_mdspi_t : public DFITCXSPEEDMDAPI::DFITCMdSpi {
-	xspeed_on_front_connected		on_front_connected_;
-	xspeed_on_front_disconnected		on_front_disconnected_;
-	xspeed_on_error				on_error_;
-	xspeed_on_user_login			on_user_login_;
-	xspeed_on_user_logout			on_user_logout_;
-	xspeed_on_tradingday			on_tradingday_;
-	xspeed_on_subscribe_market_data		on_subscribe_market_data_;
-	xspeed_on_unsubscribe_market_data	on_unsubscribe_market_data_;
-	xspeed_on_deep_market_data		on_deep_market_data_;
-	xspeed_on_subscribe_quote_response	on_subscribe_quote_response_;
-	xspeed_on_unsubscribe_quote_response	on_unsubscribe_quote_response_;
-	xspeed_on_quote_response		on_quote_response_;
-	/* make gcc happy */
-	virtual ~xspeed_mdspi_t() {};
+	xspeed_on_front_connected		on_front_connected_		= NULL;
+	xspeed_on_front_disconnected		on_front_disconnected_		= NULL;
+	xspeed_on_error				on_error_			= NULL;
+	xspeed_on_user_login			on_user_login_			= NULL;
+	xspeed_on_user_logout			on_user_logout_			= NULL;
+	xspeed_on_tradingday			on_tradingday_			= NULL;
+	xspeed_on_subscribe_market_data		on_subscribe_market_data_	= NULL;
+	xspeed_on_unsubscribe_market_data	on_unsubscribe_market_data_	= NULL;
+	xspeed_on_deep_market_data		on_deep_market_data_		= NULL;
+	xspeed_on_subscribe_quote_response	on_subscribe_quote_response_	= NULL;
+	xspeed_on_unsubscribe_quote_response	on_unsubscribe_quote_response_	= NULL;
+	xspeed_on_quote_response		on_quote_response_		= NULL;
 	void OnFrontConnected() {
 		if (on_front_connected_)
 			(*on_front_connected_)();

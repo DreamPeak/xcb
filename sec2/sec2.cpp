@@ -29,22 +29,20 @@ struct sec2_mdapi_t {
 	SECL2Api			*rep;
 };
 struct sec2_mdspi_t : public SECL2Spi {
-	sec2_on_connected		on_connected_;
-	sec2_on_disconnected		on_disconnected_;
-	sec2_on_user_login		on_user_login_;
-	sec2_on_user_logout		on_user_logout_;
-	sec2_on_subscribe_market_data	on_subscribe_market_data_;
-	sec2_on_unsubscribe_market_data	on_unsubscribe_market_data_;
-	sec2_on_subscribe_all		on_subscribe_all_;
-	sec2_on_unsubscribe_all		on_unsubscribe_all_;
-	sec2_on_modify_password		on_modify_password_;
-	sec2_on_heartbeat_lost		on_heartbeat_lost_;
-	sec2_on_sh3113			on_sh3113_;
-	sec2_on_sh3115			on_sh3115_;
-	sec2_on_sh3201			on_sh3201_;
-	sec2_on_sh3202			on_sh3202_;
-	/* make gcc happy */
-	virtual ~sec2_mdspi_t() {};
+	sec2_on_connected		on_connected_			= NULL;
+	sec2_on_disconnected		on_disconnected_		= NULL;
+	sec2_on_user_login		on_user_login_			= NULL;
+	sec2_on_user_logout		on_user_logout_			= NULL;
+	sec2_on_subscribe_market_data	on_subscribe_market_data_	= NULL;
+	sec2_on_unsubscribe_market_data	on_unsubscribe_market_data_	= NULL;
+	sec2_on_subscribe_all		on_subscribe_all_		= NULL;
+	sec2_on_unsubscribe_all		on_unsubscribe_all_		= NULL;
+	sec2_on_modify_password		on_modify_password_		= NULL;
+	sec2_on_heartbeat_lost		on_heartbeat_lost_		= NULL;
+	sec2_on_sh3113			on_sh3113_			= NULL;
+	sec2_on_sh3115			on_sh3115_			= NULL;
+	sec2_on_sh3201			on_sh3201_			= NULL;
+	sec2_on_sh3202			on_sh3202_			= NULL;
 	void OnConnected() {
 		if (on_connected_)
 			(*on_connected_)();

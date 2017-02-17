@@ -441,7 +441,6 @@ void process_quote(void *data) {
 				quote->thyquote.m_nMRSL1,
 				quote->thyquote.m_dMCJG1,
 				quote->thyquote.m_nMCSL1);
-			iter = dlist_iter_new(monitors, DLIST_START_HEAD);
 			while ((node = dlist_next(iter))) {
 				client c = (client)dlist_node_value(node);
 
