@@ -95,6 +95,7 @@ static void on_front_connected(void) {
 		strncat(req.Password, passwd, sizeof req.Password - 1);
 	strcpy(req.UserProductInfo, "demo v1.0");
 	res = femas_mdapi_user_login(mdapi, &req, 1);
+	xcb_log(XCB_LOG_NOTICE, "FEMAS version: '%s'", femas_mdapi_get_version(mdapi, NULL, NULL));
 	xcb_log(XCB_LOG_NOTICE, "Login %s for user '%s'", res == 0 ? "succeeded" : "failed", userid);
 }
 

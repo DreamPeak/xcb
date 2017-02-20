@@ -89,6 +89,7 @@ static void on_front_connected(void) {
 	strncat(req.UserID, userid, sizeof req.UserID - 1);
 	strncat(req.Password, passwd, sizeof req.Password - 1);
 	res = ctp_mdapi_login_user(mdapi, &req, 1);
+	xcb_log(XCB_LOG_NOTICE, "CTP version: '%s'", ctp_mdapi_get_version(mdapi));
 	xcb_log(XCB_LOG_NOTICE, "Login %s for user '%s'", res == 0 ? "succeeded" : "failed", userid);
 }
 

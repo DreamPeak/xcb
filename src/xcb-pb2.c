@@ -66,7 +66,7 @@ ptrie_t subscribers;
 dlist_t clients_to_close;
 table_t idxfmts;
 event_loop el;
-int persistence = 1;
+int persistence = 0;
 db_t *db;
 db_readoptions_t *db_ro;
 const char *password;

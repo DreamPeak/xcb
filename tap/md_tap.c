@@ -82,6 +82,7 @@ static inline void load_config(void) {
 }
 
 static void on_login(TAPIINT32 error, const struct TapAPIQuotLoginRspInfo *info) {
+	xcb_log(XCB_LOG_NOTICE, "TAP version: '%s'", tap_mdapi_get_version());
 	xcb_log(XCB_LOG_NOTICE, "Login %s for user '%s'",
 		error == TAPIERROR_SUCCEED ? "succeeded" : "failed", userid);
 }
