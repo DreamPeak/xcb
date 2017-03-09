@@ -325,8 +325,8 @@ static int send_quote(void *data, void *data2) {
 			char datestr[64];
 
 			strftime(datestr, sizeof datestr, "%F %T", localtime(&t));
-			xcb_log(XCB_LOG_DEBUG, "%s.%03d,%s,%s,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,"
-				"%d,%.2f,%d,%d,%.2f,%d,%.2f,%d",
+			xcb_log(XCB_LOG_DEBUG, "%s.%03d,%s,%s,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,"
+				"%d,%.4f,%d,%d,%.4f,%d,%.4f,%d",
 				datestr,
 				quote->m_nMSec,
 				quote->thyquote.m_cHYDM,
@@ -355,8 +355,8 @@ static int send_quote(void *data, void *data2) {
 			dlist_iter_t iter = dlist_iter_new(monitors, DLIST_START_HEAD);
 			dlist_node_t node;
 
-			snprintf(res, sizeof res, "TX '%d,%s,%s,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,"
-				"%d,%.2f,%d,%d,%.2f,%d,%.2f,%d'\r\n",
+			snprintf(res, sizeof res, "TX '%d,%s,%s,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,"
+				"%d,%.4f,%d,%d,%.4f,%d,%.4f,%d'\r\n",
 				quote->thyquote.m_nTime,
 				quote->thyquote.m_cHYDM,
 				quote->thyquote.m_cJYS,
@@ -420,8 +420,8 @@ void process_quote(void *data) {
 			dlist_iter_t iter = dlist_iter_new(monitors, DLIST_START_HEAD);
 			dlist_node_t node;
 
-			snprintf(res, sizeof res, "RX '%d,%s,%s,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,"
-				"%.2f,%.2f,%d,%.2f,%d,%d,%.2f,%d,%.2f,%d'\r\n",
+			snprintf(res, sizeof res, "RX '%d,%s,%s,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,"
+				"%.4f,%.4f,%d,%.4f,%d,%d,%.4f,%d,%.4f,%d'\r\n",
 				quote->thyquote.m_nTime,
 				quote->thyquote.m_cHYDM,
 				quote->thyquote.m_cJYS,
@@ -522,8 +522,8 @@ void process_quote(void *data) {
 			char datestr[64];
 
 			strftime(datestr, sizeof datestr, "%F %T", localtime(&t));
-			xcb_log(XCB_LOG_DEBUG, "%s.%03d,%s,%s,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,"
-				"%d,%.2f,%d,%d,%.2f,%d,%.2f,%d",
+			xcb_log(XCB_LOG_DEBUG, "%s.%03d,%s,%s,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,"
+				"%d,%.4f,%d,%d,%.4f,%d,%.4f,%d",
 				datestr,
 				quote->m_nMSec,
 				quote->thyquote.m_cHYDM,

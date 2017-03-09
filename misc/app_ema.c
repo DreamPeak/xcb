@@ -77,7 +77,7 @@ static int ema_exec(void *data, void *data2) {
 
 	/* FIXME */
 	if (fabs(quote->thyquote.m_dZXJ) <= 0.000001) {
-		xcb_log(XCB_LOG_WARNING, "Invalid quote: '%d,%d,%s,%.2f'",
+		xcb_log(XCB_LOG_WARNING, "Invalid quote: '%d,%d,%s,%.4f'",
 			quote->thyquote.m_nTime,
 			quote->m_nMSec,
 			quote->thyquote.m_cHYDM,
@@ -116,7 +116,7 @@ static int ema_exec(void *data, void *data2) {
 		for (i = 1; i < size; ++i)
 			ema = (2.0 / (n + 1)) * *((float *)deq_at(prices, i)) + (1 - (2.0 / (n + 1))) * ema;
 		strftime(datestr, sizeof datestr, "%F %T", localtime_r(&t, &lt));
-		snprintf(res, sizeof res, "EMA,%s.%03d,%s|%.2f",
+		snprintf(res, sizeof res, "EMA,%s.%03d,%s|%.4f",
 			datestr,
 			quote->m_nMSec,
 			quote->thyquote.m_cHYDM,

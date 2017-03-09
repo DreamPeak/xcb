@@ -37,7 +37,7 @@ static int hello_exec(void *data, void *data2) {
 	NOT_USED(data2);
 
 	strftime(datestr, sizeof datestr, "%F %T", localtime_r(&t, &lt));
-	snprintf(res, sizeof res, "HELLO,%s.%03d,%s|%.2f,%.2f,%.2f",
+	snprintf(res, sizeof res, "HELLO,%s.%03d,%s|%.4f,%.4f,%.4f",
 		datestr,
 		quote->m_nMSec,
 		quote->thyquote.m_cHYDM,

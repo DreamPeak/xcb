@@ -34,6 +34,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
+#include <sys/epoll.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -484,8 +485,8 @@ static int on_msgv(struct pgm_msgv_t *msgv, size_t len) {
 			if (dlist_length(monitors) > 0) {
 				char res[512];
 
-				snprintf(res, sizeof res, "RX '%d,%s,%s,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,"
-					"%.2f,%.2f,%d,%.2f,%d,%d,%.2f,%d,%.2f,%d'\r\n",
+				snprintf(res, sizeof res, "RX '%d,%s,%s,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,"
+					"%.4f,%.4f,%d,%.4f,%d,%d,%.4f,%d,%.4f,%d'\r\n",
 					quote->thyquote.m_nTime,
 					quote->thyquote.m_cHYDM,
 					quote->thyquote.m_cJYS,
@@ -567,8 +568,8 @@ static int on_msgv(struct pgm_msgv_t *msgv, size_t len) {
 
 				snprintf(key, sizeof key, "%d,%d,%s", quote->thyquote.m_nTime,
 					quote->m_nMSec, quote->thyquote.m_cHYDM);
-				snprintf(value, sizeof value, "%s,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,"
-					"%d,%.2f,%d,%d,%.2f,%d,%.2f,%d",
+				snprintf(value, sizeof value, "%s,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,"
+					"%d,%.4f,%d,%d,%.4f,%d,%.4f,%d",
 					quote->thyquote.m_cJYS,
 					quote->thyquote.m_dZXJ,
 					quote->thyquote.m_dJKP,

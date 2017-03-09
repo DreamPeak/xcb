@@ -138,7 +138,7 @@ static int pd_exec(void *data, void *data2) {
 					char datestr[64], res[512];
 
 					strftime(datestr, sizeof datestr, "%F %T", localtime_r(&t, &lt));
-					snprintf(res, sizeof res, "PD,%s.%03d,%s,%s|%.2f,%.2f,%.2f",
+					snprintf(res, sizeof res, "PD,%s.%03d,%s,%s|%.4f,%.4f,%.4f",
 						datestr,
 						quote->m_nMSec,
 						cpl->contract1,

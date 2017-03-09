@@ -684,8 +684,8 @@ void process_quote(void *data) {
 		if (dlist_length(monitors) > 0) {
 			char res[512];
 
-			snprintf(res, sizeof res, "RX '%d,%s,%s,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,"
-				"%.2f,%.2f,%d,%.2f,%d,%d,%.2f,%d,%.2f,%d'\r\n",
+			snprintf(res, sizeof res, "RX '%d,%s,%s,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,"
+				"%.4f,%.4f,%d,%.4f,%d,%d,%.4f,%d,%.4f,%d'\r\n",
 				quote->thyquote.m_nTime,
 				quote->thyquote.m_cHYDM,
 				quote->thyquote.m_cJYS,
@@ -806,8 +806,8 @@ void process_quote(void *data) {
 			char datestr[64];
 
 			strftime(datestr, sizeof datestr, "%F %T", localtime(&t));
-			xcb_log(XCB_LOG_DEBUG, "%s.%03d,%s,%s,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,"
-				"%d,%.2f,%d,%d,%.2f,%d,%.2f,%d",
+			xcb_log(XCB_LOG_DEBUG, "%s.%03d,%s,%s,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,"
+				"%d,%.4f,%d,%d,%.4f,%d,%.4f,%d",
 				datestr,
 				quote->m_nMSec,
 				quote->thyquote.m_cHYDM,

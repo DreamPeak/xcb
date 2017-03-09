@@ -93,7 +93,7 @@ static int kline_output(event_loop el, unsigned long id, void *data) {
 	ohlc->id = 0;
 	t = (time_t)ohlc->time;
 	strftime(datestr, sizeof datestr, "%F %T", localtime_r(&t, &lt));
-	snprintf(res, sizeof res, "KLINE,%s.000,%s|%.2f,%.2f,%.2f,%.2f,%d,%d",
+	snprintf(res, sizeof res, "KLINE,%s.000,%s|%.4f,%.4f,%.4f,%.4f,%d,%d",
 		datestr,
 		ohlc->contract,
 		ohlc->open,
@@ -117,7 +117,7 @@ static int kline_exec(void *data, void *data2) {
 	contract = dstr_new(quote->thyquote.m_cHYDM);
 	/* FIXME */
 	if (!strcasecmp(contract, "") || fabs(quote->thyquote.m_dZXJ) <= 0.000001) {
-		xcb_log(XCB_LOG_WARNING, "Invalid quote: '%d,%d,%s,%.2f,%.2f,%.2f,%d,%d'",
+		xcb_log(XCB_LOG_WARNING, "Invalid quote: '%d,%d,%s,%.4f,%.4f,%.4f,%d,%d'",
 			quote->thyquote.m_nTime,
 			quote->m_nMSec,
 			contract,
@@ -203,7 +203,7 @@ static int kline_exec(void *data, void *data2) {
 				xcb_log(XCB_LOG_INFO, "Deleting untriggered time event '%d'", ohlc->id);
 				delete_time_event(el, ohlc->id);
 				strftime(datestr, sizeof datestr, "%F %T", localtime_r(&t, &lt));
-				snprintf(res, sizeof res, "KLINE,%s.000,%s|%.2f,%.2f,%.2f,%.2f,%d,%d",
+				snprintf(res, sizeof res, "KLINE,%s.000,%s|%.4f,%.4f,%.4f,%.4f,%d,%d",
 					datestr,
 					ohlc->contract,
 					ohlc->open,
