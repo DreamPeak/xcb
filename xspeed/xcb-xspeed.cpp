@@ -41,7 +41,6 @@ static int count = 0;
 
 class CMySpi : public DFITCXSPEEDAPI::DFITCTraderSpi {
 public:
-	virtual ~CMySpi() {}
 	CMySpi(DFITCXSPEEDAPI::DFITCTraderApi *pApi) : m_pApi(pApi) {}
 
 private:
@@ -51,11 +50,16 @@ private:
 		memset(&lData, '\0', sizeof lData);
 		/* FIXME */
 		lData.lRequestID = 0;
-		strcpy(lData.accountID, variable_retrieve(cfg, "general", "account"));
-		strcpy(lData.passwd, variable_retrieve(cfg, "general", "passwd"));
+		strncat(lData.accountID, variable_retrieve(cfg, "general", "account"),
+			sizeof lData.accountID - 1);
+		strncat(lData.passwd,    variable_retrieve(cfg, "general", "passwd"),
+			sizeof lData.passwd - 1);
 		m_pApi->ReqUserLogin(&lData);
 	}
-	virtual void OnFrontDisconnected(int nReason) {}
+	virtual void OnFrontDisconnected(int nReason) {
+		close_logger();
+		exit(1);
+	}
 	virtual void OnRtnErrorMsg(struct DFITCErrorRtnField *pErrorInfo) {}
 	virtual void OnRspUserLogin(struct DFITCUserLoginInfoRtnField *pUserLoginInfoRtn,
 		struct DFITCErrorRtnField *pErrorInfo) {
@@ -75,7 +79,8 @@ private:
 			memset(&iData, '\0', sizeof iData);
 			/* FIXME */
 			iData.lRequestID = 1;
-			strcpy(iData.accountID, variable_retrieve(cfg, "general", "account"));
+			strncat(iData.accountID, variable_retrieve(cfg, "general", "account"),
+				sizeof iData.accountID - 1);
 			strcpy(iData.exchangeID, "CFFEX");
 			iData.instrumentType = DFITC_OPT_TYPE;
 			m_pApi->ReqQryExchangeInstrument(&iData);
@@ -125,8 +130,8 @@ protected:
 };
 
 static void usage(void) {
-	fprintf(stderr, "Usage: ./xcb-exp path/to/xcb-exp.conf\n");
-	fprintf(stderr, "       ./xcb-exp -h or --help\n");
+	fprintf(stderr, "Usage: ./xcb-xspeed path/to/xcb-xspeed.conf\n");
+	fprintf(stderr, "       ./xcb-xspeed -h or --help\n");
 	exit(1);
 }
 

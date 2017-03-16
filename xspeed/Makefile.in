@@ -36,7 +36,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-sbin_PROGRAMS = xcb-exp$(EXEEXT)
+sbin_PROGRAMS = xcb-xspeed$(EXEEXT)
 subdir = xspeed
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -81,14 +81,15 @@ md_xspeed_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
 	$(CXXFLAGS) $(md_xspeed_la_LDFLAGS) $(LDFLAGS) -o $@
 PROGRAMS = $(sbin_PROGRAMS)
-am_xcb_exp_OBJECTS = xcb_exp-mem.$(OBJEXT) xcb_exp-dstr.$(OBJEXT) \
-	xcb_exp-utils.$(OBJEXT) xcb_exp-logger.$(OBJEXT) \
-	xcb_exp-config.$(OBJEXT) xcb_exp-xcb-exp.$(OBJEXT)
-xcb_exp_OBJECTS = $(am_xcb_exp_OBJECTS)
-xcb_exp_DEPENDENCIES = libDFITCTraderApi.so
-xcb_exp_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
-	$(xcb_exp_LDFLAGS) $(LDFLAGS) -o $@
+am_xcb_xspeed_OBJECTS = xcb_xspeed-mem.$(OBJEXT) \
+	xcb_xspeed-dstr.$(OBJEXT) xcb_xspeed-utils.$(OBJEXT) \
+	xcb_xspeed-logger.$(OBJEXT) xcb_xspeed-config.$(OBJEXT) \
+	xcb_xspeed-xcb-xspeed.$(OBJEXT)
+xcb_xspeed_OBJECTS = $(am_xcb_xspeed_OBJECTS)
+xcb_xspeed_DEPENDENCIES = libDFITCTraderApi.so
+xcb_xspeed_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
+	$(CXXFLAGS) $(xcb_xspeed_LDFLAGS) $(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -111,8 +112,8 @@ CXXLD = $(CXX)
 CXXLINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(md_xspeed_la_SOURCES) $(xcb_exp_SOURCES)
-DIST_SOURCES = $(md_xspeed_la_SOURCES) $(xcb_exp_SOURCES)
+SOURCES = $(md_xspeed_la_SOURCES) $(xcb_xspeed_SOURCES)
+DIST_SOURCES = $(md_xspeed_la_SOURCES) $(xcb_xspeed_SOURCES)
 DATA = $(xspeed_DATA)
 ETAGS = etags
 CTAGS = ctags
@@ -233,14 +234,14 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-xcb_exp_SOURCES = $(top_srcdir)/src/mem.c $(top_srcdir)/src/dstr.c             \
+xcb_xspeed_SOURCES = $(top_srcdir)/src/mem.c $(top_srcdir)/src/dstr.c          \
 $(top_srcdir)/src/utils.c $(top_srcdir)/src/logger.c $(top_srcdir)/src/config.c\
-xcb-exp.cpp
+xcb-xspeed.cpp
 
-xcb_exp_CPPFLAGS = -I$(top_srcdir)/include
-xcb_exp_CFLAGS = -Wall -Winline -pthread
-xcb_exp_LDADD = libDFITCTraderApi.so
-xcb_exp_LDFLAGS = -pthread -ltcmalloc
+xcb_xspeed_CPPFLAGS = -I$(top_srcdir)/include
+xcb_xspeed_CFLAGS = -Wall -Winline -pthread
+xcb_xspeed_LDADD = libDFITCTraderApi.so
+xcb_xspeed_LDFLAGS = -pthread -ltcmalloc
 lib_LTLIBRARIES = md_xspeed.la
 md_xspeed_la_SOURCES = xspeed.cpp md_xspeed.c
 md_xspeed_la_CPPFLAGS = -I$(top_srcdir)/include
@@ -358,9 +359,9 @@ clean-sbinPROGRAMS:
 	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
 	echo " rm -f" $$list; \
 	rm -f $$list
-xcb-exp$(EXEEXT): $(xcb_exp_OBJECTS) $(xcb_exp_DEPENDENCIES) 
-	@rm -f xcb-exp$(EXEEXT)
-	$(xcb_exp_LINK) $(xcb_exp_OBJECTS) $(xcb_exp_LDADD) $(LIBS)
+xcb-xspeed$(EXEEXT): $(xcb_xspeed_OBJECTS) $(xcb_xspeed_DEPENDENCIES) 
+	@rm -f xcb-xspeed$(EXEEXT)
+	$(xcb_xspeed_LINK) $(xcb_xspeed_OBJECTS) $(xcb_xspeed_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -370,12 +371,12 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/md_xspeed_la-md_xspeed.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/md_xspeed_la-xspeed.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_exp-config.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_exp-dstr.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_exp-logger.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_exp-mem.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_exp-utils.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_exp-xcb-exp.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_xspeed-config.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_xspeed-dstr.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_xspeed-logger.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_xspeed-mem.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_xspeed-utils.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_xspeed-xcb-xspeed.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -405,75 +406,75 @@ md_xspeed_la-md_xspeed.lo: md_xspeed.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(md_xspeed_la_CPPFLAGS) $(CPPFLAGS) $(md_xspeed_la_CFLAGS) $(CFLAGS) -c -o md_xspeed_la-md_xspeed.lo `test -f 'md_xspeed.c' || echo '$(srcdir)/'`md_xspeed.c
 
-xcb_exp-mem.o: $(top_srcdir)/src/mem.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_exp_CPPFLAGS) $(CPPFLAGS) $(xcb_exp_CFLAGS) $(CFLAGS) -MT xcb_exp-mem.o -MD -MP -MF $(DEPDIR)/xcb_exp-mem.Tpo -c -o xcb_exp-mem.o `test -f '$(top_srcdir)/src/mem.c' || echo '$(srcdir)/'`$(top_srcdir)/src/mem.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_exp-mem.Tpo $(DEPDIR)/xcb_exp-mem.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/src/mem.c' object='xcb_exp-mem.o' libtool=no @AMDEPBACKSLASH@
+xcb_xspeed-mem.o: $(top_srcdir)/src/mem.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_xspeed_CPPFLAGS) $(CPPFLAGS) $(xcb_xspeed_CFLAGS) $(CFLAGS) -MT xcb_xspeed-mem.o -MD -MP -MF $(DEPDIR)/xcb_xspeed-mem.Tpo -c -o xcb_xspeed-mem.o `test -f '$(top_srcdir)/src/mem.c' || echo '$(srcdir)/'`$(top_srcdir)/src/mem.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_xspeed-mem.Tpo $(DEPDIR)/xcb_xspeed-mem.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/src/mem.c' object='xcb_xspeed-mem.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_exp_CPPFLAGS) $(CPPFLAGS) $(xcb_exp_CFLAGS) $(CFLAGS) -c -o xcb_exp-mem.o `test -f '$(top_srcdir)/src/mem.c' || echo '$(srcdir)/'`$(top_srcdir)/src/mem.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_xspeed_CPPFLAGS) $(CPPFLAGS) $(xcb_xspeed_CFLAGS) $(CFLAGS) -c -o xcb_xspeed-mem.o `test -f '$(top_srcdir)/src/mem.c' || echo '$(srcdir)/'`$(top_srcdir)/src/mem.c
 
-xcb_exp-mem.obj: $(top_srcdir)/src/mem.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_exp_CPPFLAGS) $(CPPFLAGS) $(xcb_exp_CFLAGS) $(CFLAGS) -MT xcb_exp-mem.obj -MD -MP -MF $(DEPDIR)/xcb_exp-mem.Tpo -c -o xcb_exp-mem.obj `if test -f '$(top_srcdir)/src/mem.c'; then $(CYGPATH_W) '$(top_srcdir)/src/mem.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/mem.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_exp-mem.Tpo $(DEPDIR)/xcb_exp-mem.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/src/mem.c' object='xcb_exp-mem.obj' libtool=no @AMDEPBACKSLASH@
+xcb_xspeed-mem.obj: $(top_srcdir)/src/mem.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_xspeed_CPPFLAGS) $(CPPFLAGS) $(xcb_xspeed_CFLAGS) $(CFLAGS) -MT xcb_xspeed-mem.obj -MD -MP -MF $(DEPDIR)/xcb_xspeed-mem.Tpo -c -o xcb_xspeed-mem.obj `if test -f '$(top_srcdir)/src/mem.c'; then $(CYGPATH_W) '$(top_srcdir)/src/mem.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/mem.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_xspeed-mem.Tpo $(DEPDIR)/xcb_xspeed-mem.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/src/mem.c' object='xcb_xspeed-mem.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_exp_CPPFLAGS) $(CPPFLAGS) $(xcb_exp_CFLAGS) $(CFLAGS) -c -o xcb_exp-mem.obj `if test -f '$(top_srcdir)/src/mem.c'; then $(CYGPATH_W) '$(top_srcdir)/src/mem.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/mem.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_xspeed_CPPFLAGS) $(CPPFLAGS) $(xcb_xspeed_CFLAGS) $(CFLAGS) -c -o xcb_xspeed-mem.obj `if test -f '$(top_srcdir)/src/mem.c'; then $(CYGPATH_W) '$(top_srcdir)/src/mem.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/mem.c'; fi`
 
-xcb_exp-dstr.o: $(top_srcdir)/src/dstr.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_exp_CPPFLAGS) $(CPPFLAGS) $(xcb_exp_CFLAGS) $(CFLAGS) -MT xcb_exp-dstr.o -MD -MP -MF $(DEPDIR)/xcb_exp-dstr.Tpo -c -o xcb_exp-dstr.o `test -f '$(top_srcdir)/src/dstr.c' || echo '$(srcdir)/'`$(top_srcdir)/src/dstr.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_exp-dstr.Tpo $(DEPDIR)/xcb_exp-dstr.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/src/dstr.c' object='xcb_exp-dstr.o' libtool=no @AMDEPBACKSLASH@
+xcb_xspeed-dstr.o: $(top_srcdir)/src/dstr.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_xspeed_CPPFLAGS) $(CPPFLAGS) $(xcb_xspeed_CFLAGS) $(CFLAGS) -MT xcb_xspeed-dstr.o -MD -MP -MF $(DEPDIR)/xcb_xspeed-dstr.Tpo -c -o xcb_xspeed-dstr.o `test -f '$(top_srcdir)/src/dstr.c' || echo '$(srcdir)/'`$(top_srcdir)/src/dstr.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_xspeed-dstr.Tpo $(DEPDIR)/xcb_xspeed-dstr.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/src/dstr.c' object='xcb_xspeed-dstr.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_exp_CPPFLAGS) $(CPPFLAGS) $(xcb_exp_CFLAGS) $(CFLAGS) -c -o xcb_exp-dstr.o `test -f '$(top_srcdir)/src/dstr.c' || echo '$(srcdir)/'`$(top_srcdir)/src/dstr.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_xspeed_CPPFLAGS) $(CPPFLAGS) $(xcb_xspeed_CFLAGS) $(CFLAGS) -c -o xcb_xspeed-dstr.o `test -f '$(top_srcdir)/src/dstr.c' || echo '$(srcdir)/'`$(top_srcdir)/src/dstr.c
 
-xcb_exp-dstr.obj: $(top_srcdir)/src/dstr.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_exp_CPPFLAGS) $(CPPFLAGS) $(xcb_exp_CFLAGS) $(CFLAGS) -MT xcb_exp-dstr.obj -MD -MP -MF $(DEPDIR)/xcb_exp-dstr.Tpo -c -o xcb_exp-dstr.obj `if test -f '$(top_srcdir)/src/dstr.c'; then $(CYGPATH_W) '$(top_srcdir)/src/dstr.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/dstr.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_exp-dstr.Tpo $(DEPDIR)/xcb_exp-dstr.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/src/dstr.c' object='xcb_exp-dstr.obj' libtool=no @AMDEPBACKSLASH@
+xcb_xspeed-dstr.obj: $(top_srcdir)/src/dstr.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_xspeed_CPPFLAGS) $(CPPFLAGS) $(xcb_xspeed_CFLAGS) $(CFLAGS) -MT xcb_xspeed-dstr.obj -MD -MP -MF $(DEPDIR)/xcb_xspeed-dstr.Tpo -c -o xcb_xspeed-dstr.obj `if test -f '$(top_srcdir)/src/dstr.c'; then $(CYGPATH_W) '$(top_srcdir)/src/dstr.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/dstr.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_xspeed-dstr.Tpo $(DEPDIR)/xcb_xspeed-dstr.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/src/dstr.c' object='xcb_xspeed-dstr.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_exp_CPPFLAGS) $(CPPFLAGS) $(xcb_exp_CFLAGS) $(CFLAGS) -c -o xcb_exp-dstr.obj `if test -f '$(top_srcdir)/src/dstr.c'; then $(CYGPATH_W) '$(top_srcdir)/src/dstr.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/dstr.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_xspeed_CPPFLAGS) $(CPPFLAGS) $(xcb_xspeed_CFLAGS) $(CFLAGS) -c -o xcb_xspeed-dstr.obj `if test -f '$(top_srcdir)/src/dstr.c'; then $(CYGPATH_W) '$(top_srcdir)/src/dstr.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/dstr.c'; fi`
 
-xcb_exp-utils.o: $(top_srcdir)/src/utils.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_exp_CPPFLAGS) $(CPPFLAGS) $(xcb_exp_CFLAGS) $(CFLAGS) -MT xcb_exp-utils.o -MD -MP -MF $(DEPDIR)/xcb_exp-utils.Tpo -c -o xcb_exp-utils.o `test -f '$(top_srcdir)/src/utils.c' || echo '$(srcdir)/'`$(top_srcdir)/src/utils.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_exp-utils.Tpo $(DEPDIR)/xcb_exp-utils.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/src/utils.c' object='xcb_exp-utils.o' libtool=no @AMDEPBACKSLASH@
+xcb_xspeed-utils.o: $(top_srcdir)/src/utils.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_xspeed_CPPFLAGS) $(CPPFLAGS) $(xcb_xspeed_CFLAGS) $(CFLAGS) -MT xcb_xspeed-utils.o -MD -MP -MF $(DEPDIR)/xcb_xspeed-utils.Tpo -c -o xcb_xspeed-utils.o `test -f '$(top_srcdir)/src/utils.c' || echo '$(srcdir)/'`$(top_srcdir)/src/utils.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_xspeed-utils.Tpo $(DEPDIR)/xcb_xspeed-utils.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/src/utils.c' object='xcb_xspeed-utils.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_exp_CPPFLAGS) $(CPPFLAGS) $(xcb_exp_CFLAGS) $(CFLAGS) -c -o xcb_exp-utils.o `test -f '$(top_srcdir)/src/utils.c' || echo '$(srcdir)/'`$(top_srcdir)/src/utils.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_xspeed_CPPFLAGS) $(CPPFLAGS) $(xcb_xspeed_CFLAGS) $(CFLAGS) -c -o xcb_xspeed-utils.o `test -f '$(top_srcdir)/src/utils.c' || echo '$(srcdir)/'`$(top_srcdir)/src/utils.c
 
-xcb_exp-utils.obj: $(top_srcdir)/src/utils.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_exp_CPPFLAGS) $(CPPFLAGS) $(xcb_exp_CFLAGS) $(CFLAGS) -MT xcb_exp-utils.obj -MD -MP -MF $(DEPDIR)/xcb_exp-utils.Tpo -c -o xcb_exp-utils.obj `if test -f '$(top_srcdir)/src/utils.c'; then $(CYGPATH_W) '$(top_srcdir)/src/utils.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/utils.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_exp-utils.Tpo $(DEPDIR)/xcb_exp-utils.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/src/utils.c' object='xcb_exp-utils.obj' libtool=no @AMDEPBACKSLASH@
+xcb_xspeed-utils.obj: $(top_srcdir)/src/utils.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_xspeed_CPPFLAGS) $(CPPFLAGS) $(xcb_xspeed_CFLAGS) $(CFLAGS) -MT xcb_xspeed-utils.obj -MD -MP -MF $(DEPDIR)/xcb_xspeed-utils.Tpo -c -o xcb_xspeed-utils.obj `if test -f '$(top_srcdir)/src/utils.c'; then $(CYGPATH_W) '$(top_srcdir)/src/utils.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/utils.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_xspeed-utils.Tpo $(DEPDIR)/xcb_xspeed-utils.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/src/utils.c' object='xcb_xspeed-utils.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_exp_CPPFLAGS) $(CPPFLAGS) $(xcb_exp_CFLAGS) $(CFLAGS) -c -o xcb_exp-utils.obj `if test -f '$(top_srcdir)/src/utils.c'; then $(CYGPATH_W) '$(top_srcdir)/src/utils.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/utils.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_xspeed_CPPFLAGS) $(CPPFLAGS) $(xcb_xspeed_CFLAGS) $(CFLAGS) -c -o xcb_xspeed-utils.obj `if test -f '$(top_srcdir)/src/utils.c'; then $(CYGPATH_W) '$(top_srcdir)/src/utils.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/utils.c'; fi`
 
-xcb_exp-logger.o: $(top_srcdir)/src/logger.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_exp_CPPFLAGS) $(CPPFLAGS) $(xcb_exp_CFLAGS) $(CFLAGS) -MT xcb_exp-logger.o -MD -MP -MF $(DEPDIR)/xcb_exp-logger.Tpo -c -o xcb_exp-logger.o `test -f '$(top_srcdir)/src/logger.c' || echo '$(srcdir)/'`$(top_srcdir)/src/logger.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_exp-logger.Tpo $(DEPDIR)/xcb_exp-logger.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/src/logger.c' object='xcb_exp-logger.o' libtool=no @AMDEPBACKSLASH@
+xcb_xspeed-logger.o: $(top_srcdir)/src/logger.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_xspeed_CPPFLAGS) $(CPPFLAGS) $(xcb_xspeed_CFLAGS) $(CFLAGS) -MT xcb_xspeed-logger.o -MD -MP -MF $(DEPDIR)/xcb_xspeed-logger.Tpo -c -o xcb_xspeed-logger.o `test -f '$(top_srcdir)/src/logger.c' || echo '$(srcdir)/'`$(top_srcdir)/src/logger.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_xspeed-logger.Tpo $(DEPDIR)/xcb_xspeed-logger.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/src/logger.c' object='xcb_xspeed-logger.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_exp_CPPFLAGS) $(CPPFLAGS) $(xcb_exp_CFLAGS) $(CFLAGS) -c -o xcb_exp-logger.o `test -f '$(top_srcdir)/src/logger.c' || echo '$(srcdir)/'`$(top_srcdir)/src/logger.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_xspeed_CPPFLAGS) $(CPPFLAGS) $(xcb_xspeed_CFLAGS) $(CFLAGS) -c -o xcb_xspeed-logger.o `test -f '$(top_srcdir)/src/logger.c' || echo '$(srcdir)/'`$(top_srcdir)/src/logger.c
 
-xcb_exp-logger.obj: $(top_srcdir)/src/logger.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_exp_CPPFLAGS) $(CPPFLAGS) $(xcb_exp_CFLAGS) $(CFLAGS) -MT xcb_exp-logger.obj -MD -MP -MF $(DEPDIR)/xcb_exp-logger.Tpo -c -o xcb_exp-logger.obj `if test -f '$(top_srcdir)/src/logger.c'; then $(CYGPATH_W) '$(top_srcdir)/src/logger.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/logger.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_exp-logger.Tpo $(DEPDIR)/xcb_exp-logger.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/src/logger.c' object='xcb_exp-logger.obj' libtool=no @AMDEPBACKSLASH@
+xcb_xspeed-logger.obj: $(top_srcdir)/src/logger.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_xspeed_CPPFLAGS) $(CPPFLAGS) $(xcb_xspeed_CFLAGS) $(CFLAGS) -MT xcb_xspeed-logger.obj -MD -MP -MF $(DEPDIR)/xcb_xspeed-logger.Tpo -c -o xcb_xspeed-logger.obj `if test -f '$(top_srcdir)/src/logger.c'; then $(CYGPATH_W) '$(top_srcdir)/src/logger.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/logger.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_xspeed-logger.Tpo $(DEPDIR)/xcb_xspeed-logger.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/src/logger.c' object='xcb_xspeed-logger.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_exp_CPPFLAGS) $(CPPFLAGS) $(xcb_exp_CFLAGS) $(CFLAGS) -c -o xcb_exp-logger.obj `if test -f '$(top_srcdir)/src/logger.c'; then $(CYGPATH_W) '$(top_srcdir)/src/logger.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/logger.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_xspeed_CPPFLAGS) $(CPPFLAGS) $(xcb_xspeed_CFLAGS) $(CFLAGS) -c -o xcb_xspeed-logger.obj `if test -f '$(top_srcdir)/src/logger.c'; then $(CYGPATH_W) '$(top_srcdir)/src/logger.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/logger.c'; fi`
 
-xcb_exp-config.o: $(top_srcdir)/src/config.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_exp_CPPFLAGS) $(CPPFLAGS) $(xcb_exp_CFLAGS) $(CFLAGS) -MT xcb_exp-config.o -MD -MP -MF $(DEPDIR)/xcb_exp-config.Tpo -c -o xcb_exp-config.o `test -f '$(top_srcdir)/src/config.c' || echo '$(srcdir)/'`$(top_srcdir)/src/config.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_exp-config.Tpo $(DEPDIR)/xcb_exp-config.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/src/config.c' object='xcb_exp-config.o' libtool=no @AMDEPBACKSLASH@
+xcb_xspeed-config.o: $(top_srcdir)/src/config.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_xspeed_CPPFLAGS) $(CPPFLAGS) $(xcb_xspeed_CFLAGS) $(CFLAGS) -MT xcb_xspeed-config.o -MD -MP -MF $(DEPDIR)/xcb_xspeed-config.Tpo -c -o xcb_xspeed-config.o `test -f '$(top_srcdir)/src/config.c' || echo '$(srcdir)/'`$(top_srcdir)/src/config.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_xspeed-config.Tpo $(DEPDIR)/xcb_xspeed-config.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/src/config.c' object='xcb_xspeed-config.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_exp_CPPFLAGS) $(CPPFLAGS) $(xcb_exp_CFLAGS) $(CFLAGS) -c -o xcb_exp-config.o `test -f '$(top_srcdir)/src/config.c' || echo '$(srcdir)/'`$(top_srcdir)/src/config.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_xspeed_CPPFLAGS) $(CPPFLAGS) $(xcb_xspeed_CFLAGS) $(CFLAGS) -c -o xcb_xspeed-config.o `test -f '$(top_srcdir)/src/config.c' || echo '$(srcdir)/'`$(top_srcdir)/src/config.c
 
-xcb_exp-config.obj: $(top_srcdir)/src/config.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_exp_CPPFLAGS) $(CPPFLAGS) $(xcb_exp_CFLAGS) $(CFLAGS) -MT xcb_exp-config.obj -MD -MP -MF $(DEPDIR)/xcb_exp-config.Tpo -c -o xcb_exp-config.obj `if test -f '$(top_srcdir)/src/config.c'; then $(CYGPATH_W) '$(top_srcdir)/src/config.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/config.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_exp-config.Tpo $(DEPDIR)/xcb_exp-config.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/src/config.c' object='xcb_exp-config.obj' libtool=no @AMDEPBACKSLASH@
+xcb_xspeed-config.obj: $(top_srcdir)/src/config.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_xspeed_CPPFLAGS) $(CPPFLAGS) $(xcb_xspeed_CFLAGS) $(CFLAGS) -MT xcb_xspeed-config.obj -MD -MP -MF $(DEPDIR)/xcb_xspeed-config.Tpo -c -o xcb_xspeed-config.obj `if test -f '$(top_srcdir)/src/config.c'; then $(CYGPATH_W) '$(top_srcdir)/src/config.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/config.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_xspeed-config.Tpo $(DEPDIR)/xcb_xspeed-config.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/src/config.c' object='xcb_xspeed-config.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_exp_CPPFLAGS) $(CPPFLAGS) $(xcb_exp_CFLAGS) $(CFLAGS) -c -o xcb_exp-config.obj `if test -f '$(top_srcdir)/src/config.c'; then $(CYGPATH_W) '$(top_srcdir)/src/config.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/config.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_xspeed_CPPFLAGS) $(CPPFLAGS) $(xcb_xspeed_CFLAGS) $(CFLAGS) -c -o xcb_xspeed-config.obj `if test -f '$(top_srcdir)/src/config.c'; then $(CYGPATH_W) '$(top_srcdir)/src/config.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/config.c'; fi`
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -503,19 +504,19 @@ md_xspeed_la-xspeed.lo: xspeed.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(md_xspeed_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o md_xspeed_la-xspeed.lo `test -f 'xspeed.cpp' || echo '$(srcdir)/'`xspeed.cpp
 
-xcb_exp-xcb-exp.o: xcb-exp.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_exp_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT xcb_exp-xcb-exp.o -MD -MP -MF $(DEPDIR)/xcb_exp-xcb-exp.Tpo -c -o xcb_exp-xcb-exp.o `test -f 'xcb-exp.cpp' || echo '$(srcdir)/'`xcb-exp.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/xcb_exp-xcb-exp.Tpo $(DEPDIR)/xcb_exp-xcb-exp.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='xcb-exp.cpp' object='xcb_exp-xcb-exp.o' libtool=no @AMDEPBACKSLASH@
+xcb_xspeed-xcb-xspeed.o: xcb-xspeed.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_xspeed_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT xcb_xspeed-xcb-xspeed.o -MD -MP -MF $(DEPDIR)/xcb_xspeed-xcb-xspeed.Tpo -c -o xcb_xspeed-xcb-xspeed.o `test -f 'xcb-xspeed.cpp' || echo '$(srcdir)/'`xcb-xspeed.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/xcb_xspeed-xcb-xspeed.Tpo $(DEPDIR)/xcb_xspeed-xcb-xspeed.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='xcb-xspeed.cpp' object='xcb_xspeed-xcb-xspeed.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_exp_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o xcb_exp-xcb-exp.o `test -f 'xcb-exp.cpp' || echo '$(srcdir)/'`xcb-exp.cpp
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_xspeed_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o xcb_xspeed-xcb-xspeed.o `test -f 'xcb-xspeed.cpp' || echo '$(srcdir)/'`xcb-xspeed.cpp
 
-xcb_exp-xcb-exp.obj: xcb-exp.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_exp_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT xcb_exp-xcb-exp.obj -MD -MP -MF $(DEPDIR)/xcb_exp-xcb-exp.Tpo -c -o xcb_exp-xcb-exp.obj `if test -f 'xcb-exp.cpp'; then $(CYGPATH_W) 'xcb-exp.cpp'; else $(CYGPATH_W) '$(srcdir)/xcb-exp.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/xcb_exp-xcb-exp.Tpo $(DEPDIR)/xcb_exp-xcb-exp.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='xcb-exp.cpp' object='xcb_exp-xcb-exp.obj' libtool=no @AMDEPBACKSLASH@
+xcb_xspeed-xcb-xspeed.obj: xcb-xspeed.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_xspeed_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT xcb_xspeed-xcb-xspeed.obj -MD -MP -MF $(DEPDIR)/xcb_xspeed-xcb-xspeed.Tpo -c -o xcb_xspeed-xcb-xspeed.obj `if test -f 'xcb-xspeed.cpp'; then $(CYGPATH_W) 'xcb-xspeed.cpp'; else $(CYGPATH_W) '$(srcdir)/xcb-xspeed.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/xcb_xspeed-xcb-xspeed.Tpo $(DEPDIR)/xcb_xspeed-xcb-xspeed.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='xcb-xspeed.cpp' object='xcb_xspeed-xcb-xspeed.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_exp_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o xcb_exp-xcb-exp.obj `if test -f 'xcb-exp.cpp'; then $(CYGPATH_W) 'xcb-exp.cpp'; else $(CYGPATH_W) '$(srcdir)/xcb-exp.cpp'; fi`
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_xspeed_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o xcb_xspeed-xcb-xspeed.obj `if test -f 'xcb-xspeed.cpp'; then $(CYGPATH_W) 'xcb-xspeed.cpp'; else $(CYGPATH_W) '$(srcdir)/xcb-xspeed.cpp'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo

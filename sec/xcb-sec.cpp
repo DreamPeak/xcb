@@ -41,7 +41,6 @@ static int count = 0;
 
 class CMySpi : public DFITCSECTraderSpi {
 public:
-	virtual ~CMySpi() {}
 	CMySpi(DFITCSECTraderApi *pApi) : m_pApi(pApi) {}
 
 private:
@@ -51,11 +50,16 @@ private:
 		memset(&lData, '\0', sizeof lData);
 		/* FIXME */
 		lData.requestID = 0;
-		strcpy(lData.accountID, variable_retrieve(cfg, "general", "account"));
-		strcpy(lData.password, variable_retrieve(cfg, "general", "passwd"));
+		strncat(lData.accountID, variable_retrieve(cfg, "general", "account"),
+			sizeof lData.accountID - 1);
+		strncat(lData.password,  variable_retrieve(cfg, "general", "passwd"),
+			sizeof lData.password - 1);
 		m_pApi->ReqSOPUserLogin(&lData);
 	}
-	virtual void OnFrontDisconnected(int nReason) {}
+	virtual void OnFrontDisconnected(int nReason) {
+		close_logger();
+		exit(1);
+	}
 	virtual void OnRspError(struct DFITCSECRspInfoField *pRspInfo) {}
 	virtual void OnRspSOPUserLogin(struct DFITCSECRspUserLoginField *pRspUserLogin,
 		struct DFITCSECRspInfoField *pRspInfo) {
@@ -70,7 +74,8 @@ private:
 			memset(&iData, '\0', sizeof iData);
 			/* FIXME */
 			iData.requestID = 1;
-			strcpy(iData.accountID, variable_retrieve(cfg, "general", "account"));
+			strncat(iData.accountID, variable_retrieve(cfg, "general", "account"),
+				sizeof iData.accountID - 1);
 			/* iData.contractObjectType = DFITCSEC_COT_ETF; */
 			m_pApi->ReqSOPQryContactInfo(&iData);
 		}
@@ -110,8 +115,8 @@ protected:
 };
 
 static void usage(void) {
-	fprintf(stderr, "Usage: ./xcb-exp2 path/to/xcb-exp2.conf\n");
-	fprintf(stderr, "       ./xcb-exp2 -h or --help\n");
+	fprintf(stderr, "Usage: ./xcb-sec path/to/xcb-sec.conf\n");
+	fprintf(stderr, "       ./xcb-sec -h or --help\n");
 	exit(1);
 }
 

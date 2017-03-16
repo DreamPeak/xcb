@@ -16,6 +16,7 @@
 @SET_MAKE@
 
 
+
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
@@ -35,6 +36,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
+sbin_PROGRAMS = xcb-ctp$(EXEEXT)
 subdir = ctp
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -68,7 +70,8 @@ am__nobase_list = $(am__nobase_strip_setup); \
 am__base_list = \
   sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
   sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
-am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(ctpdir)"
+am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(sbindir)" \
+	"$(DESTDIR)$(ctpdir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 md_ctp_la_LIBADD =
 am_md_ctp_la_OBJECTS = md_ctp_la-ctp.lo md_ctp_la-md_ctp.lo
@@ -76,6 +79,15 @@ md_ctp_la_OBJECTS = $(am_md_ctp_la_OBJECTS)
 md_ctp_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
 	$(CXXFLAGS) $(md_ctp_la_LDFLAGS) $(LDFLAGS) -o $@
+PROGRAMS = $(sbin_PROGRAMS)
+am_xcb_ctp_OBJECTS = xcb_ctp-mem.$(OBJEXT) xcb_ctp-dstr.$(OBJEXT) \
+	xcb_ctp-utils.$(OBJEXT) xcb_ctp-logger.$(OBJEXT) \
+	xcb_ctp-config.$(OBJEXT) xcb_ctp-xcb-ctp.$(OBJEXT)
+xcb_ctp_OBJECTS = $(am_xcb_ctp_OBJECTS)
+xcb_ctp_DEPENDENCIES = libthosttraderapi.so
+xcb_ctp_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
+	$(xcb_ctp_LDFLAGS) $(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -98,8 +110,8 @@ CXXLD = $(CXX)
 CXXLINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(md_ctp_la_SOURCES)
-DIST_SOURCES = $(md_ctp_la_SOURCES)
+SOURCES = $(md_ctp_la_SOURCES) $(xcb_ctp_SOURCES)
+DIST_SOURCES = $(md_ctp_la_SOURCES) $(xcb_ctp_SOURCES)
 DATA = $(ctp_DATA)
 ETAGS = etags
 CTAGS = ctags
@@ -220,6 +232,14 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
+xcb_ctp_SOURCES = $(top_srcdir)/src/mem.c $(top_srcdir)/src/dstr.c             \
+$(top_srcdir)/src/utils.c $(top_srcdir)/src/logger.c $(top_srcdir)/src/config.c\
+xcb-ctp.cpp
+
+xcb_ctp_CPPFLAGS = -I$(top_srcdir)/include
+xcb_ctp_CFLAGS = -Wall -Winline -pthread
+xcb_ctp_LDADD = libthosttraderapi.so
+xcb_ctp_LDFLAGS = -pthread -ltcmalloc
 lib_LTLIBRARIES = md_ctp.la
 md_ctp_la_SOURCES = ctp.cpp md_ctp.c
 md_ctp_la_CPPFLAGS = -I$(top_srcdir)/include
@@ -294,6 +314,52 @@ clean-libLTLIBRARIES:
 	done
 md_ctp.la: $(md_ctp_la_OBJECTS) $(md_ctp_la_DEPENDENCIES) 
 	$(md_ctp_la_LINK) -rpath $(libdir) $(md_ctp_la_OBJECTS) $(md_ctp_la_LIBADD) $(LIBS)
+install-sbinPROGRAMS: $(sbin_PROGRAMS)
+	@$(NORMAL_INSTALL)
+	test -z "$(sbindir)" || $(MKDIR_P) "$(DESTDIR)$(sbindir)"
+	@list='$(sbin_PROGRAMS)'; test -n "$(sbindir)" || list=; \
+	for p in $$list; do echo "$$p $$p"; done | \
+	sed 's/$(EXEEXT)$$//' | \
+	while read p p1; do if test -f $$p || test -f $$p1; \
+	  then echo "$$p"; echo "$$p"; else :; fi; \
+	done | \
+	sed -e 'p;s,.*/,,;n;h' -e 's|.*|.|' \
+	    -e 'p;x;s,.*/,,;s/$(EXEEXT)$$//;$(transform);s/$$/$(EXEEXT)/' | \
+	sed 'N;N;N;s,\n, ,g' | \
+	$(AWK) 'BEGIN { files["."] = ""; dirs["."] = 1 } \
+	  { d=$$3; if (dirs[d] != 1) { print "d", d; dirs[d] = 1 } \
+	    if ($$2 == $$4) files[d] = files[d] " " $$1; \
+	    else { print "f", $$3 "/" $$4, $$1; } } \
+	  END { for (d in files) print "f", d, files[d] }' | \
+	while read type dir files; do \
+	    if test "$$dir" = .; then dir=; else dir=/$$dir; fi; \
+	    test -z "$$files" || { \
+	    echo " $(INSTALL_PROGRAM_ENV) $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL_PROGRAM) $$files '$(DESTDIR)$(sbindir)$$dir'"; \
+	    $(INSTALL_PROGRAM_ENV) $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL_PROGRAM) $$files "$(DESTDIR)$(sbindir)$$dir" || exit $$?; \
+	    } \
+	; done
+
+uninstall-sbinPROGRAMS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(sbin_PROGRAMS)'; test -n "$(sbindir)" || list=; \
+	files=`for p in $$list; do echo "$$p"; done | \
+	  sed -e 'h;s,^.*/,,;s/$(EXEEXT)$$//;$(transform)' \
+	      -e 's/$$/$(EXEEXT)/' `; \
+	test -n "$$list" || exit 0; \
+	echo " ( cd '$(DESTDIR)$(sbindir)' && rm -f" $$files ")"; \
+	cd "$(DESTDIR)$(sbindir)" && rm -f $$files
+
+clean-sbinPROGRAMS:
+	@list='$(sbin_PROGRAMS)'; test -n "$$list" || exit 0; \
+	echo " rm -f" $$list; \
+	rm -f $$list || exit $$?; \
+	test -n "$(EXEEXT)" || exit 0; \
+	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
+	echo " rm -f" $$list; \
+	rm -f $$list
+xcb-ctp$(EXEEXT): $(xcb_ctp_OBJECTS) $(xcb_ctp_DEPENDENCIES) 
+	@rm -f xcb-ctp$(EXEEXT)
+	$(xcb_ctp_LINK) $(xcb_ctp_OBJECTS) $(xcb_ctp_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -303,6 +369,12 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/md_ctp_la-ctp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/md_ctp_la-md_ctp.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_ctp-config.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_ctp-dstr.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_ctp-logger.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_ctp-mem.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_ctp-utils.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcb_ctp-xcb-ctp.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -332,6 +404,76 @@ md_ctp_la-md_ctp.lo: md_ctp.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(md_ctp_la_CPPFLAGS) $(CPPFLAGS) $(md_ctp_la_CFLAGS) $(CFLAGS) -c -o md_ctp_la-md_ctp.lo `test -f 'md_ctp.c' || echo '$(srcdir)/'`md_ctp.c
 
+xcb_ctp-mem.o: $(top_srcdir)/src/mem.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_ctp_CPPFLAGS) $(CPPFLAGS) $(xcb_ctp_CFLAGS) $(CFLAGS) -MT xcb_ctp-mem.o -MD -MP -MF $(DEPDIR)/xcb_ctp-mem.Tpo -c -o xcb_ctp-mem.o `test -f '$(top_srcdir)/src/mem.c' || echo '$(srcdir)/'`$(top_srcdir)/src/mem.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_ctp-mem.Tpo $(DEPDIR)/xcb_ctp-mem.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/src/mem.c' object='xcb_ctp-mem.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_ctp_CPPFLAGS) $(CPPFLAGS) $(xcb_ctp_CFLAGS) $(CFLAGS) -c -o xcb_ctp-mem.o `test -f '$(top_srcdir)/src/mem.c' || echo '$(srcdir)/'`$(top_srcdir)/src/mem.c
+
+xcb_ctp-mem.obj: $(top_srcdir)/src/mem.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_ctp_CPPFLAGS) $(CPPFLAGS) $(xcb_ctp_CFLAGS) $(CFLAGS) -MT xcb_ctp-mem.obj -MD -MP -MF $(DEPDIR)/xcb_ctp-mem.Tpo -c -o xcb_ctp-mem.obj `if test -f '$(top_srcdir)/src/mem.c'; then $(CYGPATH_W) '$(top_srcdir)/src/mem.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/mem.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_ctp-mem.Tpo $(DEPDIR)/xcb_ctp-mem.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/src/mem.c' object='xcb_ctp-mem.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_ctp_CPPFLAGS) $(CPPFLAGS) $(xcb_ctp_CFLAGS) $(CFLAGS) -c -o xcb_ctp-mem.obj `if test -f '$(top_srcdir)/src/mem.c'; then $(CYGPATH_W) '$(top_srcdir)/src/mem.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/mem.c'; fi`
+
+xcb_ctp-dstr.o: $(top_srcdir)/src/dstr.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_ctp_CPPFLAGS) $(CPPFLAGS) $(xcb_ctp_CFLAGS) $(CFLAGS) -MT xcb_ctp-dstr.o -MD -MP -MF $(DEPDIR)/xcb_ctp-dstr.Tpo -c -o xcb_ctp-dstr.o `test -f '$(top_srcdir)/src/dstr.c' || echo '$(srcdir)/'`$(top_srcdir)/src/dstr.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_ctp-dstr.Tpo $(DEPDIR)/xcb_ctp-dstr.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/src/dstr.c' object='xcb_ctp-dstr.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_ctp_CPPFLAGS) $(CPPFLAGS) $(xcb_ctp_CFLAGS) $(CFLAGS) -c -o xcb_ctp-dstr.o `test -f '$(top_srcdir)/src/dstr.c' || echo '$(srcdir)/'`$(top_srcdir)/src/dstr.c
+
+xcb_ctp-dstr.obj: $(top_srcdir)/src/dstr.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_ctp_CPPFLAGS) $(CPPFLAGS) $(xcb_ctp_CFLAGS) $(CFLAGS) -MT xcb_ctp-dstr.obj -MD -MP -MF $(DEPDIR)/xcb_ctp-dstr.Tpo -c -o xcb_ctp-dstr.obj `if test -f '$(top_srcdir)/src/dstr.c'; then $(CYGPATH_W) '$(top_srcdir)/src/dstr.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/dstr.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_ctp-dstr.Tpo $(DEPDIR)/xcb_ctp-dstr.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/src/dstr.c' object='xcb_ctp-dstr.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_ctp_CPPFLAGS) $(CPPFLAGS) $(xcb_ctp_CFLAGS) $(CFLAGS) -c -o xcb_ctp-dstr.obj `if test -f '$(top_srcdir)/src/dstr.c'; then $(CYGPATH_W) '$(top_srcdir)/src/dstr.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/dstr.c'; fi`
+
+xcb_ctp-utils.o: $(top_srcdir)/src/utils.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_ctp_CPPFLAGS) $(CPPFLAGS) $(xcb_ctp_CFLAGS) $(CFLAGS) -MT xcb_ctp-utils.o -MD -MP -MF $(DEPDIR)/xcb_ctp-utils.Tpo -c -o xcb_ctp-utils.o `test -f '$(top_srcdir)/src/utils.c' || echo '$(srcdir)/'`$(top_srcdir)/src/utils.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_ctp-utils.Tpo $(DEPDIR)/xcb_ctp-utils.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/src/utils.c' object='xcb_ctp-utils.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_ctp_CPPFLAGS) $(CPPFLAGS) $(xcb_ctp_CFLAGS) $(CFLAGS) -c -o xcb_ctp-utils.o `test -f '$(top_srcdir)/src/utils.c' || echo '$(srcdir)/'`$(top_srcdir)/src/utils.c
+
+xcb_ctp-utils.obj: $(top_srcdir)/src/utils.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_ctp_CPPFLAGS) $(CPPFLAGS) $(xcb_ctp_CFLAGS) $(CFLAGS) -MT xcb_ctp-utils.obj -MD -MP -MF $(DEPDIR)/xcb_ctp-utils.Tpo -c -o xcb_ctp-utils.obj `if test -f '$(top_srcdir)/src/utils.c'; then $(CYGPATH_W) '$(top_srcdir)/src/utils.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/utils.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_ctp-utils.Tpo $(DEPDIR)/xcb_ctp-utils.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/src/utils.c' object='xcb_ctp-utils.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_ctp_CPPFLAGS) $(CPPFLAGS) $(xcb_ctp_CFLAGS) $(CFLAGS) -c -o xcb_ctp-utils.obj `if test -f '$(top_srcdir)/src/utils.c'; then $(CYGPATH_W) '$(top_srcdir)/src/utils.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/utils.c'; fi`
+
+xcb_ctp-logger.o: $(top_srcdir)/src/logger.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_ctp_CPPFLAGS) $(CPPFLAGS) $(xcb_ctp_CFLAGS) $(CFLAGS) -MT xcb_ctp-logger.o -MD -MP -MF $(DEPDIR)/xcb_ctp-logger.Tpo -c -o xcb_ctp-logger.o `test -f '$(top_srcdir)/src/logger.c' || echo '$(srcdir)/'`$(top_srcdir)/src/logger.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_ctp-logger.Tpo $(DEPDIR)/xcb_ctp-logger.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/src/logger.c' object='xcb_ctp-logger.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_ctp_CPPFLAGS) $(CPPFLAGS) $(xcb_ctp_CFLAGS) $(CFLAGS) -c -o xcb_ctp-logger.o `test -f '$(top_srcdir)/src/logger.c' || echo '$(srcdir)/'`$(top_srcdir)/src/logger.c
+
+xcb_ctp-logger.obj: $(top_srcdir)/src/logger.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_ctp_CPPFLAGS) $(CPPFLAGS) $(xcb_ctp_CFLAGS) $(CFLAGS) -MT xcb_ctp-logger.obj -MD -MP -MF $(DEPDIR)/xcb_ctp-logger.Tpo -c -o xcb_ctp-logger.obj `if test -f '$(top_srcdir)/src/logger.c'; then $(CYGPATH_W) '$(top_srcdir)/src/logger.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/logger.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_ctp-logger.Tpo $(DEPDIR)/xcb_ctp-logger.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/src/logger.c' object='xcb_ctp-logger.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_ctp_CPPFLAGS) $(CPPFLAGS) $(xcb_ctp_CFLAGS) $(CFLAGS) -c -o xcb_ctp-logger.obj `if test -f '$(top_srcdir)/src/logger.c'; then $(CYGPATH_W) '$(top_srcdir)/src/logger.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/logger.c'; fi`
+
+xcb_ctp-config.o: $(top_srcdir)/src/config.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_ctp_CPPFLAGS) $(CPPFLAGS) $(xcb_ctp_CFLAGS) $(CFLAGS) -MT xcb_ctp-config.o -MD -MP -MF $(DEPDIR)/xcb_ctp-config.Tpo -c -o xcb_ctp-config.o `test -f '$(top_srcdir)/src/config.c' || echo '$(srcdir)/'`$(top_srcdir)/src/config.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_ctp-config.Tpo $(DEPDIR)/xcb_ctp-config.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/src/config.c' object='xcb_ctp-config.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_ctp_CPPFLAGS) $(CPPFLAGS) $(xcb_ctp_CFLAGS) $(CFLAGS) -c -o xcb_ctp-config.o `test -f '$(top_srcdir)/src/config.c' || echo '$(srcdir)/'`$(top_srcdir)/src/config.c
+
+xcb_ctp-config.obj: $(top_srcdir)/src/config.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_ctp_CPPFLAGS) $(CPPFLAGS) $(xcb_ctp_CFLAGS) $(CFLAGS) -MT xcb_ctp-config.obj -MD -MP -MF $(DEPDIR)/xcb_ctp-config.Tpo -c -o xcb_ctp-config.obj `if test -f '$(top_srcdir)/src/config.c'; then $(CYGPATH_W) '$(top_srcdir)/src/config.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/config.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xcb_ctp-config.Tpo $(DEPDIR)/xcb_ctp-config.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/src/config.c' object='xcb_ctp-config.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_ctp_CPPFLAGS) $(CPPFLAGS) $(xcb_ctp_CFLAGS) $(CFLAGS) -c -o xcb_ctp-config.obj `if test -f '$(top_srcdir)/src/config.c'; then $(CYGPATH_W) '$(top_srcdir)/src/config.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/config.c'; fi`
+
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
 @am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
@@ -359,6 +501,20 @@ md_ctp_la-ctp.lo: ctp.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='ctp.cpp' object='md_ctp_la-ctp.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(md_ctp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o md_ctp_la-ctp.lo `test -f 'ctp.cpp' || echo '$(srcdir)/'`ctp.cpp
+
+xcb_ctp-xcb-ctp.o: xcb-ctp.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_ctp_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT xcb_ctp-xcb-ctp.o -MD -MP -MF $(DEPDIR)/xcb_ctp-xcb-ctp.Tpo -c -o xcb_ctp-xcb-ctp.o `test -f 'xcb-ctp.cpp' || echo '$(srcdir)/'`xcb-ctp.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/xcb_ctp-xcb-ctp.Tpo $(DEPDIR)/xcb_ctp-xcb-ctp.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='xcb-ctp.cpp' object='xcb_ctp-xcb-ctp.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_ctp_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o xcb_ctp-xcb-ctp.o `test -f 'xcb-ctp.cpp' || echo '$(srcdir)/'`xcb-ctp.cpp
+
+xcb_ctp-xcb-ctp.obj: xcb-ctp.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_ctp_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT xcb_ctp-xcb-ctp.obj -MD -MP -MF $(DEPDIR)/xcb_ctp-xcb-ctp.Tpo -c -o xcb_ctp-xcb-ctp.obj `if test -f 'xcb-ctp.cpp'; then $(CYGPATH_W) 'xcb-ctp.cpp'; else $(CYGPATH_W) '$(srcdir)/xcb-ctp.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/xcb_ctp-xcb-ctp.Tpo $(DEPDIR)/xcb_ctp-xcb-ctp.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='xcb-ctp.cpp' object='xcb_ctp-xcb-ctp.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xcb_ctp_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o xcb_ctp-xcb-ctp.obj `if test -f 'xcb-ctp.cpp'; then $(CYGPATH_W) 'xcb-ctp.cpp'; else $(CYGPATH_W) '$(srcdir)/xcb-ctp.cpp'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -470,9 +626,9 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(LTLIBRARIES) $(DATA)
+all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) $(DATA)
 installdirs:
-	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(ctpdir)"; do \
+	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(sbindir)" "$(DESTDIR)$(ctpdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -503,7 +659,7 @@ maintainer-clean-generic:
 clean: clean-am
 
 clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
-	mostlyclean-am
+	clean-sbinPROGRAMS mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -529,7 +685,7 @@ install-dvi: install-dvi-am
 
 install-dvi-am:
 
-install-exec-am: install-libLTLIBRARIES
+install-exec-am: install-libLTLIBRARIES install-sbinPROGRAMS
 
 install-html: install-html-am
 
@@ -569,24 +725,26 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-ctpDATA uninstall-libLTLIBRARIES
+uninstall-am: uninstall-ctpDATA uninstall-libLTLIBRARIES \
+	uninstall-sbinPROGRAMS
 
 .MAKE: install-am install-strip
 
 .PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
-	clean-libLTLIBRARIES clean-libtool ctags distclean \
-	distclean-compile distclean-generic distclean-libtool \
-	distclean-tags distdir dvi dvi-am html html-am info info-am \
-	install install-am install-ctpDATA install-data \
-	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-libLTLIBRARIES install-man install-pdf \
-	install-pdf-am install-ps install-ps-am install-strip \
-	installcheck installcheck-am installdirs maintainer-clean \
+	clean-libLTLIBRARIES clean-libtool clean-sbinPROGRAMS ctags \
+	distclean distclean-compile distclean-generic \
+	distclean-libtool distclean-tags distdir dvi dvi-am html \
+	html-am info info-am install install-am install-ctpDATA \
+	install-data install-data-am install-dvi install-dvi-am \
+	install-exec install-exec-am install-html install-html-am \
+	install-info install-info-am install-libLTLIBRARIES \
+	install-man install-pdf install-pdf-am install-ps \
+	install-ps-am install-sbinPROGRAMS install-strip installcheck \
+	installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
 	tags uninstall uninstall-am uninstall-ctpDATA \
-	uninstall-libLTLIBRARIES
+	uninstall-libLTLIBRARIES uninstall-sbinPROGRAMS
 
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

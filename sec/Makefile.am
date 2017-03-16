@@ -1,11 +1,11 @@
-sbin_PROGRAMS = xcb-exp2
-xcb_exp2_SOURCES = $(top_srcdir)/src/mem.c $(top_srcdir)/src/dstr.c            \
+sbin_PROGRAMS = xcb-sec
+xcb_sec_SOURCES = $(top_srcdir)/src/mem.c $(top_srcdir)/src/dstr.c             \
 $(top_srcdir)/src/utils.c $(top_srcdir)/src/logger.c $(top_srcdir)/src/config.c\
-xcb-exp2.cpp
-xcb_exp2_CPPFLAGS = -I$(top_srcdir)/include
-xcb_exp2_CFLAGS = -Wall -Winline -pthread
-xcb_exp2_LDADD = libDFITCSECTraderApi.so
-xcb_exp2_LDFLAGS = -pthread -ltcmalloc
+xcb-sec.cpp
+xcb_sec_CPPFLAGS = -I$(top_srcdir)/include
+xcb_sec_CFLAGS = -Wall -Winline -pthread
+xcb_sec_LDADD = libDFITCSECTraderApi.so
+xcb_sec_LDFLAGS = -pthread -ltcmalloc
 
 lib_LTLIBRARIES = md_sec.la
 md_sec_la_SOURCES = sec.cpp md_sec.c
