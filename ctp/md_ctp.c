@@ -39,7 +39,8 @@ static char *desc = "Comprehensive Transaction Platform API";
 static ctp_mdspi_t *mdspi;
 static ctp_mdapi_t *mdapi;
 static struct config *cfg;
-static const char *front_ip, *front_port, *brokerid, *userid, *passwd, *contracts;
+static const char *front_ip, *front_port, *brokerid, *userid, *passwd;
+static dstr contracts;
 
 static inline void load_config(void) {
 	/* FIXME */
@@ -67,8 +68,11 @@ static inline void load_config(void) {
 						if (strcasecmp(var->value, ""))
 							passwd = var->value;
 					} else if (!strcasecmp(var->name, "contracts")) {
-						if (strcasecmp(var->value, ""))
-							contracts = var->value;
+						if (strcasecmp(var->value, "")) {
+							if (dstr_length(contracts) > 0)
+								contracts = dstr_cat(contracts, ",");
+							contracts = dstr_cat(contracts, var->value);
+						}
 					} else
 						xcb_log(XCB_LOG_WARNING, "Unknown variable '%s' in "
 							"category '%s' of ctp.conf", var->name, cat);
@@ -196,6 +200,7 @@ static int ctp_exec(void *data, void *data2) {
 static int load_module(void) {
 	char path[256], front[1024];
 
+	contracts = dstr_new("");
 	load_config();
 	if (front_ip == NULL || front_port == NULL || brokerid == NULL || userid == NULL || passwd == NULL) {
 		xcb_log(XCB_LOG_ERROR, "front_ip, front_port, brokerid, userid or passwd can't be empty");
@@ -226,6 +231,7 @@ static int unload_module(void) {
 	ctp_mdapi_destroy(mdapi);
 	ctp_mdspi_destroy(mdspi);
 	config_destroy(cfg);
+	dstr_free(contracts);
 	return unregister_application(app);
 }
 
