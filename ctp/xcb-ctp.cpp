@@ -34,6 +34,7 @@
 /* FIXME */
 static struct config *cfg;
 static std::map<std::string, std::string> expiries;
+static std::map<std::string, int> multipliers;
 static int terminate_pipe[2];
 static char path[256];
 static char front[1024];
@@ -82,9 +83,13 @@ private:
 			exit(1);
 		} else {
 			if (pInstrument->ProductClass == THOST_FTDC_PC_Options &&
-				strlen(pInstrument->InstrumentID) > 0 && strlen(pInstrument->ExpireDate) > 0)
+				strlen(pInstrument->InstrumentID) > 0 && strlen(pInstrument->ExpireDate) > 0) {
 				expiries.insert(std::make_pair(pInstrument->InstrumentID,
 					pInstrument->ExpireDate));
+				if (strcmp(pInstrument->ExchangeID, "CZCE"))
+					multipliers.insert(std::make_pair(pInstrument->InstrumentID,
+						pInstrument->VolumeMultiple));
+			}
 			if (bIsLast) {
 				const char one = '1';
 
@@ -112,7 +117,8 @@ int main(int argc, char **argv) {
 	CThostFtdcTraderApi *pApi;
 	CMySpi *pSpi;
 	struct pollfd rfd[1];
-	std::map<std::string, std::string>::iterator iter;
+	std::map<std::string, std::string>::iterator eiter;
+	std::map<std::string, int>::iterator miter;
 
 	if (argc != 2)
 		usage();
@@ -154,13 +160,17 @@ int main(int argc, char **argv) {
 		goto end;
 	}
 	/* FIXME */
-	xcb_log(XCB_LOG_NOTICE, "Outputting expiries ...");
+	xcb_log(XCB_LOG_NOTICE, "Outputting results ...");
 	fprintf(stdout, "[expiries]\n");
-	for (iter = expiries.begin(); iter != expiries.end(); ++iter) {
-		iter->second.erase(std::remove(iter->second.begin(), iter->second.end(), '.'),
-			iter->second.end());
-		fprintf(stdout, "%s=%s\n", iter->first.c_str(), iter->second.c_str());
+	for (eiter = expiries.begin(); eiter != expiries.end(); ++eiter) {
+		eiter->second.erase(std::remove(eiter->second.begin(), eiter->second.end(), '.'),
+			eiter->second.end());
+		fprintf(stdout, "%s=%s\n", eiter->first.c_str(), eiter->second.c_str());
 	}
+	fprintf(stdout, "\n");
+	fprintf(stdout, "[multipliers]\n");
+	for (miter = multipliers.begin(); miter != multipliers.end(); ++miter)
+		fprintf(stdout, "%s=%d\n", miter->first.c_str(), miter->second);
 	fprintf(stdout, "\n");
 	close(terminate_pipe[0]);
 	close(terminate_pipe[1]);
