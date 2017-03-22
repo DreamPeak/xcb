@@ -25,6 +25,7 @@
 #include <strings.h>
 #include "macros.h"
 #include "mem.h"
+#include "table.h"
 #include "dstr.h"
 #include "utils.h"
 #include "logger.h"
@@ -41,16 +42,17 @@ static ctp_mdapi_t *mdapi;
 static struct config *cfg;
 static const char *front_ip, *front_port, *brokerid, *userid, *passwd;
 static dstr contracts;
+static table_t multipliers;
 
 static inline void load_config(void) {
 	/* FIXME */
 	if ((cfg = config_load("/etc/xcb/ctp.conf"))) {
 		char *cat = category_browse(cfg, NULL);
+		struct variable *var;
 
 		while (cat) {
 			if (!strcasecmp(cat, "general")) {
-				struct variable *var = variable_browse(cfg, cat);
-
+				var = variable_browse(cfg, cat);
 				while (var) {
 					if (!strcasecmp(var->name, "front_ip")) {
 						if (strcasecmp(var->value, ""))
@@ -76,6 +78,16 @@ static inline void load_config(void) {
 					} else
 						xcb_log(XCB_LOG_WARNING, "Unknown variable '%s' in "
 							"category '%s' of ctp.conf", var->name, cat);
+					var = var->next;
+				}
+			} else if (!strcasecmp(cat, "multipliers")) {
+				var = variable_browse(cfg, cat);
+				while (var) {
+					table_node_t node;
+
+					/* FIXME */
+					if ((node = table_insert_raw(multipliers, var->name)))
+						table_set_int(node, atoi(var->value));
 					var = var->next;
 				}
 			}
@@ -149,8 +161,13 @@ static void on_deep_market_data(struct CThostFtdcDepthMarketDataField *deepmd) {
 			quote->thyquote.m_dZJSJ  = deepmd->PreSettlementPrice;
 		if (deepmd->SettlementPrice != DBL_MAX)
 			quote->thyquote.m_dJJSJ  = deepmd->SettlementPrice;
-		if (deepmd->AveragePrice != DBL_MAX)
+		if (deepmd->AveragePrice != DBL_MAX) {
+			table_node_t node;
+
 			quote->thyquote.m_dCJJJ  = deepmd->AveragePrice;
+			if ((node = table_find(multipliers, quote->thyquote.m_cHYDM)))
+				quote->thyquote.m_dCJJJ /= table_node_int(node);
+		}
 		if (deepmd->PreClosePrice != DBL_MAX)
 			quote->thyquote.m_dZSP   = deepmd->PreClosePrice;
 		if (deepmd->ClosePrice != DBL_MAX)
@@ -201,6 +218,7 @@ static int load_module(void) {
 	char path[256], front[1024];
 
 	contracts = dstr_new("");
+	multipliers = table_new(cmpstr, hashmurmur2, NULL,  NULL);
 	load_config();
 	if (front_ip == NULL || front_port == NULL || brokerid == NULL || userid == NULL || passwd == NULL) {
 		xcb_log(XCB_LOG_ERROR, "front_ip, front_port, brokerid, userid or passwd can't be empty");
@@ -231,6 +249,7 @@ static int unload_module(void) {
 	ctp_mdapi_destroy(mdapi);
 	ctp_mdspi_destroy(mdspi);
 	config_destroy(cfg);
+	table_free(&multipliers);
 	dstr_free(contracts);
 	return unregister_application(app);
 }
