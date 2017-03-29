@@ -83,12 +83,17 @@ private:
 			exit(1);
 		} else {
 			if (pInstrument->ProductClass == THOST_FTDC_PC_Options &&
-				strlen(pInstrument->InstrumentID) > 0 && strlen(pInstrument->ExpireDate) > 0) {
+				strlen(pInstrument->InstrumentID) > 0 &&
+				strlen(pInstrument->ExpireDate) > 0) {
 				expiries.insert(std::make_pair(pInstrument->InstrumentID,
 					pInstrument->ExpireDate));
-				if (strcmp(pInstrument->ExchangeID, "CZCE"))
-					multipliers.insert(std::make_pair(pInstrument->InstrumentID,
-						pInstrument->VolumeMultiple));
+			}
+			if ((pInstrument->ProductClass == THOST_FTDC_PC_Futures ||
+				pInstrument->ProductClass == THOST_FTDC_PC_Options) &&
+				strlen(pInstrument->InstrumentID) > 0 &&
+				strcmp(pInstrument->ExchangeID, "CZCE")) {
+				multipliers.insert(std::make_pair(pInstrument->InstrumentID,
+					pInstrument->VolumeMultiple));
 			}
 			if (bIsLast) {
 				const char one = '1';
