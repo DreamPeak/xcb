@@ -469,17 +469,22 @@ void process_quote(void *data) {
 			int hour, min;
 			struct tm lt;
 
+			/*
 			if (quote->thyquote.m_cHYDM[0] == 'S' && quote->thyquote.m_cHYDM[1] == 'P')
 				quote->thyquote.m_nTime *= 1000;
 			else if ((tlen == 6 || tlen == 7) && quote->thyquote.m_nTime / 100000 != 0)
 				quote->thyquote.m_nTime *= 100;
+			*/
 			hour = quote->thyquote.m_nTime / 10000000;
 			min  = quote->thyquote.m_nTime % 10000000 / 100000;
 			if (tv.tv_sec == 0 || (hour == 8 && min == 59) || hour == 9 ||
 				(hour == 20 && min == 59) || hour == 21)
 				gettimeofday(&tv, NULL);
-			if (prev_hour == 23 && hour == 0)
+			if (prev_hour == 23 && hour == 0) {
+				xcb_log(XCB_LOG_NOTICE, "Triggered timestamp is '%d'",
+					quote->thyquote.m_nTime);
 				tv.tv_sec += 24 * 60 * 60;
+			}
 			prev_hour = hour;
 			localtime_r(&tv.tv_sec, &lt);
 			lt.tm_sec  = quote->thyquote.m_nTime % 100000 / 1000;

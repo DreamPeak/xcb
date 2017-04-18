@@ -623,7 +623,7 @@ static int on_msgv(struct pgm_msgv_t *msgv, size_t len) {
 static void *receiver_thread(void *data) {
 	pgm_sock_t *pgm_receiver = (pgm_sock_t *)data;
 	/* FIXME */
-	int iov_len = 20;
+	int iov_len = 40;
 	struct pgm_msgv_t msgv[iov_len];
 #ifdef CONFIG_HAVE_EPOLL
 	int efd, ev_len = 1;
