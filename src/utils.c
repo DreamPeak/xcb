@@ -110,7 +110,7 @@ dstr getipv4(void) {
 	if (getifaddrs(&ifaddr) == -1)
 		return NULL;
 	for (ifa = ifaddr; ifa; ifa = ifa->ifa_next)
-		if (ifa->ifa_addr->sa_family == AF_INET && !strcmp(ifa->ifa_name, "eth0"))
+		if (ifa->ifa_addr->sa_family == AF_INET && strcmp(ifa->ifa_name, "lo"))
 			break;
 	if (ifa && getnameinfo(ifa->ifa_addr, sizeof (struct sockaddr_in), host, NI_MAXHOST,
 		NULL, 0, NI_NUMERICHOST) == 0)

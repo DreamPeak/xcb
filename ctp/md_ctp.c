@@ -151,8 +151,6 @@ static void on_deep_market_data(struct CThostFtdcDepthMarketDataField *deepmd) {
 	if (deepmd == NULL)
 		return;
 	if (NEW0(quote)) {
-		table_node_t node;
-
 		/* FIXME */
 		quote->thyquote.m_nLen   = sizeof (tHYQuote);
 		RMCHR(deepmd->UpdateTime, ':');
@@ -163,15 +161,15 @@ static void on_deep_market_data(struct CThostFtdcDepthMarketDataField *deepmd) {
 			quote->thyquote.m_dZJSJ  = deepmd->PreSettlementPrice;
 		if (deepmd->SettlementPrice != DBL_MAX)
 			quote->thyquote.m_dJJSJ  = deepmd->SettlementPrice;
-		if (deepmd->AveragePrice != DBL_MAX) {
-			quote->thyquote.m_dCJJJ  = deepmd->AveragePrice;
-			if ((node = table_find(multipliers, quote->thyquote.m_cHYDM)))
-				quote->thyquote.m_dCJJJ /= table_node_int(node);
-		} else if (deepmd->Turnover != DBL_MAX && deepmd->Volume != 0) {
+		/*
+		if (deepmd->Turnover != DBL_MAX && deepmd->Volume != 0) {
+			table_node_t node;
+
 			quote->thyquote.m_dCJJJ  = deepmd->Turnover / deepmd->Volume;
 			if ((node = table_find(multipliers, quote->thyquote.m_cHYDM)))
 				quote->thyquote.m_dCJJJ /= table_node_int(node);
 		}
+		*/
 		if (deepmd->PreClosePrice != DBL_MAX)
 			quote->thyquote.m_dZSP   = deepmd->PreClosePrice;
 		if (deepmd->ClosePrice != DBL_MAX)
