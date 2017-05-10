@@ -147,7 +147,7 @@ int main(int argc, char **argv) {
 	else if (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help"))
 		usage();
 	/* FIXME */
-	if (init_logger("/var/log/xcb/xcb-exp.log", __LOG_DEBUG) == -1) {
+	if (init_logger("/var/log/xcb/xcb-xspeed.log", __LOG_DEBUG) == -1) {
 		fprintf(stderr, "Error initializing logger\n");
 		exit(1);
 	}

@@ -865,7 +865,8 @@ static void read_quote(event_loop el, int fd, int mask, void *data) {
 	if ((buf = CALLOC(1, sizeof (Quote))) == NULL)
 		return;
 	/* FIXME */
-	if ((nread = recvfrom(fd, buf, sizeof (Quote), 0, (struct sockaddr *)&si, &slen)) > 0 && strcmp(buf, ""))
+	if ((nread = recvfrom(fd, buf, sizeof (tHYQuote), 0, (struct sockaddr *)&si, &slen)) > 0 &&
+		strcmp(buf, ""))
 		process_quote(buf);
 	else
 		FREE(buf);
